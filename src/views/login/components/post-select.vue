@@ -9,13 +9,10 @@
 			option-value="id"
 			option-label="name"
 		>
-			<i v-if="theme" class="el-input__icon el-icom-post" slot="prefix"></i>
-			<img
-				v-else
-				src="../../../assets/images/login/z61.png"
-				class=" "
-				slot="prefix"
-			/>
+			<template #prefix>
+				<i v-if="theme" class="el-input__icon el-icom-post"></i>
+				<img v-else src="../../../assets/images/login/z61.png" class=" " />
+			</template>
 		</el-select>
 	</div>
 </template>

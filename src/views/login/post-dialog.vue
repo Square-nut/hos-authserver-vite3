@@ -51,7 +51,7 @@
 			</template>
 		</el-biz-table>
 
-		<div slot="footer" class="dialog-footer">
+		<div class="dialog-footer">
 			<el-button
 				class="margin-t-5"
 				v-has-permi="{ key: 'base:perm:role:cancel' }"

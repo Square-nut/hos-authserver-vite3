@@ -1,12 +1,14 @@
 <template>
 	<div class="scan-code">
 		<el-image class="phone-code" :src="QRcodeInfo.scanCode">
-			<div slot="placeholder" class="image-slot">
-				{{ $t('加载中') }}<span class="dot">...</span>
-			</div>
-			<div slot="error" class="image-slot">
-				<i class="el-icon-loading"></i>
-			</div>
+			<template #placeholder>
+				<div class="image-slot">{{ $t('加载中') }}<span class="dot">...</span></div>
+			</template>
+			<template #error>
+				<div class="image-slot">
+					<i class="el-icon-loading"></i>
+				</div>
+			</template>
 		</el-image>
 		<div class="phone-code-text">
 			<span>{{ $t('打开手机') }}</span

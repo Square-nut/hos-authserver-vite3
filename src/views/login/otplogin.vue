@@ -39,7 +39,7 @@
 						name="loginName"
 						type="text"
 						v-focus
-						@keyup.enter.native="keyEnterLogin('smsCode')"
+						@keyup.enter="keyEnterLogin('smsCode')"
 						@change="changeLoginName"
 					/>
 				</el-form-item>
@@ -55,7 +55,7 @@
 								:placeholder="$t('请输入验证码')"
 								prefix-icon="el-icom-select-grant"
 								type="text"
-								@keyup.enter.native="keyEnterLogin"
+								@keyup.enter="keyEnterLogin"
 							>
 							</el-input>
 							<span class="get-opt-code" @click="getCode()">{{
@@ -75,7 +75,7 @@
 							ref="captchaCode"
 							:placeholder="$t('请输入图形验证码')"
 							type="text"
-							@keyup.enter.native="keyEnterLogin"
+							@keyup.enter="keyEnterLogin"
 						>
 						</el-input>
 					</el-col>

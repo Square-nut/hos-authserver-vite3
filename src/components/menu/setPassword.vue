@@ -36,13 +36,14 @@
 								:type="flag ? 'text' : 'password'"
 								v-model="passwordForm.oldPassword"
 							>
-								<i
-									class="iconPos"
-									slot="suffix"
-									:class="['hos-icon-view']"
-									autocomplete="auto"
-									@click.stop="flag = !flag"
-								/>
+								<template #suffix>
+									<i
+										class="iconPos"
+										:class="['hos-icon-view']"
+										autocomplete="auto"
+										@click.stop="flag = !flag"
+									/>
+								</template>
 							</hos-input>
 						</hos-form-item>
 					</hos-col>
@@ -53,13 +54,15 @@
 							<hos-input
 								:type="flag1 ? 'text' : 'password'"
 								v-model="passwordForm.newPasswordOne"
-								><i
-									slot="suffix"
-									class="iconPos"
-									:class="['hos-icon-view']"
-									autocomplete="auto"
-									@click.stop="flag1 = !flag1"
-								/>
+								>
+								<template #suffix>
+									<i
+										class="iconPos"
+										:class="['hos-icon-view']"
+										autocomplete="auto"
+										@click.stop="flag1 = !flag1"
+									/>
+								</template>
 							</hos-input>
 							<span v-if="showPwdStr" class="lengthStrClass"
 								>({{ this.lengthStr }})</span
@@ -87,20 +90,21 @@
 								:type="flag2 ? 'text' : 'password'"
 								v-model="passwordForm.newPasswordTwo"
 							>
-								<i
-									slot="suffix"
-									class="iconPos"
-									:class="['hos-icon-view']"
-									autocomplete="auto"
-									@click.stop="flag2 = !flag2"
-								/>
+								<template #suffix>
+									<i
+										class="iconPos"
+										:class="['hos-icon-view']"
+										autocomplete="auto"
+										@click.stop="flag2 = !flag2"
+									/>
+								</template>
 							</hos-input>
 						</hos-form-item>
 					</hos-col>
 				</hos-row>
 			</hos-form>
 		</hos-card>
-		<div slot="footer" class="dialog-footer">
+		<div class="dialog-footer">
 			<hos-button type="primary" @click="cancel()">{{ $t('取消') }}</hos-button>
 			<hos-button type="success" @click="save()">{{ $t('保存') }}</hos-button>
 			<!-- v-if="showLastBtn" -->

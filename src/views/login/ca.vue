@@ -211,7 +211,7 @@
 	</div>
 </template>
 <script>
-import QRCode from 'qrcodejs2';
+import QRCode from 'qrcode';
 import { ukMixinData } from './js/uk';
 import { pinMixinData } from './js/pin';
 import AuthConstant from '@/constant/auth-constant';
@@ -618,14 +618,16 @@ export default {
 		qrcode(content, w, h) {
 			this.$nextTick(() => {
 				this.$refs.qrcode.innerHTML = ''; // 清除上一次二维码图片，否则每次生成，图片会累加
-				let qrcode = new QRCode(this.$refs.qrcode, {
+				const canvas = document.createElement('canvas');
+				QRCode.toCanvas(canvas, content, {
 					width: w, // 二维码宽度
-					height: h, // 二维码高度
-					text: content, // 这里需要填写要转二维码图片的字符串
-					background: '#ffffff',
-					foreground: '#f7382b',
-					correctLevel: QRCode.CorrectLevel.L, // 纠错等级
+					margin: 0,
+					color: {
+						dark: '#f7382b',
+						light: '#ffffff',
+					},
 				});
+				this.$refs.qrcode.appendChild(canvas);
 			});
 		},
 		reset() {

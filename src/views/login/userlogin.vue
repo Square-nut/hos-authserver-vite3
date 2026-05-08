@@ -40,15 +40,12 @@
 					type="text"
 					v-focus
 					@change="changeLoginName"
-					@keyup.enter.native="keyEnterLogin('password')"
+					@keyup.enter="keyEnterLogin('password')"
 				>
 					<i v-if="theme == 1" class="el-icom-person" alt=""></i>
-					<img
-						v-else
-						src="../../assets/images/login/z59.png"
-						slot="prefix"
-						alt=""
-					/>
+					<template #prefix>
+						<img v-if="theme != 1" src="../../assets/images/login/z59.png" alt="" />
+					</template>
 				</el-input>
 			</el-form-item>
 		</el-col>
@@ -61,20 +58,15 @@
 					:type="passwordType"
 					:placeholder="$t('密码')"
 					name="password"
-					@keyup.enter.native="keyEnterLogin('captchaCode')"
+					@keyup.enter="keyEnterLogin('captchaCode')"
 				>
 					<i v-if="theme == 1" class="el-icon-lock" alt=""></i>
-					<img
-						v-else
-						src="../../assets/images/login/z60.png"
-						slot="prefix"
-						alt=""
-					/>
-					<i
-						@click="togglePwd"
-						slot="suffix"
-						class="el-input__icon el-icon-view"
-					></i>
+					<template #prefix>
+						<img v-if="theme != 1" src="../../assets/images/login/z60.png" alt="" />
+					</template>
+					<template #suffix>
+						<i @click="togglePwd" class="el-input__icon el-icon-view"></i>
+					</template>
 				</el-input>
 			</el-form-item>
 		</el-col>
@@ -88,7 +80,7 @@
 						ref="captchaCode"
 						:placeholder="$t('请输入图形验证码')"
 						type="text"
-						@keyup.enter.native="keyEnterLogin"
+						@keyup.enter="keyEnterLogin"
 					>
 					</el-input>
 				</el-col>

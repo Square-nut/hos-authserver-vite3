@@ -36,7 +36,7 @@
 									ref="smsCode"
 									type="text"
 									class="input-width"
-									@keyup.enter.native="keyEnterLogin"
+									@keyup.enter="keyEnterLogin"
 								>
 								</el-input>
 								<span class="get-opt-code" @click="getCode()">{{

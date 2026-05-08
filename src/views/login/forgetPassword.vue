@@ -80,13 +80,14 @@
 							v-model="passwordForm.newPassword"
 							:placeholder="$t('新密码')"
 						>
-							<i
-								slot="suffix"
-								class="iconPos"
-								:class="['el-icon-view']"
-								autocomplete="auto"
-								@click.stop="flag1 = !flag1"
-							/>
+							<template #suffix>
+								<i
+									class="iconPos"
+									:class="['el-icon-view']"
+									autocomplete="auto"
+									@click.stop="flag1 = !flag1"
+								/>
+							</template>
 						</el-input>
 						<span v-if="showPwdStr" class="lengthStrClass"
 							>({{ this.lengthStr }})</span
@@ -111,13 +112,14 @@
 							v-model="passwordForm.rePassword"
 							:placeholder="$t('确认密码')"
 						>
-							<i
-								slot="suffix"
-								class="iconPos"
-								:class="['el-icon-view']"
-								autocomplete="auto"
-								@click.stop="flag2 = !flag2"
-							/>
+							<template #suffix>
+								<i
+									class="iconPos"
+									:class="['el-icon-view']"
+									autocomplete="auto"
+									@click.stop="flag2 = !flag2"
+								/>
+							</template>
 						</el-input>
 					</el-form-item>
 				</el-form>

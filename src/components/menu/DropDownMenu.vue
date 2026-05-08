@@ -10,25 +10,23 @@
 				></hos-avatar>
 				<span style="padding-left: 3px">{{ userInfo.name }}</span>
 			</div>
-			<hos-dropdown-menu slot="dropdown">
-				<hos-dropdown-item
-					v-for="(item, index) in dropDownMenus"
-					:key="index"
-					:command="item"
-					:icon="item.meta.icon ? item.meta.icon : 'hos-icon-menu'"
-				>
-					{{ item.meta.title }}
-				</hos-dropdown-item>
-				<hos-dropdown-item @click.native="setPssword" icon="hos-icon-setting">
-					修改密码</hos-dropdown-item
-				>
-				<hos-dropdown-item
-					@click.native="handlerLogout"
-					icon="hos-icon-switch-button"
-				>
-					退出登录</hos-dropdown-item
-				>
-				<!-- <hos-dropdown-item v-if="simple == 0">
+			<template #dropdown>
+				<hos-dropdown-menu>
+					<hos-dropdown-item
+						v-for="(item, index) in dropDownMenus"
+						:key="index"
+						:command="item"
+						:icon="item.meta.icon ? item.meta.icon : 'hos-icon-menu'"
+					>
+						{{ item.meta.title }}
+					</hos-dropdown-item>
+					<hos-dropdown-item @click="setPssword" icon="hos-icon-setting">
+						修改密码</hos-dropdown-item
+					>
+					<hos-dropdown-item @click="handlerLogout" icon="hos-icon-switch-button">
+						退出登录</hos-dropdown-item
+					>
+					<!-- <hos-dropdown-item v-if="simple == 0">
           <span
             >左侧菜单：
             <hos-switch
@@ -43,7 +41,8 @@
             </hos-switch>
           </span>
         </hos-dropdown-item> -->
-			</hos-dropdown-menu>
+				</hos-dropdown-menu>
+			</template>
 		</hos-dropdown>
 		<!--  设置按钮 SZWW  -->
 		<hos-dropdown
@@ -56,11 +55,12 @@
 			<div class="drop-user">
 				<i class="hos-icon-setting"></i>
 			</div>
-			<hos-dropdown-menu slot="dropdown" class="headMenu_setUp">
-				<hos-dropdown-item>
-					<img src="@/assets/images/helpImg.png" />
-					<span @click="openHelpDoc()">帮助文档</span>
-				</hos-dropdown-item>
+			<template #dropdown>
+				<hos-dropdown-menu class="headMenu_setUp">
+					<hos-dropdown-item>
+						<img src="@/assets/images/helpImg.png" />
+						<span @click="openHelpDoc()">帮助文档</span>
+					</hos-dropdown-item>
 				<!--        <hos-dropdown-item>-->
 				<!--          <img src="@/assets/images/colorImg.png" />-->
 				<!--          <span>系统颜色转换</span>-->
@@ -119,7 +119,8 @@
 				<!--            >-->
 				<!--          </div>-->
 				<!--        </hos-dropdown-item>-->
-			</hos-dropdown-menu>
+				</hos-dropdown-menu>
+			</template>
 		</hos-dropdown>
 		<!--  设置按钮 EZWW  -->
 		<hos-biz-dialog

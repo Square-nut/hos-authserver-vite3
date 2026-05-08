@@ -11,16 +11,14 @@
           simpleLeftMenu == 1 ? 'leftMenu' : '',
         ]"
       >
-        <template slot="title">
+        <template #title>
           <i
             v-if="showIcon"
             :class="item.meta.icon ? item.meta.icon : 'hos-icon-menu'"
           ></i>
-          <span
-            slot="title"
-            :style="item.meta.oneMenu ? { color: '#fff' } : {}"
-            >{{ item.meta.title }}</span
-          >
+          <span :style="item.meta.oneMenu ? { color: '#fff' } : {}">{{
+            item.meta.title
+          }}</span>
         </template>
         <MenuTree :menuList="item.children"></MenuTree>
       </hos-submenu>
@@ -36,7 +34,9 @@
         ]"
       >
         <i v-if="showIcon" :class="item.meta.icon ? item.meta.icon : 'hos-icon-menu'"></i>
-        <span slot="title">{{ item.meta.title }}</span>
+        <template #title>
+          <span>{{ item.meta.title }}</span>
+        </template>
       </hos-menu-item>
     </template>
   </div>

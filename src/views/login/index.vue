@@ -50,17 +50,18 @@
 							v-html="licenseInfo.licenseText"
 							@click="triggerClick"
 						></div>
-						<span
-							slot="reference"
-							@click="yorn = !yorn"
-							class="el-edition"
-							:class="{
-								'button-yellow': licenseType == 2,
-								'button-red': licenseType != 1 && licenseType != 2,
-							}"
-						>
-							{{ licenseEdition }}
-						</span>
+						<template #reference>
+							<span
+								@click="yorn = !yorn"
+								class="el-edition"
+								:class="{
+									'button-yellow': licenseType == 2,
+									'button-red': licenseType != 1 && licenseType != 2,
+								}"
+							>
+								{{ licenseEdition }}
+							</span>
+						</template>
 					</el-popover>
 					<el-select
 						v-if="i18nStatus && isHos"

@@ -18,6 +18,7 @@ const pinia = createPinia()
 
 const globalProperties = app.config.globalProperties as any
 globalProperties.$api = apiRequest
+globalProperties.$t = (...args: any[]) => (i18n.global.t as any)(...args)
 globalProperties.$ls = {
   get(key: string) {
     try {
