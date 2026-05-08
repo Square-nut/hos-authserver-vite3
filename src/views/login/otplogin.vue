@@ -1,6 +1,6 @@
 <template>
-	<hos-row>
-		<hos-form
+	<el-row>
+		<el-form
 			ref="otpLoginForm"
 			:model="otpLoginForm"
 			:rules="otpLoginRules"
@@ -8,31 +8,31 @@
 			auto-complete="on"
 			label-position="left"
 		>
-			<hos-col :span="24" v-if="openTenant">
-				<hos-form-item prop="tenantId">
-					<hos-select
+			<el-col :span="24" v-if="openTenant">
+				<el-form-item prop="tenantId">
+					<el-select
 						disabled
 						class="tenantSelect"
 						popper-class="tenantPop"
 						:placeholder="$t('请选择租户')"
 						v-model="otpLoginForm.tenantId"
 					>
-						<hos-option
+						<el-option
 							v-for="(item, index) in tenantData"
 							:key="index"
 							:label="item.name"
 							:value="item.tenantId"
 						>
-						</hos-option>
-					</hos-select>
-					<i class="hos-icon-s-home"></i>
-				</hos-form-item>
-			</hos-col>
+						</el-option>
+					</el-select>
+					<i class="el-icon-s-home"></i>
+				</el-form-item>
+			</el-col>
 
-			<hos-col :span="24">
-				<hos-form-item prop="loginName">
-					<hos-input
-						prefix-icon="hos-icom-person"
+			<el-col :span="24">
+				<el-form-item prop="loginName">
+					<el-input
+						prefix-icon="el-icom-person"
 						ref="loginName"
 						v-model="otpLoginForm.loginName"
 						:placeholder="$t('请输入手机号')"
@@ -42,51 +42,51 @@
 						@keyup.enter.native="keyEnterLogin('smsCode')"
 						@change="changeLoginName"
 					/>
-				</hos-form-item>
-			</hos-col>
+				</el-form-item>
+			</el-col>
 			<!--短信验证码的区域-->
-			<hos-col :span="24">
-				<hos-form-item prop="smsCode">
-					<hos-col :span="24">
+			<el-col :span="24">
+				<el-form-item prop="smsCode">
+					<el-col :span="24">
 						<div class="otp-box">
-							<hos-input
+							<el-input
 								v-model="otpLoginForm.smsCode"
 								ref="smsCode"
 								:placeholder="$t('请输入验证码')"
-								prefix-icon="hos-icom-select-grant"
+								prefix-icon="el-icom-select-grant"
 								type="text"
 								@keyup.enter.native="keyEnterLogin"
 							>
-							</hos-input>
+							</el-input>
 							<span class="get-opt-code" @click="getCode()">{{
 								!btnShow ? `${count}${$t('s后重新获取')}` : $t('获取验证码')
 							}}</span>
 						</div>
-					</hos-col>
-				</hos-form-item>
-			</hos-col>
+					</el-col>
+				</el-form-item>
+			</el-col>
 			<!-- 图形验证码的区域 -->
-			<hos-col :span="24" v-if="openCaptcha">
-				<hos-form-item prop="captchaCode">
-					<hos-col :span="16">
-						<hos-input
-							prefix-icon="hos-icom-select-grant"
+			<el-col :span="24" v-if="openCaptcha">
+				<el-form-item prop="captchaCode">
+					<el-col :span="16">
+						<el-input
+							prefix-icon="el-icom-select-grant"
 							v-model="otpLoginForm.captchaCode"
 							ref="captchaCode"
 							:placeholder="$t('请输入图形验证码')"
 							type="text"
 							@keyup.enter.native="keyEnterLogin"
 						>
-						</hos-input>
-					</hos-col>
-					<hos-col :span="8" class="VCode">
+						</el-input>
+					</el-col>
+					<el-col :span="8" class="VCode">
 						<img :src="imgUrl" @click="getCaptcha" />
-					</hos-col>
-				</hos-form-item>
-			</hos-col>
+					</el-col>
+				</el-form-item>
+			</el-col>
 			<!-- 岗位 -->
-			<hos-col :span="24" v-if="!Simple">
-				<hos-form-item prop="post">
+			<el-col :span="24" v-if="!Simple">
+				<el-form-item prop="post">
 					<postSelect
 						v-if="showPostType"
 						ref="otpLoginSelect_post"
@@ -106,44 +106,44 @@
 						:placeholder="$t('点击登录按钮获取人员定岗数据')"
 						@change="changePost"
 					></post-select-table>
-				</hos-form-item>
-			</hos-col>
-			<hos-col :span="24">
-				<hos-form-item>
-					<hos-button
+				</el-form-item>
+			</el-col>
+			<el-col :span="24">
+				<el-form-item>
+					<el-button
 						:loading="loading"
 						type="primary"
 						style="width: 100%; margin-bottom: 20px"
 						@click="otpHandleLogin(true)"
 						>{{ $t('登录') }}
-					</hos-button>
-					<!-- <hos-form-item> -->
-					<!-- <hos-row class="Password_settings" v-if="loginPageInfo?.easyHideRetrievePassword || loginPageInfo?.hosHideRetrievePassword"> -->
+					</el-button>
+					<!-- <el-form-item> -->
+					<!-- <el-row class="Password_settings" v-if="loginPageInfo?.easyHideRetrievePassword || loginPageInfo?.hosHideRetrievePassword"> -->
 					<!--忘记密码-->
 					<!-- <a @click="handleForgetPass">{{ $t("忘记密码？") }}</a>
-                    </hos-row> -->
-					<!-- </hos-form-item> -->
-				</hos-form-item>
-			</hos-col>
+                    </el-row> -->
+					<!-- </el-form-item> -->
+				</el-form-item>
+			</el-col>
 			<!-- 忘记密码 -->
-			<hos-biz-dialog
+			<el-biz-dialog
 				:title="$t('找回密码')"
 				uid="forgetPassDialog"
 				:append-to-body="true"
 				:close-on-click-modal="false"
 			>
-			</hos-biz-dialog>
-		</hos-form>
-	</hos-row>
+			</el-biz-dialog>
+		</el-form>
+	</el-row>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
 import AuthConstant from '@/constant/auth-constant';
 import { validPhone11, validEmail } from '@/utils/validateUtil';
 import { getLoginErrorDesc } from './js/login';
 import postSelect from './components/post-select.vue';
 import postSelectTable from './components/post-select-table.vue';
+import { useUserStore } from '@/stores/user';
 export default {
 	name: 'otplogin',
 	components: { postSelect, postSelectTable },
@@ -151,7 +151,7 @@ export default {
 		focus: {
 			// 指令的定义
 			inserted: function (el) {
-				el.getElementsByClassName('hos-input__inner')[0].focus();
+				el.getElementsByClassName('el-input__inner')[0].focus();
 			},
 		},
 	},
@@ -329,7 +329,6 @@ export default {
 		},
 	},
 	methods: {
-		...mapActions(['Login']),
 		keyEnterLogin(name) {
 			///键盘enter事件
 			if (this.$refs[name]) {
@@ -351,7 +350,7 @@ export default {
 						paramData.postChainId = this.postChainId;
 					}
 					this.loading = true;
-					this.Login(paramData)
+					useUserStore().Login(paramData)
 						.then((res) => {
 							// 登录成功跳转
 							if (res && res.code == 200) {

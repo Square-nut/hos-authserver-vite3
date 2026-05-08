@@ -3,26 +3,26 @@
       <div></div>
   </div> -->
 
-	<hos-card style="border: none">
-		<hos-row>
-			<hos-col :span="24">
+	<el-card style="border: none">
+		<el-row>
+			<el-col :span="24">
 				<div class="welcome"></div>
-			</hos-col>
-		</hos-row>
-		<!--    <hos-row>
-      <hos-col :span="24" style="text-align: center; color: #fff">
-        <hos-button type="primary" plain @click="logoutSystem()"
+			</el-col>
+		</el-row>
+		<!--    <el-row>
+      <el-col :span="24" style="text-align: center; color: #fff">
+        <el-button type="primary" plain @click="logoutSystem()"
           >退出
-        </hos-button>
-      </hos-col>
-    </hos-row>-->
-	</hos-card>
+        </el-button>
+      </el-col>
+    </el-row>-->
+	</el-card>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
 import { INDEX_MAIN_PAGE_PATH } from '@/store/mutation-types';
 import * as tokenUtil from '@/utils/base/token-util';
+import { useUserStore } from '@/stores/user';
 export default {
 	data() {
 		return {};
@@ -32,10 +32,10 @@ export default {
 	},
 	mounted() {},
 	methods: {
-		...mapActions(['Logout']),
 		logoutSystem() {
 			console.log('退出操作');
-			this.Logout()
+			useUserStore()
+				.Logout()
 				.then((res) => {
 					location.href = INDEX_MAIN_PAGE_PATH;
 					// this.$router.push({path: INDEX_MAIN_PAGE_PATH});

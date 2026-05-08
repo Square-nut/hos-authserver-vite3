@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { useUserStore } from '@/stores/user';
 export default {
 	name: 'freeAuth',
 	data() {
@@ -22,7 +22,6 @@ export default {
 		this.init();
 	},
 	methods: {
-		...mapActions(['Login']),
 		async init() {
 			const { query } = this.$route;
 			if (query.CASTicket) {
@@ -57,7 +56,7 @@ export default {
 			window.location.href = redirect;
 		},
 		freeAuthLogin(freeLoginParam) {
-			return this.Login(freeLoginParam);
+			return useUserStore().Login(freeLoginParam);
 		},
 	},
 };

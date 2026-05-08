@@ -1,6 +1,6 @@
 <template>
 	<div class="pl15 pr15 pt15 login-post-dialog">
-		<hos-biz-table
+		<el-biz-table
 			ref="post-dialog-select-table"
 			:cols="cols"
 			:form="form"
@@ -10,55 +10,55 @@
 			highlight-current-row
 			:page="pageConfig"
 			uid="post-dialog-select-table"
-      @row-dblclick="onRowDblclick"
+			@row-dblclick="onRowDblclick"
 			@current-change="changePeople"
 			header-row-class-name="login-biz-table-header"
 			@after-load="tableLoadAfter"
 		>
 			<template #form>
-				<hos-row :gutter="20">
+				<el-row :gutter="20">
 					<!-- 业务单元 -->
-					<hos-col :span="8">
-						<hos-form-item :label="$t('业务单元')">
-							<hos-input
+					<el-col :span="8">
+						<el-form-item :label="$t('业务单元')">
+							<el-input
 								v-model="form.model.queryBuName"
 								:placeholder="$t('请输入业务单元')"
 								clearable
-							></hos-input>
-						</hos-form-item>
-					</hos-col>
+							></el-input>
+						</el-form-item>
+					</el-col>
 					<!-- 岗位 -->
-					<hos-col :span="8">
-						<hos-form-item :label="$t('业务岗位')">
-							<hos-input
+					<el-col :span="8">
+						<el-form-item :label="$t('业务岗位')">
+							<el-input
 								v-model="form.model.queryPostName"
 								clearable
 								:placeholder="$t('请输入业务岗位')"
-							></hos-input>
-						</hos-form-item>
-					</hos-col>
-					<hos-col :span="8">
-						<hos-form-item>
-							<hos-biz-button run="form.search" type="primary">{{
+							></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item>
+							<el-biz-button run="form.search" type="primary">{{
 								$t('查询')
-							}}</hos-biz-button>
-							<hos-biz-button run="form.reset" @click="reset">{{
+							}}</el-biz-button>
+							<el-biz-button run="form.reset" @click="reset">{{
 								$t('重置')
-							}}</hos-biz-button>
-						</hos-form-item>
-					</hos-col>
-				</hos-row>
+							}}</el-biz-button>
+						</el-form-item>
+					</el-col>
+				</el-row>
 			</template>
-		</hos-biz-table>
+		</el-biz-table>
 
 		<div slot="footer" class="dialog-footer">
-			<hos-button
+			<el-button
 				class="margin-t-5"
 				v-has-permi="{ key: 'base:perm:role:cancel' }"
 				@click="cancel"
-				>{{ $t('取消') }}</hos-button
+				>{{ $t('取消') }}</el-button
 			>
-			<hos-button
+			<el-button
 				type="success"
 				class="margin-t-5"
 				@click="save"
@@ -66,12 +66,12 @@
 				:disabled="disabled"
 			>
 				{{ $t('确认') }}
-			</hos-button>
+			</el-button>
 		</div>
 	</div>
 </template>
 <script>
-import { mapActions } from 'vuex';
+import { useUserStore } from '@/stores/user';
 export default {
 	// TODO 处理dialogUid，handleRowClick传参
 	props: [
@@ -82,14 +82,14 @@ export default {
 		'openTwoAuthDialog',
 		'loginSucessHandler',
 		'dialogUid',
-		'handleRowClick'
+		'handleRowClick',
 	],
 	components: {},
 	data() {
 		return {
-      disabled: true,
+			disabled: true,
 			pageConfig: {
-				pageSize: 5
+				pageSize: 5,
 			},
 			post: '',
 			form: {
@@ -148,42 +148,41 @@ export default {
 		};
 	},
 	created() {
-		if(
-			(import.meta.env.VITE_APP_SIMPLE_ONCE ??
-				import.meta.env.VUE_APP_SIMPLE_ONCE) == '1'
+		if (
+			import.meta.env.VITE_APP_THEME_STYLE == '1'
 		) {
-			this.pageConfig.layout  = 'total, home, prev, pager, next, end'
+			this.pageConfig.layout = 'total, home, prev, pager, next, end';
 		}
-		if(this.dialogUid) {
+		if (this.dialogUid) {
 			// this.$refs['post-dialog-select-table'].setCurrentRow(row);
 			// this.handleRowClick(this.post)
 		}
 		// this.$refs.singleTable.setCurrentRow(row);
 	},
 	methods: {
-		...mapActions(['Login']),
-    onRowDblclick(row, column, event) {
-      this.post = row
-      this.loading = true
-      this.disabled = true
-      // 选择岗位支持双击切换
-      this.loginFn()
-    },
+		onRowDblclick(row, column, event) {
+			this.post = row;
+			this.loading = true;
+			this.disabled = true;
+			// 选择岗位支持双击切换
+			this.loginFn();
+		},
 		save() {
 			// 有dialogUid代表是登录后dropdownMenu调用
-			if(this.dialogUid) {
-				this.handleRowClick(this.post)
+			if (this.dialogUid) {
+				this.handleRowClick(this.post);
 			} else {
-				this.loginFn()
+				this.loginFn();
 			}
 		},
 		cancel() {
-			if(this.dialogUid) {
-				this.$store.commit('CLOSE_DIALOG', { _uid: 'dropmenu-post-change-dialog' });
+			if (this.dialogUid) {
+				this.$store.commit('CLOSE_DIALOG', {
+					_uid: 'dropmenu-post-change-dialog',
+				});
 			} else {
 				this.$store.commit('CLOSE_DIALOG', { _uid: 'postDialog' });
 			}
-			
 		},
 		// 登录
 		loginFn() {
@@ -195,8 +194,8 @@ export default {
 				return;
 			}
 			this.loading = true;
-			this.disabled = true 
-			this.Login(postData)
+			this.disabled = true;
+			useUserStore().Login(postData)
 				.then((res) => {
 					this.loading = false;
 					// 登录成功跳转
@@ -243,16 +242,16 @@ export default {
 		},
 		changePeople(row) {
 			this.post = row;
-      this.disabled = false
+			this.disabled = false;
 		},
 		reset() {
 			this.form.model = {
 				query: '',
 				dataType: '',
 			};
-      this.post = ''
-      this.disabled = true
-      this.$store.commit('UPDATE_TABLE', { _uid: 'post-dialog-select-table' })
+			this.post = '';
+			this.disabled = true;
+			this.$store.commit('UPDATE_TABLE', { _uid: 'post-dialog-select-table' });
 		},
 
 		// 列表加载完数据
@@ -260,7 +259,7 @@ export default {
 			// 自动赋值
 			if (Array.isArray(data) && data.length) {
 				this.$refs['post-dialog-select-table'].setCurrentRow(data[0]);
-			} 
+			}
 		},
 	},
 };
@@ -273,10 +272,9 @@ export default {
 	// ie浏览器不能自动撑开高度
 	height: 350px;
 	margin-bottom: 75px;
-	:deep(.hos-form) {
+	:deep(.el-form) {
 		padding: 0;
 	}
-
 }
 </style>
 <style lang="scss"></style>

@@ -8,10 +8,8 @@ declare module '*.vue' {
 
 interface ImportMetaEnv {
   readonly VITE_APP_THEME_STYLE?: string
-  readonly VITE_APP_SIMPLE_ONCE?: string
   readonly VITE_APP_BASE_URL?: string
   readonly VITE_APP_TIME_OUT?: string
-  readonly VUE_APP_SIMPLE_ONCE?: string
   readonly VUE_APP_BASE_URL?: string
   readonly VUE_APP_TIME_OUT?: string
 }

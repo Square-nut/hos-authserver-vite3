@@ -12,7 +12,7 @@
 				</div>
 				<div class="flex-box">
 					<div class="login-type-title">{{ $t('短信验证登录') }}</div>
-					<hos-form
+					<el-form
 						ref="otpLoginForm"
 						label-width=""
 						hide-required-asterisk
@@ -21,50 +21,50 @@
 						:rules="otpLoginRules"
 					>
 						<!-- 手机号 -->
-						<hos-form-item label="" prop="loginName">
-							<hos-input
+						<el-form-item label="" prop="loginName">
+							<el-input
 								v-model="otpForm.loginName"
 								class="input-width"
 								disabled
-							></hos-input>
-						</hos-form-item>
+							></el-input>
+						</el-form-item>
 						<!-- 验证码 -->
-						<hos-form-item label="" prop="">
+						<el-form-item label="" prop="">
 							<div class="otp-box">
-								<hos-input
+								<el-input
 									v-model="otpForm.smsCode"
 									ref="smsCode"
 									type="text"
 									class="input-width"
 									@keyup.enter.native="keyEnterLogin"
 								>
-								</hos-input>
+								</el-input>
 								<span class="get-opt-code" @click="getCode()">{{
 									!btnShow ? `${count}${$t('s后重新获取')}` : $t('获取验证码')
 								}}</span>
 							</div>
-						</hos-form-item>
+						</el-form-item>
 						<!-- 操作按钮 -->
-						<!-- <hos-form-item label=""> -->
-						<hos-button
+						<!-- <el-form-item label=""> -->
+						<el-button
 							type="primary"
 							@click="otpLogin"
 							class="input-width ca-login-button"
-							>{{ $t('登录') }}</hos-button
+							>{{ $t('登录') }}</el-button
 						>
-						<!-- <hos-button class="button-width " @click="close">{{$t('取消')}}</hos-button> -->
-						<!-- </hos-form-item> -->
-					</hos-form>
+						<!-- <el-button class="button-width " @click="close">{{$t('取消')}}</el-button> -->
+						<!-- </el-form-item> -->
+					</el-form>
 				</div>
 			</div>
 		</div>
 	</div>
 </template>
 <script>
-import { mapActions } from 'vuex';
 import AuthConstant from '@/constant/auth-constant';
 import { getLoginErrorDesc } from './js/login';
 import { validPhone11, validEmail } from '@/utils/validateUtil';
+import { useUserStore } from '@/stores/user';
 export default {
 	props: {
 		// 登录成功的回调
@@ -135,7 +135,6 @@ export default {
 		this.otpForm.grantChainId = this.grantChainId;
 	},
 	methods: {
-		...mapActions(['Login']),
 		// 关闭弹框
 		close() {
 			// this.$store.commit('CLOSE_DIALOG',{_uid:'SCDialog'});
@@ -152,7 +151,7 @@ export default {
 				grantType: 'sms', // 登录方式
 				loginType: 'phone',
 			};
-			this.Login(upData)
+			useUserStore().Login(upData)
 				.then((res) => {
 					if (res && res.code == 200) {
 						this.loginSucessHandler();
@@ -247,7 +246,7 @@ export default {
 	.input-width {
 		width: 260px;
 		height: 36px;
-		&::v-deep .hos-input__inner {
+		&::v-deep .el-input__inner {
 			height: 36px;
 			line-height: 36px;
 		}
@@ -273,7 +272,7 @@ export default {
 			padding-right: 10px;
 		}
 	}
-	&::v-deep .hos-form-item {
+	&::v-deep .el-form-item {
 		margin-bottom: 24px;
 	}
 	.uk-dynamic,

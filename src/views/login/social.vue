@@ -1,16 +1,16 @@
 <template>
 	<!--<div>
-            &lt;!&ndash; <hos-tag  :key="index" v-if="item.enable" @click="handleClick(item.code)"><i :class="item.icon"></i>{{item.name}}</hos-tag>&ndash;&gt;
-           &lt;!&ndash; <hos-avatar style="margin-left: 10px" v-if="item.enable" v-for="(item,index) in sourceData" @click.native="handleClick(item.code)"
+            &lt;!&ndash; <el-tag  :key="index" v-if="item.enable" @click="handleClick(item.code)"><i :class="item.icon"></i>{{item.name}}</el-tag>&ndash;&gt;
+           &lt;!&ndash; <el-avatar style="margin-left: 10px" v-if="item.enable" v-for="(item,index) in sourceData" @click.native="handleClick(item.code)"
                         size="small" :src="item.url" :alt="item.name">
-            </hos-avatar>&ndash;&gt;
+            </el-avatar>&ndash;&gt;
             <img v-if="item.enable" :src="item.url" :alt="item.name" v-for="(item,index) in sourceData" @click.native="handleClick(item.code)" />
-            &lt;!&ndash;<hos-button type="info" circle  :icon="item.icon" v-if="item.enable" v-for="(item,index) in sourceData" @click.native="handleClick(item.code)" >{{item.name}}</hos-button>&ndash;&gt;
+            &lt;!&ndash;<el-button type="info" circle  :icon="item.icon" v-if="item.enable" v-for="(item,index) in sourceData" @click.native="handleClick(item.code)" >{{item.name}}</el-button>&ndash;&gt;
     </div>-->
 
-	<hos-row>
-		<hos-col :span="12">{{ $t('第三方登录方式') }}</hos-col>
-		<hos-col :span="12">
+	<el-row>
+		<el-col :span="12">{{ $t('第三方登录方式') }}</el-col>
+		<el-col :span="12">
 			<img
 				v-if="item.enable"
 				:id="item.code"
@@ -19,8 +19,8 @@
 				v-for="(item, index) in sourceData"
 				@click="handleClick(item.code)"
 			/>
-		</hos-col>
-	</hos-row>
+		</el-col>
+	</el-row>
 </template>
 <script>
 import hosUrl from '@/assets/images/social/hos.png';
@@ -36,7 +36,7 @@ export default {
 					name: 'QQ',
 					code: 'QQ',
 					enable: false,
-					url: 'hos-icon-s-flag',
+					url: 'el-icon-s-flag',
 				},
 				{
 					name: '微信',

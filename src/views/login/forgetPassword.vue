@@ -2,80 +2,80 @@
 	<div :loading="loading" class="forget-pass">
 		<div class="card-style" style="padding-top: 40px">
 			<div>
-				<hos-steps :active="active" align-center>
-					<hos-step :title="$t('短信校验')"></hos-step>
-					<hos-step :title="$t('设置新密码')"></hos-step>
-					<hos-step :title="$t('完成')"></hos-step>
-				</hos-steps>
+				<el-steps :active="active" align-center>
+					<el-step :title="$t('短信校验')"></el-step>
+					<el-step :title="$t('设置新密码')"></el-step>
+					<el-step :title="$t('完成')"></el-step>
+				</el-steps>
 			</div>
 		</div>
-		<!-- <hos-divider></hos-divider> -->
+		<!-- <el-divider></el-divider> -->
 		<div class="card-style">
 			<div v-show="showFirst">
 				<!-- 短信校验 -->
-				<hos-form :model="firstForm" :rules="firstFormRules" ref="firstFormRef">
+				<el-form :model="firstForm" :rules="firstFormRules" ref="firstFormRef">
 					<!-- 工号 -->
-					<hos-form-item>
-						<hos-input
+					<el-form-item>
+						<el-input
 							v-model="code"
 							:placeholder="$t('请输入工号')"
 							@change="getPhone"
-						></hos-input>
-					</hos-form-item>
+						></el-input>
+					</el-form-item>
 					<!-- 手机号 -->
-					<hos-form-item>
-						<hos-input
+					<el-form-item>
+						<el-input
 							v-model="maskCode"
 							:placeholder="$t('根据工号获取手机号')"
 							disabled
-						></hos-input>
-					</hos-form-item>
+						></el-input>
+					</el-form-item>
 					<!-- 验证码 -->
-					<hos-form-item prop="smsCode">
-						<hos-input
+					<el-form-item prop="smsCode">
+						<el-input
 							v-model="firstForm.smsCode"
 							:placeholder="$t('请输入验证码')"
 						>
-						</hos-input>
+						</el-input>
 						<a @click="handleCode" class="get-code-style" v-if="showCode">{{
 							$t('获取验证码')
 						}}</a>
 						<span class="span-code" v-else
 							>{{ waitTime }}{{ $t('秒后重新获取') }}</span
 						>
-					</hos-form-item>
+					</el-form-item>
 					<!-- 图形验证码 -->
-					<hos-form-item prop="captchaCode">
-						<hos-row :gutter="20">
-							<hos-col :span="18">
-								<hos-input
+					<el-form-item prop="captchaCode">
+						<el-row :gutter="20">
+							<el-col :span="18">
+								<el-input
 									v-model="firstForm.captchaCode"
 									:placeholder="$t('请输入图形验证码')"
 								>
-								</hos-input>
-							</hos-col>
+								</el-input>
+							</el-col>
 							<img style="height: 30px" :src="imgCodeUrl" @click="getCaptcha" />
-						</hos-row>
-					</hos-form-item>
-				</hos-form>
+						</el-row>
+					</el-form-item>
+				</el-form>
 				<!-- 下一步 -->
 				<div class="footer">
-					<hos-button type="success" @click="firstNextStep">{{
+					<el-button type="success" @click="firstNextStep">{{
 						$t('下一步')
-					}}</hos-button>
+					}}</el-button>
 				</div>
 			</div>
 			<div v-show="showSecond">
 				<!-- 设置新密码 -->
-				<hos-form
+				<el-form
 					:model="passwordForm"
 					:rules="passwordFormRules"
 					ref="passwordFormRef"
 					label-width="auto"
 				>
 					<!-- 新密码 -->
-					<hos-form-item prop="newPassword">
-						<hos-input
+					<el-form-item prop="newPassword">
+						<el-input
 							:type="flag1 ? 'text' : 'password'"
 							v-model="passwordForm.newPassword"
 							:placeholder="$t('新密码')"
@@ -83,18 +83,18 @@
 							<i
 								slot="suffix"
 								class="iconPos"
-								:class="['hos-icon-view']"
+								:class="['el-icon-view']"
 								autocomplete="auto"
 								@click.stop="flag1 = !flag1"
 							/>
-						</hos-input>
+						</el-input>
 						<span v-if="showPwdStr" class="lengthStrClass"
 							>({{ this.lengthStr }})</span
 						>
-					</hos-form-item>
+					</el-form-item>
 					<!-- 密码强度 -->
-					<hos-form-item>
-						<hos-progress
+					<el-form-item>
+						<el-progress
 							:text-inside="notCn"
 							:stroke-width="notCn ? 18 : 7"
 							:percentage="percentage"
@@ -102,11 +102,11 @@
 							:format="percentageFormat"
 							:placeholder="$t('密码强度')"
 						>
-						</hos-progress>
-					</hos-form-item>
+						</el-progress>
+					</el-form-item>
 					<!-- 确认密码 -->
-					<hos-form-item prop="rePassword">
-						<hos-input
+					<el-form-item prop="rePassword">
+						<el-input
 							:type="flag2 ? 'text' : 'password'"
 							v-model="passwordForm.rePassword"
 							:placeholder="$t('确认密码')"
@@ -114,28 +114,28 @@
 							<i
 								slot="suffix"
 								class="iconPos"
-								:class="['hos-icon-view']"
+								:class="['el-icon-view']"
 								autocomplete="auto"
 								@click.stop="flag2 = !flag2"
 							/>
-						</hos-input>
-					</hos-form-item>
-				</hos-form>
+						</el-input>
+					</el-form-item>
+				</el-form>
 				<!-- 下一步 -->
 				<div class="footer">
-					<hos-button type="success" @click="secondNextStep">{{
+					<el-button type="success" @click="secondNextStep">{{
 						$t('下一步')
-					}}</hos-button>
+					}}</el-button>
 				</div>
 			</div>
 			<div v-show="showThird">
-				<hos-result icon="success" :subTitle="$t('登录密码更新成功')">
-				</hos-result>
+				<el-result icon="success" :subTitle="$t('登录密码更新成功')">
+				</el-result>
 				<!-- 重新登录 -->
 				<div class="footer">
-					<hos-button type="primary" @click="cancel">{{
+					<el-button type="primary" @click="cancel">{{
 						$t('重新登录')
-					}}</hos-button>
+					}}</el-button>
 				</div>
 			</div>
 		</div>
@@ -565,10 +565,10 @@ export default {
 		padding-right: 10px;
 	}
 
-	::v-deep .hos-progress {
+	::v-deep .el-progress {
 		// width: 95%;
 		// line-height: 22px;
-		.hos-progress-bar__outer {
+		.el-progress-bar__outer {
 			// height: 22px !important;
 		}
 	}

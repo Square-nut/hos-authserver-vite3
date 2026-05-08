@@ -1,33 +1,37 @@
 <template>
 	<div class="post-select">
-		<hos-select
+		<el-select
 			v-model="post"
 			:data="postList"
-      v-bind="$attrs"
-      @change="change"
+			v-bind="$attrs"
+			@change="change"
 			popper-class="post-select-popper"
 			option-value="id"
 			option-label="name"
 		>
-			<i v-if="theme" class="hos-input__icon hos-icom-post" slot="prefix"></i>
-			<img v-else src="../../../assets/images/login/z61.png" class=" " slot="prefix" />
-		</hos-select>
+			<i v-if="theme" class="el-input__icon el-icom-post" slot="prefix"></i>
+			<img
+				v-else
+				src="../../../assets/images/login/z61.png"
+				class=" "
+				slot="prefix"
+			/>
+		</el-select>
 	</div>
 </template>
 <script>
 export default {
 	props: {
 		type: String,
-		personId: String
-  },
+		personId: String,
+	},
 	components: {},
 	data() {
 		return {
 			theme:
-				import.meta.env.VITE_APP_SIMPLE_ONCE ??
-				import.meta.env.VUE_APP_SIMPLE_ONCE,
+				import.meta.env.VITE_APP_THEME_STYLE,
 			postList: [],
-			post: ''
+			post: '',
 		};
 	},
 	created() {},
@@ -35,9 +39,9 @@ export default {
 		// 岗位下拉表格相关逻辑开始
 		getPostPage() {
 			// 先重置
-			
-			this.clear()
-			
+
+			this.clear();
+
 			let params = {
 				current: 1,
 				type: this.type,
@@ -50,31 +54,28 @@ export default {
 						if (res.data.records && res.data.records.length) {
 							this.postList = res.data.records;
 							this.post = this.postList[0].id;
-							this.$emit('change', this.post, this.postList[0])
+							this.$emit('change', this.post, this.postList[0]);
 						} else {
-							this.clear()
+							this.clear();
 						}
 					}
 				})
 				.catch((err) => {
-					this.clear()
+					this.clear();
 				});
 		},
 
-    change(val){
+		change(val) {
 			let post = this.postList.filter((ele) => ele.id == val)[0];
-      this.$emit('change', val, post)
-      // this.$emit('input', val)
-    },
-    clear() {
-      this.postList = [];
-      this.post = '';
-    }
-  },
+			this.$emit('change', val, post);
+			// this.$emit('input', val)
+		},
+		clear() {
+			this.postList = [];
+			this.post = '';
+		},
+	},
 };
 </script>
-<style lang="scss" scoped>
-
-</style>
-<style lang="scss">
-</style>
+<style lang="scss" scoped></style>
+<style lang="scss"></style>

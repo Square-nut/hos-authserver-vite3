@@ -6,7 +6,6 @@
 <script>
 // import * as ww from '@wecom/jssdk';
 import AuthConstant from '@/constant/auth-constant';
-import { mapActions } from 'vuex';
 import { getLoginErrorDesc } from './js/login';
 import { getQueryString, getTopUrl } from '@/utils/base/base-util';
 
@@ -99,8 +98,6 @@ export default {
 		// wwLogin.unmount();
 	},
 	methods: {
-		...mapActions(['Login']),
-
 		loginSucessHandler(toPath) {
 			// 不需要二次认证
 			this.$emit('loginSucessHandler');

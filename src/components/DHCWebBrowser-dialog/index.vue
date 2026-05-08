@@ -1,6 +1,6 @@
 <template>
 	<!-- 下载医为客户端 S -->
-	<hos-dialog
+	<el-dialog
 		:title="$t('安装医为客户端基础环境')"
 		:visible.sync="DHCWebBrowser"
 		width="45%"
@@ -10,14 +10,14 @@
 		:close-on-press-escape="false"
 		:show-close="true"
 	>
-		<hos-row>
-			<hos-col :span="16"
+		<el-row>
+			<el-col :span="16"
 				><div class="grid-content bg-purple text">
 					<div>
 						{{ $t('1. 需要安装医为客户端，请点击按钮下载最新安装包！') }}
 						<div class="downBut">
-							<hos-button type="primary" @click="download" size="large">
-								{{ $t('点击下载安装') }}</hos-button
+							<el-button type="primary" @click="download" size="large">
+								{{ $t('点击下载安装') }}</el-button
 							>
 						</div>
 					</div>
@@ -26,22 +26,22 @@
 						{{ $t('或 "我曾经安装过" ,点击按钮运行管理程序。') }}
 					</div>
 					<div class="downBut">
-						<hos-button
+						<el-button
 							type="success"
 							size="large"
 							@click="openWebsysServerSetup"
-							>{{ $t('运行管理程序') }}</hos-button
+							>{{ $t('运行管理程序') }}</el-button
 						>
 					</div>
 					<div>{{ $t('成功启动客户端管理程序后,重新进入登录界面即可。') }}</div>
-				</div></hos-col
+				</div></el-col
 			>
-			<hos-col :span="8"
+			<el-col :span="8"
 				><div class="grid-content bg-purple-light">
 					<img src="@/assets/images/dhcDialog.png" /></div
-			></hos-col>
-		</hos-row>
-	</hos-dialog>
+			></el-col>
+		</el-row>
+	</el-dialog>
 	<!-- 下载医为客户端 S -->
 </template>
 
@@ -163,7 +163,7 @@ export default {
 </script>
 <style lang="scss">
 .DHCWebBrowser-dialog {
-	.hos-dialog__body {
+	.el-dialog__body {
 		padding: 0 40px 40px 40px !important;
 		line-height: 40px;
 		.text {
@@ -173,16 +173,16 @@ export default {
 		.downBut {
 			margin-left: 100px;
 		}
-		.hos-button {
+		.el-button {
 			margin: 20px 0;
 		}
 	}
-	.hos-dialog__header {
+	.el-dialog__header {
 		text-align: center;
 		padding: 40px 15px !important;
 		border-bottom: 0px solid #e2e2e2;
 	}
-	.hos-dialog__title {
+	.el-dialog__title {
 		font-size: 24px;
 		font-weight: bold;
 	}

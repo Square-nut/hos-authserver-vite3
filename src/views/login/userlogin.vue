@@ -1,5 +1,5 @@
 <template>
-	<hos-form
+	<el-form
 		ref="loginForm"
 		:model="loginForm"
 		:rules="theme == 1 ? loginRules : {}"
@@ -7,30 +7,30 @@
 		auto-complete="on"
 		label-position="left"
 	>
-		<hos-col :span="24" v-if="openTenant">
-			<hos-form-item prop="tenantId">
-				<hos-select
+		<el-col :span="24" v-if="openTenant">
+			<el-form-item prop="tenantId">
+				<el-select
 					@change="changeTenant"
 					class="tenantSelect"
 					popper-class="tenantPop"
 					:placeholder="$t('请选择租户')"
 					v-model="loginForm.tenantId"
 				>
-					<hos-option
+					<el-option
 						v-for="(item, index) in tenantData"
 						:key="index"
 						:label="item.name"
 						:value="item.tenantId"
 					>
-					</hos-option>
-				</hos-select>
-				<i class="hos-icon-s-home"></i>
-			</hos-form-item>
-		</hos-col>
+					</el-option>
+				</el-select>
+				<i class="el-icon-s-home"></i>
+			</el-form-item>
+		</el-col>
 
-		<hos-col :span="24">
-			<hos-form-item prop="loginName">
-				<hos-input
+		<el-col :span="24">
+			<el-form-item prop="loginName">
+				<el-input
 					ref="loginName"
 					v-model="loginForm.loginName"
 					:placeholder="
@@ -42,19 +42,19 @@
 					@change="changeLoginName"
 					@keyup.enter.native="keyEnterLogin('password')"
 				>
-					<i v-if="theme == 1" class="hos-icom-person" alt=""></i>
+					<i v-if="theme == 1" class="el-icom-person" alt=""></i>
 					<img
 						v-else
 						src="../../assets/images/login/z59.png"
 						slot="prefix"
 						alt=""
 					/>
-				</hos-input>
-			</hos-form-item>
-		</hos-col>
-		<hos-col :span="24">
-			<hos-form-item prop="password">
-				<hos-input
+				</el-input>
+			</el-form-item>
+		</el-col>
+		<el-col :span="24">
+			<el-form-item prop="password">
+				<el-input
 					key="password"
 					ref="password"
 					v-model="loginForm.password"
@@ -63,7 +63,7 @@
 					name="password"
 					@keyup.enter.native="keyEnterLogin('captchaCode')"
 				>
-					<i v-if="theme == 1" class="hos-icon-lock" alt=""></i>
+					<i v-if="theme == 1" class="el-icon-lock" alt=""></i>
 					<img
 						v-else
 						src="../../assets/images/login/z60.png"
@@ -73,35 +73,35 @@
 					<i
 						@click="togglePwd"
 						slot="suffix"
-						class="hos-input__icon hos-icon-view"
+						class="el-input__icon el-icon-view"
 					></i>
-				</hos-input>
-			</hos-form-item>
-		</hos-col>
+				</el-input>
+			</el-form-item>
+		</el-col>
 		<!--图形验证码的区域-->
-		<hos-col :span="24" v-if="openCaptcha">
-			<hos-form-item prop="captchaCode">
-				<hos-col :span="16" style="padding-right: 15px">
-					<hos-input
-						prefix-icon="hos-icom-select-grant"
+		<el-col :span="24" v-if="openCaptcha">
+			<el-form-item prop="captchaCode">
+				<el-col :span="16" style="padding-right: 15px">
+					<el-input
+						prefix-icon="el-icom-select-grant"
 						v-model="loginForm.captchaCode"
 						ref="captchaCode"
 						:placeholder="$t('请输入图形验证码')"
 						type="text"
 						@keyup.enter.native="keyEnterLogin"
 					>
-					</hos-input>
-				</hos-col>
-				<hos-col :span="8" class="VCode">
-					<!--<hos-image
-                            :src="imgUrl" @click="getCaptcha"></hos-image>-->
+					</el-input>
+				</el-col>
+				<el-col :span="8" class="VCode">
+					<!--<el-image
+                            :src="imgUrl" @click="getCaptcha"></el-image>-->
 					<img :src="imgUrl" @click="getCaptcha" />
-				</hos-col>
-			</hos-form-item>
-		</hos-col>
+				</el-col>
+			</el-form-item>
+		</el-col>
 		<!-- 岗位 -->
-		<hos-col :span="24" v-if="showPostType != 'simple'">
-			<hos-form-item prop="post">
+		<el-col :span="24" v-if="showPostType != 'simple'">
+			<el-form-item prop="post">
 				<postSelect
 					v-if="showPostType == 'professional'"
 					ref="userLoginSelect_post"
@@ -122,21 +122,21 @@
 					:personId="personId"
 					@change="changePost"
 				></post-select-table>
-			</hos-form-item>
-		</hos-col>
+			</el-form-item>
+		</el-col>
 		<div v-if="theme == 0 && loginErr" class="loginErrBox">
 			<span>{{ loginErr }}</span>
 		</div>
-		<hos-col :span="24">
-			<hos-form-item class="simple-login-btn pure-login-btn">
-				<hos-button
+		<el-col :span="24">
+			<el-form-item class="simple-login-btn pure-login-btn">
+				<el-button
 					:loading="loading"
 					type="primary"
 					style="width: 100%; margin-bottom: 20px"
 					@click="userHandleLogin(true)"
 					>{{ $t('登录') }}
-				</hos-button>
-				<hos-row
+				</el-button>
+				<el-row
 					class="Password_settings"
 					v-if="
 						(loginPageInfo?.easyHideRetrievePassword ||
@@ -146,26 +146,26 @@
 				>
 					<!--忘记密码-->
 					<a @click="handleForgetPass">{{ $t('忘记密码？') }}</a>
-				</hos-row>
-			</hos-form-item>
-		</hos-col>
+				</el-row>
+			</el-form-item>
+		</el-col>
 		<!-- 忘记密码 -->
-		<hos-biz-dialog
+		<el-biz-dialog
 			:title="$t('找回密码')"
 			uid="forgetPassDialog"
 			:append-to-body="true"
 			:close-on-click-modal="false"
 		>
-		</hos-biz-dialog>
-	</hos-form>
+		</el-biz-dialog>
+	</el-form>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
 import { isOpenDb } from '@/utils/is-open-db';
 import postSelect from './components/post-select.vue';
 import postSelectTable from './components/post-select-table.vue';
 import AuthConstant from '@/constant/auth-constant';
+import { useUserStore } from '@/stores/user';
 
 export default {
 	name: 'userlogin',
@@ -198,7 +198,7 @@ export default {
 		focus: {
 			// 指令的定义
 			inserted: function (el) {
-				el.getElementsByClassName('hos-input__inner')[0].focus();
+				el.getElementsByClassName('el-input__inner')[0].focus();
 			},
 		},
 	},
@@ -211,8 +211,7 @@ export default {
 			passwordType: 'password',
 			loginErr: '', // 错误信息
 			theme:
-				import.meta.env.VITE_APP_SIMPLE_ONCE ??
-				import.meta.env.VUE_APP_SIMPLE_ONCE, // 当前ui样式  hos / 极简
+				import.meta.env.VITE_APP_THEME_STYLE, // 当前ui样式  hos / 极简
 			openTenant: false, //是否开启租户
 			openCaptcha: false, //开启图形验证码
 			imgUrl: '', //图形验证码,给个默认的图片
@@ -302,7 +301,6 @@ export default {
 			this.passwordType =
 				this.passwordType === 'password' ? 'text' : 'password';
 		},
-		...mapActions(['Login']),
 		keyEnterLogin(name) {
 			///键盘enter事件
 			if (this.$refs[name]) {
@@ -346,7 +344,7 @@ export default {
 						upData.postChainId = this.postChainId;
 					}
 					this.loading = true;
-					this.Login(upData)
+					useUserStore().Login(upData)
 						.then((res) => {
 							// 登录成功跳转
 							if (res && res.code == 200) {

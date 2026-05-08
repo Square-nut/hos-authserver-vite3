@@ -4,7 +4,7 @@
   </div>
 </template>
 <script>
-import { mapActions } from "vuex";
+import { useUserStore } from "@/stores/user";
 export default {
   data() {
     return {};
@@ -14,13 +14,13 @@ export default {
   },
   mounted() {},
   methods: {
-    ...mapActions(["Logout"]),
     logoutSystem() {
       //获取退出后的重定向地址
       var servceUrl = this.$route.query.service;
       //调用退出接口
       // 20240506 杨桐-----兼容老版门户退出
-      this.Logout()
+      useUserStore()
+        .Logout()
         .then((res) => {
           //重定向到指定的地址
           location.href = servceUrl;

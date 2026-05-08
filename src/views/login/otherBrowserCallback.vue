@@ -7,6 +7,7 @@
 <script>
 import { setCurrentLocale } from '@/utils/i18n/i18n-util';
 import Qs from 'qs';
+import { useUserStore } from '@/stores/user';
 export default {
 	name: 'oauth_callback',
 	data() {
@@ -33,8 +34,8 @@ export default {
 				grantType: 'disposableKey',
 				disposableKey: key,
 			};
-			this.$store
-				.dispatch('Login', upData)
+			useUserStore()
+				.Login(upData)
 				.then((res) => {
 					window.location.href = redirectUrl;
 				})

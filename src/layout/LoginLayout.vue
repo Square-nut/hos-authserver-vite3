@@ -1,33 +1,34 @@
 <template>
-	<hos-container>
+	<el-container>
 		<template v-if="isSimple == 1">
-			<div class="hos-img-login-bg"></div>
-			<div class="hos-img-login-content">
-				<!-- <hos-header> </hos-header> -->
-				<hos-main class="hos-login-main">
-					<div class="hos-login-card">
-						<route-view></route-view>
+			<div class="el-img-login-bg"></div>
+			<div class="el-img-login-content">
+				<!-- <el-header> </el-header> -->
+				<el-main class="el-login-main">
+					<div class="el-login-card">
+						<!-- <route-view></route-view> -->
+						<LoginIndex />
 					</div>
-				</hos-main>
-				<hos-footer class="login-footer">
+				</el-main>
+				<el-footer class="login-footer">
 					<div>
 						<!-- TODO 英文翻译不正确 -->
 						<span class="foot-font">{{
 							loginPageDataDTO.hosCopyrightInformation
 						}}</span>
 					</div>
-				</hos-footer>
+				</el-footer>
 			</div>
 		</template>
 		<template v-else>
-			<hos-main class="login-simple-hos-main">
+			<el-main class="login-simple-el-main">
 				<div class="header-four-box">
 					<div class="left-group-box"></div>
 					<div class="center">
 						<span>{{ loginPageDataDTO.easyTitle }}</span>
 					</div>
 					<div class="languangeChange">
-						<hos-select
+						<el-select
 							v-if="i18nStatus"
 							class="languageSelect"
 							v-model="currLang"
@@ -37,30 +38,30 @@
 							option-label="label"
 							option-value="value"
 						>
-						</hos-select>
+						</el-select>
 					</div>
 					<div class="right-group-box"></div>
 				</div>
 				<div class="simple-login-mid">
-					<hos-carousel trigger="click" height="100%">
-						<hos-carousel-item v-for="item in carouselImage" :key="item.sort">
-							<hos-image
+					<el-carousel trigger="click" height="100%">
+						<el-carousel-item v-for="item in carouselImage" :key="item.sort">
+							<el-image
 								:src="item.login_back_file_id"
 								style="width: 100%; height: 100%"
-							></hos-image>
-						</hos-carousel-item>
-					</hos-carousel>
+							></el-image>
+						</el-carousel-item>
+					</el-carousel>
 					<div class="simple-login-card">
-						<route-view></route-view>
+						<LoginIndex />
 					</div>
 				</div>
-			</hos-main>
-			<hos-footer class="simple-footer">
+			</el-main>
+			<el-footer class="simple-footer">
 				<div class="simple-com-logo"></div>
 				<span class="simple-foot-font">
 					{{ loginPageDataDTO.easyCopyrightInformation }}
 				</span>
-			</hos-footer>
+			</el-footer>
 		</template>
 		<div v-if="showLoginDeviceInfo" class="login-layout-device-info">
 			<span>本机IP: {{ localIp || '--' }}</span>
@@ -69,10 +70,11 @@
 		<!-- 下载或开启医为客户端 SZWW -->
 		<db-dialog v-if="dbDialogVisible"></db-dialog>
 		<!-- 下载或开启医为客户端 EZWW -->
-	</hos-container>
+	</el-container>
 </template>
 
 <script setup>
+import LoginIndex from '@/views/login/index.vue';
 import {
 	getCurrentInstance,
 	onBeforeMount,
@@ -113,9 +115,7 @@ const defaultCarouselImage = [
 
 const { proxy } = getCurrentInstance();
 const deviceStore = useDeviceStore();
-const isSimple = ref(
-	import.meta.env.VITE_APP_SIMPLE_ONCE ?? import.meta.env.VUE_APP_SIMPLE_ONCE
-);
+const isSimple = ref(import.meta.env.VITE_APP_THEME_STYLE);
 const carouselImage = ref([...defaultCarouselImage]);
 const loginPageDataDTO = ref({});
 const DHCWebBrowserStatus = ref(''); //医为客户端状态
@@ -340,10 +340,10 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-.hos-header {
+.el-header {
 	margin-bottom: 48px;
 }
-.hos-system-name {
+.el-system-name {
 	padding-top: 25px;
 	font-size: 32px;
 	font-family: Microsoft YaHei;
@@ -356,16 +356,16 @@ img {
 	opacity: 1;
 	border-radius: 0px;
 }
-.hos-login-main {
+.el-login-main {
 	display: flex;
 	height: 502px;
 	opacity: 1;
 	border-radius: 0px;
-	.hos-img-login {
+	.el-img-login {
 		padding-left: 166px;
 	}
-	.hos-login-card {
-		.hos-card {
+	.el-login-card {
+		.el-card {
 			width: 350px;
 			height: 375px;
 			opacity: 1;

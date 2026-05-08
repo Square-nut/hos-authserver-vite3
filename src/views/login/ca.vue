@@ -18,7 +18,7 @@
 					</div>
 					<div class="flex-box">
 						<div class="login-type-title">{{ $t('UKey登录') }}</div>
-						<hos-form
+						<el-form
 							ref="ukLogin"
 							label-width=""
 							hide-required-asterisk
@@ -27,32 +27,32 @@
 							:rules="ukRules"
 						>
 							<!-- UKEY 下拉框 -->
-							<hos-form-item label="" prop="strContainerName">
-								<hos-select
+							<el-form-item label="" prop="strContainerName">
+								<el-select
 									v-model="ukForm.strContainerName"
 									:placeholder="$t('请选择UKEY')"
 									class="input-width"
 								>
-									<hos-option
+									<el-option
 										v-for="(item, index) in ukSelectArray"
 										:key="item.value + index"
 										:label="item.label"
 										:value="item.value"
 									>
-									</hos-option>
-								</hos-select>
-							</hos-form-item>
+									</el-option>
+								</el-select>
+							</el-form-item>
 							<!-- 密码 -->
-							<hos-form-item label="" prop="ukeyPassword">
-								<hos-input
+							<el-form-item label="" prop="ukeyPassword">
+								<el-input
 									v-model="ukForm.ukeyPassword"
 									type="password"
 									class="input-width"
 									:placeholder="$t('请输入密码')"
-								></hos-input>
-							</hos-form-item>
+								></el-input>
+							</el-form-item>
 							<!-- 岗位 -->
-							<!-- <hos-form-item prop="post" v-if="!Simple">
+							<!-- <el-form-item prop="post" v-if="!Simple">
 								
 								<postSelect
 									v-if="showPostType"
@@ -75,18 +75,18 @@
 									:placeholder="postPlaceholder"
 									@change="changePost"
 								></post-select-table>
-							</hos-form-item> -->
+							</el-form-item> -->
 							<!-- 操作按钮 -->
-							<!-- <hos-form-item label=""> -->
-							<hos-button
+							<!-- <el-form-item label=""> -->
+							<el-button
 								type="primary"
 								@click="ukLogin('ukLogin')"
 								class="input-width ca-login-button"
-								>{{ $t('登录') }}</hos-button
+								>{{ $t('登录') }}</el-button
 							>
-							<!-- <hos-button class="button-width " @click="close">{{$t('取消')}}</hos-button> -->
-							<!-- </hos-form-item> -->
-						</hos-form>
+							<!-- <el-button class="button-width " @click="close">{{$t('取消')}}</el-button> -->
+							<!-- </el-form-item> -->
+						</el-form>
 					</div>
 				</div>
 			</div>
@@ -134,16 +134,16 @@
 							<img src="@/assets/images/ca/fake.png" />
 							<div class="mask">
 								<span>{{ $t('二维码生成错误') }}</span>
-								<i @click="refreshQR" class="hos-icom-big-refresh"></i>
+								<i @click="refreshQR" class="el-icom-big-refresh"></i>
 							</div>
 						</div>
 						<!-- <span>请使用<span class="colorF59">北京CA的APP</span>扫码登录</span> -->
 						<!-- 二维码过期遮罩 -->
 						<div class="mask" v-if="showMask">
 							<span>{{ $t('当前二维码已过期') }}</span>
-							<hos-button class="mar-t-10" @click="refreshQR">{{
+							<el-button class="mar-t-10" @click="refreshQR">{{
 								$t('刷新')
-							}}</hos-button>
+							}}</el-button>
 						</div>
 					</div>
 				</div>
@@ -163,7 +163,7 @@
 					</div>
 					<div class="flex-box">
 						<div class="login-type-title">{{ $t('PIN码登录') }}</div>
-						<hos-form
+						<el-form
 							ref="pinLogin"
 							label-width=""
 							hide-required-asterisk
@@ -172,34 +172,34 @@
 							:rules="pinRules"
 						>
 							<!-- 用户名 -->
-							<hos-form-item label="" prop="accountCode">
-								<hos-input
+							<el-form-item label="" prop="accountCode">
+								<el-input
 									v-model="pinForm.accountCode"
 									:placeholder="$t('请输入用户名')"
 									class="input-width"
-								></hos-input>
-							</hos-form-item>
+								></el-input>
+							</el-form-item>
 							<!-- PIN码 -->
-							<hos-form-item label="" prop="passwordPin">
-								<hos-input
+							<el-form-item label="" prop="passwordPin">
+								<el-input
 									class="input-width"
 									v-model="pinForm.passwordPin"
 									type="password"
 									:placeholder="$t('请输入PIN码')"
-								></hos-input>
-							</hos-form-item>
-							<!-- <hos-form-item> -->
+								></el-input>
+							</el-form-item>
+							<!-- <el-form-item> -->
 							<!-- 操作按钮 -->
 
-							<hos-button
+							<el-button
 								type="primary"
 								class="input-width ca-login-button"
 								@click="pinLogin('pinLogin')"
-								>{{ $t('登录') }}</hos-button
+								>{{ $t('登录') }}</el-button
 							>
-							<!-- <hos-button class="button-width " @click="close()">{{$t('取消')}}</hos-button> -->
-							<!-- </hos-form-item> -->
-						</hos-form>
+							<!-- <el-button class="button-width " @click="close()">{{$t('取消')}}</el-button> -->
+							<!-- </el-form-item> -->
+						</el-form>
 					</div>
 				</div>
 			</div>
@@ -214,11 +214,11 @@
 import QRCode from 'qrcodejs2';
 import { ukMixinData } from './js/uk';
 import { pinMixinData } from './js/pin';
-import { mapActions } from 'vuex';
 import AuthConstant from '@/constant/auth-constant';
 import { getLoginErrorDesc } from './js/login';
 import postSelect from './components/post-select.vue';
 import postSelectTable from './components/post-select-table.vue';
+import { useUserStore } from '@/stores/user';
 export default {
 	name: 'CA',
 	components: { postSelect, postSelectTable },
@@ -386,7 +386,6 @@ export default {
 		clearTimeout(this.delay);
 	},
 	methods: {
-		...mapActions(['Login']),
 		// 关闭弹框
 		close() {
 			// this.$store.commit('CLOSE_DIALOG',{_uid:'SCDialog'});
@@ -518,7 +517,7 @@ export default {
 				upData.postChainId = this.postChainId;
 				upData.post = this.ukForm.post;
 			}
-			this.Login(upData)
+			useUserStore().Login(upData)
 				.then((res) => {
 					if (res && res.code == 200) {
 						// postDialog
@@ -651,7 +650,7 @@ export default {
 .input-width {
 	width: 260px;
 	height: 36px;
-	&::v-deep .hos-input__inner {
+	&::v-deep .el-input__inner {
 		height: 36px;
 		line-height: 36px;
 	}
@@ -679,7 +678,7 @@ export default {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	&::v-deep .hos-form-item {
+	&::v-deep .el-form-item {
 		margin-bottom: 24px;
 	}
 	&.phone-in-frame {
