@@ -210,7 +210,9 @@ export default {
 			postChainId: '',
 			passwordType: 'password',
 			loginErr: '', // 错误信息
-			theme: process.env.VUE_APP_SIMPLE_ONCE, // 当前ui样式  hos / 极简
+			theme:
+				import.meta.env.VITE_APP_SIMPLE_ONCE ??
+				import.meta.env.VUE_APP_SIMPLE_ONCE, // 当前ui样式  hos / 极简
 			openTenant: false, //是否开启租户
 			openCaptcha: false, //开启图形验证码
 			imgUrl: '', //图形验证码,给个默认的图片

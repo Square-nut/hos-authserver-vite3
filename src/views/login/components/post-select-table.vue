@@ -118,7 +118,10 @@ export default {
     };
 	},
 	created() {
-		if(process.env.VUE_APP_SIMPLE_ONCE == '1') {
+		if(
+			(import.meta.env.VITE_APP_SIMPLE_ONCE ??
+				import.meta.env.VUE_APP_SIMPLE_ONCE) == '1'
+		) {
 			this.pageConfig.layout  = 'total, home, prev, pager, next, end'
 		}
 	},

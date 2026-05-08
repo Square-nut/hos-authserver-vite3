@@ -265,12 +265,16 @@ export default {
 	},
 	data() {
 		return {
-			isHos: process.env.VUE_APP_SIMPLE_ONCE === '1', // 是否为HOS风格
+			isHos:
+				(import.meta.env.VITE_APP_SIMPLE_ONCE ??
+					import.meta.env.VUE_APP_SIMPLE_ONCE) === '1', // 是否为HOS风格
 			currLang: '',
 			title: this.$t('医院综合业务操作系统HOS2.0'), // 欢迎登录，项目名
 			loginPageInfo: {}, // 登录配置信息
 			activeType: '', // 当前登录方式 账号密码/短信登录
-			UItype: process.env.VUE_APP_SIMPLE_ONCE, // 当前ui样式  hos / 极简
+			UItype:
+				import.meta.env.VITE_APP_SIMPLE_ONCE ??
+				import.meta.env.VUE_APP_SIMPLE_ONCE, // 当前ui样式  hos / 极简
 			SCDialogTitle: this.$t('二次认证'), // 二次认证弹框标题
 			CADialogTitle: '', // ca 弹框标题
 			yorn: false, // 是否显示许可证提示

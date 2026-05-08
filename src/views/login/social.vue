@@ -155,7 +155,7 @@ export default {
 				.catch((error) => {
 					console.log(error);
 				});
-			//window.location.href = `${process.env.VUE_APP_BASE_URL}/social-auth/oauth/render/${source}`;
+			//window.location.href = `${import.meta.env.VITE_APP_BASE_URL ?? import.meta.env.VUE_APP_BASE_URL}/social-auth/oauth/render/${source}`;
 		},
 	},
 };

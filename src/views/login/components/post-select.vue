@@ -23,7 +23,9 @@ export default {
 	components: {},
 	data() {
 		return {
-			theme: process.env.VUE_APP_SIMPLE_ONCE,
+			theme:
+				import.meta.env.VITE_APP_SIMPLE_ONCE ??
+				import.meta.env.VUE_APP_SIMPLE_ONCE,
 			postList: [],
 			post: ''
 		};
