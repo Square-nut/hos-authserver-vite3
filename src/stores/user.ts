@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import apiRequest from '@/axios'
 import i18n from '@/i18n'
+import { useDeviceStore } from '@/stores/device'
 
 const ACCESS_TOKEN_KEY = 'access-token'
 const REFRESH_TOKEN_KEY = 'refresh-token'
@@ -37,7 +38,8 @@ function removeLocal(key: string) {
 }
 
 function hasMac() {
-  return !!localStorage.getItem(USER_CONSTANT.Mac)
+  const deviceStore = useDeviceStore()
+  return !!(deviceStore.mac || localStorage.getItem(USER_CONSTANT.Mac))
 }
 
 function clearLoginCache() {
@@ -101,6 +103,7 @@ export const useUserStore = defineStore('user', {
     },
 
     async Login(loginForm: LoginForm) {
+      const deviceStore = useDeviceStore()
       const headers: Record<string, string> = {}
       if (loginForm.grantType === 'captcha' || loginForm.grantType === 'otp') {
         headers['captcha-key'] = loginForm.grantChainId || ''
@@ -117,8 +120,8 @@ export const useUserStore = defineStore('user', {
         }
       }
 
-      const ip = localStorage.getItem(USER_CONSTANT.IP)
-      const mac = localStorage.getItem(USER_CONSTANT.Mac)
+      const ip = deviceStore.ip || localStorage.getItem(USER_CONSTANT.IP)
+      const mac = deviceStore.mac || localStorage.getItem(USER_CONSTANT.Mac)
       if (!ip || !mac) {
         try {
           const cmdResponse = (await apiRequest('websys.cmd')) as any
@@ -127,6 +130,11 @@ export const useUserStore = defineStore('user', {
             setLocal(USER_CONSTANT.IP, config.IP)
             setLocal(USER_CONSTANT.HostName, config.HostName)
             setLocal(USER_CONSTANT.Mac, config.Mac)
+            deviceStore.setDeviceInfo({
+              ip: config.IP || '',
+              hostName: config.HostName || '',
+              mac: config.Mac || '',
+            })
           }
         } catch {
           // ignore client probe failure; keep legacy behavior tolerant
