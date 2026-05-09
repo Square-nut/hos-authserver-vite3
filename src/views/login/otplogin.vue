@@ -143,6 +143,7 @@ import { validPhone11, validEmail } from '@/utils/validateUtil';
 import { getLoginErrorDesc } from './js/login';
 import postSelect from './components/post-select.vue';
 import postSelectTable from './components/post-select-table.vue';
+import forgetPassword from './forgetPassword.vue';
 import { useUserStore } from '@/stores/user';
 export default {
 	name: 'otplogin',
@@ -150,7 +151,7 @@ export default {
 	directives: {
 		focus: {
 			// 指令的定义
-			inserted: function (el) {
+			mounted: function (el) {
 				el.getElementsByClassName('el-input__inner')[0].focus();
 			},
 		},
@@ -499,7 +500,7 @@ export default {
 		// 忘记密码
 		handleForgetPass() {
 			this.$store.commit('OPEN_DIALOG', {
-				component: require('./forgetPassword.vue').default,
+				component: forgetPassword,
 				_uid: 'forgetPassDialog',
 				ref: 'forgetPassDialog',
 				props: {},

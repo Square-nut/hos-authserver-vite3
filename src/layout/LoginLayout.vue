@@ -94,6 +94,8 @@ import {
 } from '@/utils/i18n/i18n-util';
 import i18n from '@/i18n';
 import { useDeviceStore } from '@/stores/device';
+import { useI18nStore } from '@/stores/i18n';
+import { useUserStore } from '@/stores/user';
 import loginBg01 from '@/assets/images/login/01.png';
 import loginBg02 from '@/assets/images/login/02.png';
 import loginBg03 from '@/assets/images/login/03.png';
@@ -115,6 +117,9 @@ const defaultCarouselImage = [
 
 const { proxy } = getCurrentInstance();
 const deviceStore = useDeviceStore();
+const i18nStore = useI18nStore();
+const userStore = useUserStore();
+
 const isSimple = ref(import.meta.env.VITE_APP_THEME_STYLE);
 const carouselImage = ref([...defaultCarouselImage]);
 const loginPageDataDTO = ref({});
@@ -152,7 +157,7 @@ async function isOpen() {
 	const { code, data } = await proxy.$api('isOpen');
 	if (code == '200') {
 		i18nStatus.value = data;
-		proxy.$store.commit('SET_I18N_STATUS', data);
+		i18nStore.setI18nStatus(data);
 		// 开启国际化，获取语言列表和页面翻译
 		if (i18nStatus.value) {
 			getlangs();
@@ -301,13 +306,13 @@ function configPageType() {
 					const loginTypeInfo = res.data.loginTypeDataDTO;
 					const strObj = JSON.stringify(loginTypeInfo);
 					sessionStorage.setItem('loginTypeDataDTO', strObj);
-					proxy.$store.commit('SET_LOGIN_TYPE_DTO', loginTypeInfo);
+					userStore.setLoginType(loginTypeInfo);
 				} else {
 					// fix by 2024.05.10 需求序号	4425543 需求名称	登录界面初始化如果只是后台的服务有问题，应该把登录界面显示出来，而不是一片空白，否则用户的体验不是很好
 					const loginTypeInfo = getDefaultLoginTypeInfo();
 					const strObj = JSON.stringify(loginTypeInfo);
 					sessionStorage.setItem('loginTypeDataDTO', strObj);
-					proxy.$store.commit('SET_LOGIN_TYPE_DTO', loginTypeInfo);
+					userStore.setLoginType(loginTypeInfo);
 				}
 			}
 		})
@@ -315,7 +320,7 @@ function configPageType() {
 			// fix by 2024.05.10 需求序号	4425543 需求名称	登录界面初始化如果只是后台的服务有问题，应该把登录界面显示出来，而不是一片空白，否则用户的体验不是很好
 			const loginTypeInfo = getDefaultLoginTypeInfo();
 			const strObj = JSON.stringify(loginTypeInfo);
-			proxy.$store.commit('SET_LOGIN_TYPE_DTO', loginTypeInfo);
+			userStore.setLoginType(loginTypeInfo);
 			sessionStorage.setItem('loginTypeDataDTO', strObj);
 		});
 }

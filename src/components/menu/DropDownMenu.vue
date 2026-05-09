@@ -140,14 +140,36 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from 'vue';
 import themeConfig from '@/utils/theme/themeConfig';
 import { useUserStore } from '@/stores/user';
+import setPassword from './setPassword.vue';
+
+const viewModules = import.meta.glob('/src/views/**/*.vue');
+const frameModules = import.meta.glob('/src/components/layouts/**/*.vue');
+
+function resolveViewImporter(componentPath) {
+	const normalized = componentPath.startsWith('/') ? componentPath : `/${componentPath}`;
+	const base = `/src/views${normalized}`;
+	const candidates = [base, `${base}.vue`, `${base}/index.vue`];
+	const match = candidates.find((path) => viewModules[path]);
+	return match ? viewModules[match] : null;
+}
+
+function resolveFrameImporter() {
+	const candidates = [
+		'/src/components/layouts/IframePageView.vue',
+		'/src/components/layouts/IframePageView/index.vue',
+	];
+	const match = candidates.find((path) => frameModules[path]);
+	return match ? frameModules[match] : null;
+}
 export default {
 	name: 'DropDownMenu',
 
 	data() {
 		return {
-			simple: process.env.VUE_APP_SIMPLE_ONCE,
+			simple: import.meta.env.VITE_APP_THEME_STYLE ?? import.meta.env.VUE_APP_THEME_STYLE ?? '0',
 			simpleLeftMenu: localStorage.getItem('leftMenu'),
 			dialogTitle: '',
 			width: '50%',
@@ -193,7 +215,7 @@ export default {
 		setPssword() {
 			console.log('修改密码');
 			this.$store.commit('OPEN_DIALOG', {
-				component: require('./setPassword.vue').default,
+				component: setPassword,
 				_uid: 'setPassword',
 				props: {
 					status: 'edit:',
@@ -205,13 +227,6 @@ export default {
 				.Logout({ initiativeLogout: true })
 				.then(() => {
 					location.reload();
-					// const loginType = process.env.VUE_APP_LOGIN_TYPE;
-					// if (loginType == "oauth") {
-					//   const logoutUrl = process.env.VUE_APP_OAUTH_LOGOUT_URL;
-					//   location.href = logoutUrl + "?service=" + window.location.href;
-					// } else {
-					//   location.href = "/";
-					// }
 				});
 		},
 		openHelpDoc() {
@@ -258,13 +273,18 @@ export default {
 			if (!menu.meta.isDialog) {
 				this.$router.push({ path: menu.path });
 			} else {
-				let componentPath = menu.meta.componentPath;
-				let component = '';
+				const componentPath = menu.meta.componentPath;
+				let importer = null;
 				if (menu.meta.isFrame) {
-					component = require('@/components/layouts/IframePageView').default;
+					importer = resolveFrameImporter();
 				} else {
-					component = require(`@/views${componentPath}`).default;
+					importer = resolveViewImporter(componentPath);
 				}
+				if (!importer) {
+					this.$message.error('页面组件不存在，请检查菜单配置');
+					return;
+				}
+				const component = defineAsyncComponent(importer);
 				//  打开一个弹窗
 				this.dialogTitle = menu.meta.title;
 				this.$store.commit('OPEN_DIALOG', {

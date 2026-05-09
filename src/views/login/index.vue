@@ -288,16 +288,68 @@ const systemConfigTitle = ref('');
 const authTypeLength = ref(0);
 const authInfo = ref({});
 const grantChainId = ref('');
+const defaultLoginTypeInfo = {
+	password: { enable: 0 },
+	sms: { enable: 0 },
+	ca: { enable: 0, data: [] },
+	scanCode: { enable: 0 },
+	enableAD: false,
+	defaultModel: 'password',
+};
 
+function readSessionJSON(key, fallback) {
+	try {
+		const raw = sessionStorage.getItem(key);
+		return raw ? JSON.parse(raw) : fallback;
+	} catch {
+		return fallback;
+	}
+}
+
+function commitStore(type, payload) {
+	proxy?.$store?.commit?.(type, payload);
+}
+
+function normalizeLoginTypeInfo(raw) {
+	const source = raw && typeof raw === 'object' ? raw : {};
+	return {
+		...defaultLoginTypeInfo,
+		...source,
+		password: {
+			...defaultLoginTypeInfo.password,
+			...(source.password || {}),
+		},
+		sms: {
+			...defaultLoginTypeInfo.sms,
+			...(source.sms || {}),
+		},
+		ca: {
+			...defaultLoginTypeInfo.ca,
+			...(source.ca || {}),
+			data: Array.isArray(source?.ca?.data) ? source.ca.data : [],
+		},
+		scanCode: {
+			...defaultLoginTypeInfo.scanCode,
+			...(source.scanCode || {}),
+		},
+		enableAD: Boolean(source.enableAD),
+		defaultModel: source.defaultModel || defaultLoginTypeInfo.defaultModel,
+	};
+}
+
+const loginState = computed(() => proxy?.$store?.state?.login || {});
 const loginTypeDataDTO = computed(
-	() => proxy.$store.state.login.loginTypeDataDTO
+	() => loginState.value.loginTypeDataDTO || readSessionJSON('loginTypeDataDTO', {})
 );
 const loginPostVersion = computed(
-	() => proxy.$store.state.login.loginPostVersion
+	() => loginState.value.loginPostVersion || sessionStorage.getItem('loginPostVersion') || ''
 );
-const portalUrl = computed(() => proxy.$store.state.login.portalUrl);
-const i18nStatus = computed(() => proxy.$store.state.login.i18nStatus);
-const langOpts = computed(() => proxy.$store.state.login.langOpts);
+const portalUrl = computed(() => loginState.value.portalUrl || '');
+const i18nStatus = computed(() => {
+	if (typeof loginState.value.i18nStatus === 'boolean') return loginState.value.i18nStatus;
+	return false;
+});
+const langOpts = computed(() => loginState.value.langOpts || []);
 
 const illustrationStyle = computed(() => {
 	if (
@@ -318,7 +370,7 @@ async function getSysAuthInfo() {
 		if (code == '200') {
 			authInfo.value = data;
 			licenseState();
-			proxy.$store.commit('SET_AUTH_INFO', data);
+			commitStore('SET_AUTH_INFO', data);
 		} else {
 			licenseState();
 		}
@@ -356,9 +408,13 @@ function getAuthTypeLength() {
 }
 
 function loginTypeFn() {
-	loginTypeInfo.value = JSON.parse(
-		sessionStorage.getItem('loginTypeDataDTO') || '{}'
-	);
+	const stateLoginType = loginTypeDataDTO.value;
+	const sessionLoginType = readSessionJSON('loginTypeDataDTO', {});
+	const source =
+		stateLoginType && Object.keys(stateLoginType).length
+			? stateLoginType
+			: sessionLoginType;
+	loginTypeInfo.value = normalizeLoginTypeInfo(source);
 	loginPageInfo.value = JSON.parse(
 		sessionStorage.getItem('loginPageDataDTO') || '{}'
 	);
@@ -376,7 +432,7 @@ function triggerClick(event) {
 		iframeUrl = licenseInfo.value.activedPath + '?language=' + getLocale();
 	}
 	if (className == 'install-license') {
-		proxy.$store.commit('OPEN_DIALOG', {
+		commitStore('OPEN_DIALOG', {
 			component: licenseDialog,
 			_uid: 'licenseDialog',
 			props: {
@@ -469,7 +525,7 @@ function licenseState() {
 
 function openCADialog(row) {
 	CADialogTitle.value = '';
-	proxy.$store.commit('OPEN_DIALOG', {
+	commitStore('OPEN_DIALOG', {
 		component: caDialog,
 		_uid: 'CADialog',
 		props: {
@@ -520,7 +576,7 @@ function openTwoAuthDialog(
 	switch (authType) {
 		case 'sms': {
 			CADialogTitle.value = '二次认证';
-			proxy.$store.commit('OPEN_DIALOG', {
+			commitStore('OPEN_DIALOG', {
 				component: secondaryCertification,
 				_uid: 'CADialog',
 				ref: 'CADialog',
@@ -535,7 +591,7 @@ function openTwoAuthDialog(
 			break;
 		}
 		case 'social': {
-			proxy.$store.commit('OPEN_DIALOG', {
+			commitStore('OPEN_DIALOG', {
 				component: social,
 				_uid: 'twoAuthDialog',
 				ref: 'twoAuthDialog',
@@ -549,7 +605,7 @@ function openTwoAuthDialog(
 		}
 		case 'ca': {
 			CADialogTitle.value = proxy.$t('二次认证');
-			proxy.$store.commit('OPEN_DIALOG', {
+			commitStore('OPEN_DIALOG', {
 				component: secondaryCertification,
 				_uid: 'CADialog',
 				ref: 'CADialog',
@@ -610,7 +666,7 @@ async function loginPageElements() {
 }
 
 function forcedJumpSetPassword(res) {
-	proxy.$store.commit('OPEN_DIALOG', {
+	commitStore('OPEN_DIALOG', {
 		component: setPasswordDialog,
 		_uid: 'forcedJumpSetPassword',
 		ref: 'forcedJumpSetPassword',

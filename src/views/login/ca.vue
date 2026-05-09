@@ -218,6 +218,7 @@ import AuthConstant from '@/constant/auth-constant';
 import { getLoginErrorDesc } from './js/login';
 import postSelect from './components/post-select.vue';
 import postSelectTable from './components/post-select-table.vue';
+import postDialog from './post-dialog.vue';
 import { useUserStore } from '@/stores/user';
 export default {
 	name: 'CA',
@@ -381,7 +382,7 @@ export default {
 			);
 		},
 	},
-	beforeDestroy() {
+	beforeUnmount() {
 		clearInterval(this.timer);
 		clearTimeout(this.delay);
 	},
@@ -530,7 +531,7 @@ export default {
 								this.info.loginType === 'UKEY'
 							) {
 								this.$store.commit('OPEN_DIALOG', {
-									component: require('./post-dialog.vue').default,
+									component: postDialog,
 									_uid: 'postDialog',
 									props: {
 										personId: res.data.personId,

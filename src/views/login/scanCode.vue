@@ -18,7 +18,9 @@
 	</div>
 </template>
 <script>
+import AuthConstant from '@/constant/auth-constant';
 import { useUserStore } from '@/stores/user';
+import postDialog from './post-dialog.vue';
 export default {
 	props: ['activeType'],
 	data() {
@@ -43,13 +45,13 @@ export default {
 			},
 		},
 	},
-	beforeDestroy() {
+	beforeUnmount() {
 		this.stopInterval();
 	},
 	methods: {
 		test() {
 			this.$store.commit('OPEN_DIALOG', {
-				component: require('./post-dialog.vue').default,
+				component: postDialog,
 				_uid: 'postDialog',
 				props: {},
 			});
@@ -136,7 +138,7 @@ export default {
 						// 获取岗位信息并展示下拉列表
 						if (res.data.personId) {
 							this.$store.commit('OPEN_DIALOG', {
-								component: require('./post-dialog.vue').default,
+								component: postDialog,
 								_uid: 'postDialog',
 								props: {
 									personId: res.data.personId,

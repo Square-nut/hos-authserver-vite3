@@ -54,7 +54,7 @@ export const useUserStore = defineStore('user', {
   state: () => ({
     accessToken: '',
     loginStyle: {} as Record<string, unknown>,
-    loginType: '',
+    loginType: {},
     refreshToken: '',
     loginName: '',
     name: '',
@@ -67,6 +67,9 @@ export const useUserStore = defineStore('user', {
   }),
 
   actions: {
+    setLoginType(obj: Record<string, unknown>) {
+      this.loginType = obj;
+    },
     setLoginStyle(configObj: Record<string, unknown>) {
       this.loginStyle = configObj
     },
