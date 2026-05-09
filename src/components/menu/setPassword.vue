@@ -118,6 +118,8 @@
 import AuthConstant from '@/constant/auth-constant';
 import { getLocale } from '@/utils/i18n/i18n-util';
 import { useUserStore } from '@/stores/user';
+import { closeHosBizDialog } from '@/composables/useHosBiz';
+import { getPolicyErrorCode } from '@/utils/base/user-store-util';
 
 export default {
 	props: ['personUuid', 'code', 'msg', 'callback'],
@@ -364,7 +366,7 @@ export default {
 		//     this.offsetNum = 5;
 		// }
 		// 获取需要展示在alert里的文字信息
-		let policyErrorCode = this.$store.getters.policyErrorCode;
+		let policyErrorCode = getPolicyErrorCode();
 		///
 		if (policyErrorCode && AuthConstant.passwordError[policyErrorCode]) {
 			this.isError = true;
@@ -545,8 +547,8 @@ export default {
 			// } else {
 			////弹出层 内部打开的
 
-			this.$store.commit('CLOSE_DIALOG', { _uid: 'forcedJumpSetPassword' });
-			this.$store.commit('CLOSE_DIALOG', { _uid: 'setPassword' });
+			closeHosBizDialog({ _uid: 'forcedJumpSetPassword' });
+			closeHosBizDialog({ _uid: 'setPassword' });
 			window.parent.postMessage('cancel', '*');
 			// }
 		},
@@ -565,7 +567,7 @@ export default {
 							this.$message.success(this.$t(res.msg));
 							this.cancel();
 							this.callback();
-							this.$store.commit('CLOSE_DIALOG', { _uid: 'setPassword' });
+							closeHosBizDialog({ _uid: 'setPassword' });
 							window.parent.postMessage('cancel', '*');
 						} else {
 							this.$message.error(res.msg);

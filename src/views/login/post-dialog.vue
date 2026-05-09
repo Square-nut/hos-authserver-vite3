@@ -72,6 +72,7 @@
 </template>
 <script>
 import { useUserStore } from '@/stores/user';
+import { closeHosBizDialog, updateHosBizTable } from '@/composables/useHosBiz';
 export default {
 	// TODO 处理dialogUid，handleRowClick传参
 	props: [
@@ -177,11 +178,11 @@ export default {
 		},
 		cancel() {
 			if (this.dialogUid) {
-				this.$store.commit('CLOSE_DIALOG', {
+				closeHosBizDialog({
 					_uid: 'dropmenu-post-change-dialog',
 				});
 			} else {
-				this.$store.commit('CLOSE_DIALOG', { _uid: 'postDialog' });
+				closeHosBizDialog({ _uid: 'postDialog' });
 			}
 		},
 		// 登录
@@ -251,7 +252,7 @@ export default {
 			};
 			this.post = '';
 			this.disabled = true;
-			this.$store.commit('UPDATE_TABLE', { _uid: 'post-dialog-select-table' });
+			updateHosBizTable({ _uid: 'post-dialog-select-table' });
 		},
 
 		// 列表加载完数据

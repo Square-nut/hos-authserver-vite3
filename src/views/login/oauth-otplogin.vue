@@ -65,6 +65,7 @@ import AuthConstant from '@/constant/auth-constant';
 import { getLoginErrorDesc } from './js/login';
 import { validPhone11, validEmail } from '@/utils/validateUtil';
 import { useUserStore } from '@/stores/user';
+import { closeHosBizDialog } from '@/composables/useHosBiz';
 export default {
 	props: {
 		// 登录成功的回调
@@ -138,7 +139,7 @@ export default {
 		// 关闭弹框
 		close() {
 			// this.$store.commit('CLOSE_DIALOG',{_uid:'SCDialog'});
-			this.$store.commit('CLOSE_DIALOG', { _uid: 'CADialog' });
+			closeHosBizDialog({ _uid: 'CADialog' });
 		},
 		// 登录流程  所有登录形式最后都走到登录流程来
 		otpLogin() {
@@ -157,7 +158,7 @@ export default {
 						this.loginSucessHandler();
 					} else {
 						this.$message.error(res.msg);
-						this.$store.commit('CLOSE_DIALOG');
+						closeHosBizDialog({});
 					}
 				})
 				.catch((err) => {

@@ -146,6 +146,7 @@
 
 <script>
 import { getLocale, setCurrentLocale } from '@/utils/i18n/i18n-util';
+import { closeHosBizDialog } from '@/composables/useHosBiz';
 export default {
 	name: 'forgetPassword',
 	data() {
@@ -511,7 +512,7 @@ export default {
 			}
 		},
 		cancel() {
-			this.$store.commit('CLOSE_DIALOG', {
+			closeHosBizDialog({
 				_uid: 'forgetPassDialog',
 			});
 		},

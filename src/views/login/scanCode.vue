@@ -21,6 +21,7 @@
 import AuthConstant from '@/constant/auth-constant';
 import { useUserStore } from '@/stores/user';
 import postDialog from './post-dialog.vue';
+import { openHosBizDialog } from '@/composables/useHosBiz';
 export default {
 	props: ['activeType'],
 	data() {
@@ -50,7 +51,7 @@ export default {
 	},
 	methods: {
 		test() {
-			this.$store.commit('OPEN_DIALOG', {
+			openHosBizDialog({
 				component: postDialog,
 				_uid: 'postDialog',
 				props: {},
@@ -137,7 +138,7 @@ export default {
 						// postDialog
 						// 获取岗位信息并展示下拉列表
 						if (res.data.personId) {
-							this.$store.commit('OPEN_DIALOG', {
+							openHosBizDialog({
 								component: postDialog,
 								_uid: 'postDialog',
 								props: {

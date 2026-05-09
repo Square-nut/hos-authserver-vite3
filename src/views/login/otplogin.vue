@@ -145,6 +145,7 @@ import postSelect from './components/post-select.vue';
 import postSelectTable from './components/post-select-table.vue';
 import forgetPassword from './forgetPassword.vue';
 import { useUserStore } from '@/stores/user';
+import { openHosBizDialog } from '@/composables/useHosBiz';
 export default {
 	name: 'otplogin',
 	components: { postSelect, postSelectTable },
@@ -499,7 +500,7 @@ export default {
 		},
 		// 忘记密码
 		handleForgetPass() {
-			this.$store.commit('OPEN_DIALOG', {
+			openHosBizDialog({
 				component: forgetPassword,
 				_uid: 'forgetPassDialog',
 				ref: 'forgetPassDialog',

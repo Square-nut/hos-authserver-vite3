@@ -220,6 +220,7 @@ import postSelect from './components/post-select.vue';
 import postSelectTable from './components/post-select-table.vue';
 import postDialog from './post-dialog.vue';
 import { useUserStore } from '@/stores/user';
+import { closeHosBizDialog, openHosBizDialog } from '@/composables/useHosBiz';
 export default {
 	name: 'CA',
 	components: { postSelect, postSelectTable },
@@ -390,7 +391,7 @@ export default {
 		// 关闭弹框
 		close() {
 			// this.$store.commit('CLOSE_DIALOG',{_uid:'SCDialog'});
-			this.$store.commit('CLOSE_DIALOG', { _uid: 'CADialog' });
+			closeHosBizDialog({ _uid: 'CADialog' });
 		},
 		// 循环请求二维码扫描结果
 		start() {
@@ -530,7 +531,7 @@ export default {
 								this.info.loginType === 'PHONE' ||
 								this.info.loginType === 'UKEY'
 							) {
-								this.$store.commit('OPEN_DIALOG', {
+								openHosBizDialog({
 									component: postDialog,
 									_uid: 'postDialog',
 									props: {
@@ -541,7 +542,7 @@ export default {
 										loginSucessHandler: this.loginSucessHandler,
 									},
 								});
-								this.$store.commit('CLOSE_DIALOG', {
+								closeHosBizDialog({
 									_uid: 'CADialog',
 								});
 							}
@@ -569,12 +570,12 @@ export default {
 							this.loginSucessHandler();
 						}
 
-						this.$store.commit('CLOSE_DIALOG', {
+						closeHosBizDialog({
 							_uid: 'CADialog',
 						});
 					} else {
 						this.$message.error(res.msg);
-						this.$store.commit('CLOSE_DIALOG', {
+						closeHosBizDialog({
 							_uid: 'CADialog',
 						});
 					}
@@ -604,7 +605,7 @@ export default {
 							errorDesc = this.$t('短信登录失败，请重新再试！');
 						}
 						this.$message.error(err.msg);
-						this.$store.commit('CLOSE_DIALOG', {
+						closeHosBizDialog({
 							_uid: 'CADialog',
 						});
 					}

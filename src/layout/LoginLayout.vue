@@ -96,6 +96,12 @@ import i18n from '@/i18n';
 import { useDeviceStore } from '@/stores/device';
 import { useI18nStore } from '@/stores/i18n';
 import { useUserStore } from '@/stores/user';
+import {
+	setLoginI18nList,
+	setLoginPageStyle,
+	setLoginPortalUrl,
+	setLoginPostVersion,
+} from '@/composables/useHosBiz';
 import loginBg01 from '@/assets/images/login/01.png';
 import loginBg02 from '@/assets/images/login/02.png';
 import loginBg03 from '@/assets/images/login/03.png';
@@ -172,7 +178,7 @@ async function getlangs() {
 		if (code == 200) {
 			langOpts.value = data;
 
-			proxy.$store.commit('SET_I18N_LIST', data);
+			setLoginI18nList(data);
 
 			const defaultLang = data.find((item) => {
 				return item.isDefault;
@@ -253,11 +259,8 @@ function configPageType() {
 		.$api('getLoginConfig', upData)
 		.then((res) => {
 			if (res && res.code == 200) {
-				proxy.$store.commit(
-					'SET_LOGIN_POST_VERSION',
-					res.data.functionalVersion
-				);
-				proxy.$store.commit('SET_PORTAL_URL', res.data.portalUrl);
+				setLoginPostVersion(res.data.functionalVersion);
+				setLoginPortalUrl(res.data.portalUrl);
 				document.querySelector('.login-loading-mask').style.display = 'none';
 				if (res.data.loginPageDataDTO) {
 					loginPageDataDTO.value = res.data.loginPageDataDTO;
@@ -268,7 +271,7 @@ function configPageType() {
 							: [...defaultCarouselImage];
 					const strObj = JSON.stringify(loginPageDataDTO.value);
 					sessionStorage.setItem('loginPageDataDTO', strObj);
-					proxy.$store.commit('SET_LOGIN_STYLE', loginPageDataDTO.value);
+					setLoginPageStyle(loginPageDataDTO.value);
 					// 修改浏览器的标题和图标
 					document.title =
 						loginPageDataDTO.value.easyBrowserTabName ||

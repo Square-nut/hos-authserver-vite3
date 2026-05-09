@@ -144,6 +144,7 @@ import { defineAsyncComponent } from 'vue';
 import themeConfig from '@/utils/theme/themeConfig';
 import { useUserStore } from '@/stores/user';
 import setPassword from './setPassword.vue';
+import { openHosBizDialog } from '@/composables/useHosBiz';
 
 const viewModules = import.meta.glob('/src/views/**/*.vue');
 const frameModules = import.meta.glob('/src/components/layouts/**/*.vue');
@@ -214,7 +215,7 @@ export default {
 		// 修改密码
 		setPssword() {
 			console.log('修改密码');
-			this.$store.commit('OPEN_DIALOG', {
+			openHosBizDialog({
 				component: setPassword,
 				_uid: 'setPassword',
 				props: {
@@ -287,7 +288,7 @@ export default {
 				const component = defineAsyncComponent(importer);
 				//  打开一个弹窗
 				this.dialogTitle = menu.meta.title;
-				this.$store.commit('OPEN_DIALOG', {
+				openHosBizDialog({
 					_uid: 'menuDialog',
 					component: component,
 					props: menu.props,

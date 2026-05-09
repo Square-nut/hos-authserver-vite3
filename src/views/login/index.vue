@@ -259,8 +259,11 @@ import {
 } from '@/utils/i18n/i18n-util';
 import i18n from '@/i18n';
 import { computed, getCurrentInstance, onBeforeMount, ref, watch } from 'vue';
+import { openHosBizDialog, setLoginAuthInfo } from '@/composables/useHosBiz';
+import { useLoginSessionStore } from '@/stores/loginSession';
 
 const { proxy } = getCurrentInstance();
+const loginSessionStore = useLoginSessionStore();
 
 const isHos = ref(import.meta.env.VITE_APP_THEME_STYLE === '1');
 const currLang = ref('');
@@ -306,10 +309,6 @@ function readSessionJSON(key, fallback) {
 	}
 }
 
-function commitStore(type, payload) {
-	proxy?.$store?.commit?.(type, payload);
-}
-
 function normalizeLoginTypeInfo(raw) {
 	const source = raw && typeof raw === 'object' ? raw : {};
 	return {
@@ -337,7 +336,7 @@ function normalizeLoginTypeInfo(raw) {
 	};
 }
 
-const loginState = computed(() => proxy?.$store?.state?.login || {});
+const loginState = computed(() => ({ ...loginSessionStore.$state }));
 const loginTypeDataDTO = computed(
 	() => loginState.value.loginTypeDataDTO || readSessionJSON('loginTypeDataDTO', {})
 );
@@ -370,7 +369,7 @@ async function getSysAuthInfo() {
 		if (code == '200') {
 			authInfo.value = data;
 			licenseState();
-			commitStore('SET_AUTH_INFO', data);
+			setLoginAuthInfo(data);
 		} else {
 			licenseState();
 		}
@@ -432,7 +431,7 @@ function triggerClick(event) {
 		iframeUrl = licenseInfo.value.activedPath + '?language=' + getLocale();
 	}
 	if (className == 'install-license') {
-		commitStore('OPEN_DIALOG', {
+		openHosBizDialog({
 			component: licenseDialog,
 			_uid: 'licenseDialog',
 			props: {
@@ -525,7 +524,7 @@ function licenseState() {
 
 function openCADialog(row) {
 	CADialogTitle.value = '';
-	commitStore('OPEN_DIALOG', {
+	openHosBizDialog({
 		component: caDialog,
 		_uid: 'CADialog',
 		props: {
@@ -576,7 +575,7 @@ function openTwoAuthDialog(
 	switch (authType) {
 		case 'sms': {
 			CADialogTitle.value = '二次认证';
-			commitStore('OPEN_DIALOG', {
+			openHosBizDialog({
 				component: secondaryCertification,
 				_uid: 'CADialog',
 				ref: 'CADialog',
@@ -591,7 +590,7 @@ function openTwoAuthDialog(
 			break;
 		}
 		case 'social': {
-			commitStore('OPEN_DIALOG', {
+			openHosBizDialog({
 				component: social,
 				_uid: 'twoAuthDialog',
 				ref: 'twoAuthDialog',
@@ -605,7 +604,7 @@ function openTwoAuthDialog(
 		}
 		case 'ca': {
 			CADialogTitle.value = proxy.$t('二次认证');
-			commitStore('OPEN_DIALOG', {
+			openHosBizDialog({
 				component: secondaryCertification,
 				_uid: 'CADialog',
 				ref: 'CADialog',
@@ -666,7 +665,7 @@ async function loginPageElements() {
 }
 
 function forcedJumpSetPassword(res) {
-	commitStore('OPEN_DIALOG', {
+	openHosBizDialog({
 		component: setPasswordDialog,
 		_uid: 'forcedJumpSetPassword',
 		ref: 'forcedJumpSetPassword',
