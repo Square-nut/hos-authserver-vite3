@@ -54,7 +54,7 @@
 							<hos-input
 								:type="flag1 ? 'text' : 'password'"
 								v-model="passwordForm.newPasswordOne"
-								>
+							>
 								<template #suffix>
 									<i
 										class="iconPos"
@@ -65,7 +65,7 @@
 								</template>
 							</hos-input>
 							<span v-if="showPwdStr" class="lengthStrClass"
-								>({{ this.lengthStr }})</span
+								>({{ lengthStr }})</span
 							>
 						</hos-form-item>
 					</hos-col>
@@ -579,8 +579,8 @@ export default {
 	},
 };
 </script>
-<style scoped lang="scss">
-.change-pass::v-deep .hos-form-item {
+<style scoped>
+.change-pass :deep(.hos-form-item) {
 	margin-bottom: 20px;
 }
 .change-pass .hos-form {
@@ -591,19 +591,19 @@ export default {
 .change-pass .dialog-footer {
 	text-align: center;
 	padding-bottom: 15px;
-	.hos-button + .hos-button {
-		margin-left: 80px;
-	}
 }
-.change-pass::v-deep .hos-input__suffix {
+.change-pass .dialog-footer .hos-button + .hos-button {
+	margin-left: 80px;
+}
+.change-pass :deep(.hos-input__suffix) {
 	right: 10px;
 }
 .setWidth {
 	padding: 15px;
 	padding-top: 0;
-	// width: 600px;
-	// margin:0 auto;
-	// margin-top: 40px;
+	/* width: 600px; */
+	/* margin: 0 auto; */
+	/* margin-top: 40px; */
 }
 .force-setpassword-tip {
 	box-sizing: border-box;

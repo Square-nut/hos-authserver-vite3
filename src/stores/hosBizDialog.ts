@@ -8,7 +8,7 @@ import {
 	params,
 	timestamp,
 	uid,
-} from '@/components/hos-biz/utils/store-config';
+} from '../components/hos-biz/utils/store-config';
 
 export type DialogUid = number | string;
 

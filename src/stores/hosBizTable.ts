@@ -8,7 +8,7 @@ import {
 	params,
 	timestamp,
 	uid,
-} from '@/components/hos-biz/utils/store-config';
+} from '../components/hos-biz/utils/store-config';
 
 /** HosBizTable listens for refresh/update without coupling to Vuex. */
 export type HosBizTableMutationType = 'UPDATE_TABLE' | 'REFRESH_TABLE';

@@ -365,9 +365,14 @@ export default {
 					newVal === this.info.type &&
 					this.info.loginType === 'UKEY'
 				) {
-					this.requireUKJS();
-					this.analysis();
-					this.getCAInitParams();
+					this.requireUKJS()
+						.then(() => {
+							this.analysis();
+							this.getCAInitParams();
+						})
+						.catch((err) => {
+							console.error('[CA UKEY] vendor script load failed:', err);
+						});
 				}
 			},
 		},

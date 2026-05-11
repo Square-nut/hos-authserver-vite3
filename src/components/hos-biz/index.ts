@@ -1,23 +1,27 @@
 /*
  * @Author: liruiqing@mediway.cn
  * @Date: 2022-03-21 18:57:24
- * @Last Modified by: liruiqing@mediway.cn
- * @Last Modified time: 2024-04-23 09:22:40
+ * @Last Modified time: 2026-05-09
  */
+import type { App, Component, Plugin } from 'vue';
 import STable from './components/l-biz-table.vue';
 import SButton from './components/form/button';
 import SDialog from './components/dialog';
 import SelectTable2 from './components/select-table-v2/index.vue';
-const components = {
+
+const components: Record<string, Component> = {
 	STable,
 	SButton,
 	SDialog,
 	SelectTable2,
 };
-const install = (Vue) => {
-	Object.keys(components).forEach((name) => {
-		const component = components[name];
-		Vue.component(component.name, component);
+
+const install: Plugin = (app: App) => {
+	Object.values(components).forEach((component) => {
+		const comp = component as Component & { name?: string };
+		if (comp.name) {
+			app.component(comp.name, component);
+		}
 	});
 };
 

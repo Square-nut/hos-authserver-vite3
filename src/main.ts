@@ -12,6 +12,7 @@ import App from './App.vue'
 import router from './router'
 import i18n from './i18n'
 import apiRequest from './axios'
+import { ls } from '@/utils/ls'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -19,29 +20,7 @@ const pinia = createPinia()
 const globalProperties = app.config.globalProperties as any
 globalProperties.$api = apiRequest
 globalProperties.$t = (...args: any[]) => (i18n.global.t as any)(...args)
-globalProperties.$ls = {
-  get(key: string) {
-    try {
-      return window.localStorage.getItem(key)
-    } catch {
-      return null
-    }
-  },
-  set(key: string, value: unknown) {
-    try {
-      window.localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value))
-    } catch {
-      // noop
-    }
-  },
-  remove(key: string) {
-    try {
-      window.localStorage.removeItem(key)
-    } catch {
-      // noop
-    }
-  },
-}
+globalProperties.$ls = ls
 
 pinia.use(piniaPluginPersistedstate)
 app.use(pinia)

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import apiRequest from '@/axios'
 import i18n from '@/i18n'
 import { useDeviceStore } from '@/stores/device'
+import { lsGet, lsRemove, lsSet } from '@/utils/ls'
 
 const ACCESS_TOKEN_KEY = 'access-token'
 const REFRESH_TOKEN_KEY = 'refresh-token'
@@ -20,21 +21,16 @@ type LoginForm = Record<string, any>
 type PermissionMenu = Record<string, any>
 
 function setLocal(key: string, value: unknown) {
-  localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value))
+  lsSet(key, value)
 }
 
 function getLocal<T = unknown>(key: string): T | null {
-  const raw = localStorage.getItem(key)
-  if (!raw) return null
-  try {
-    return JSON.parse(raw) as T
-  } catch {
-    return raw as T
-  }
+  const v = lsGet(key)
+  return (v ?? null) as T | null
 }
 
 function removeLocal(key: string) {
-  localStorage.removeItem(key)
+  lsRemove(key)
 }
 
 function hasMac() {

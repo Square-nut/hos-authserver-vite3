@@ -1,5 +1,7 @@
 // 此文件为 UKEY 登录的 mixins 混入到 ca.vue 中
 // 参数定义以 uk 开头 避免参数冲突
+import { loadCaVendorExports } from '@/utils/load-ca-vendor';
+
 export const ukMixinData = {
   data(){
     return {
@@ -21,29 +23,27 @@ export const ukMixinData = {
   },
   created(){
     if(this.info.loginType === 'UKEY' && this.againLogin !== true){
-      this.requireUKJS()
-      this.analysis()
-      this.getCAInitParams()
+      this.requireUKJS().then(() => {
+        this.analysis()
+        this.getCAInitParams()
+      }).catch((err) => {
+        console.error('[CA UKEY] vendor script load failed:', err)
+      })
     }
   },
   methods:{
-    // 引入UK文件
+    /**
+     * 按接口下发的 `jsPath` 从 `public/ca/` 动态加载厂商脚本（ESM）。
+     * 路径兼容旧数据：`ca/xxx.js`、仅文件名、`ca-vendor/xxx.js`（旧目录名）等，见 `load-ca-vendor.ts`。
+     */
     requireUKJS(){
-      // ca.vue 中接受的 CAAUTH 所有登录方式
-      let item = this.info;
-      // console.log(item,'item')
-      // 判断登录方式为 uk 登录  并且 是当前的UK数据
-      if(item.loginType === 'UKEY'){
-        // console.log(item.jsPath)
-        let jsPath = item.jsPath // uk 的js文件地址
-        // 以逗号分割路径，获取所有路径数组
-        let pathArr = jsPath.split(',')
-        // 遍历路径数组，按顺序引入js文件
-        for(let i = 0; i < pathArr.length; i++){
-          this.ukFunction = require('../' + pathArr[i])
-        }
-        
+      const item = this.info;
+      if(item.loginType !== 'UKEY' || !item.jsPath){
+        return Promise.resolve();
       }
+      return loadCaVendorExports(String(item.jsPath)).then((mod) => {
+        this.ukFunction = mod;
+      });
     },
     // 解析 uk下拉框字符串转数组
     analysis(){
