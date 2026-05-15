@@ -1,0 +1,134 @@
+.hos-side-menu {
+  // 使用伪元素添加arrow
+  &::after {
+    z-index: 99999;
+    content: '';
+    display: block;
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    top: 20px;
+    left: 0px;
+    background-color: #384765;
+    transform: rotate(45deg);
+  }
+  & > ul {
+    border-radius: 5px;
+  }
+}
+
+// flat-menu.vue
+.flat-menu {
+  // 整体样式
+  // 左120px 右134*4+左右margin10*2+滚动条4=560px total:680px
+  width: 680px;
+  max-height: 450px;
+  background-color: rgba(56, 71, 101, 0.1);
+  border-radius: 5px;
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.4);
+  overflow-y: auto;
+  font-size: 14px;
+  // 每一个目录行样式(每行样式)
+  .flat-menu-list {
+    margin-top: 15px;
+    display: flex;
+    // 6个字符14px*6,左右padding均为10px,border-right:1px  14px*6+10*2+1 = 105px+15(冗余15px)=120px
+    .flat-menu-left {
+      width: 120px;
+      box-sizing: border-box;
+    }
+    .flat-menu-right {
+      flex: 1;
+    }
+    &:last-child {
+      margin-bottom: 15px;
+    }
+  }
+
+  // 左侧目录样式
+  .flat-menu-left {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    border-right: 1px solid #afafaf;
+    span {
+      padding: 0 10px;
+      font-weight: 700;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      color: #fff;
+    }
+  }
+
+  // 右侧菜单整体样式
+  .flat-menu-right {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}
+
+// flat-menu.item.vue
+.flat-menu-item {
+  .hos-menu-item:focus {
+    background-color: transparent !important;
+  }
+  & > .hos-submenu {
+    &:hover {
+      background-color: #636e84;
+      & > .hos-submenu__title {
+        background-color: #636e84;
+        // i {
+        //   color: #fff !important;
+        // }
+      }
+    }
+    .hos-submenu__title {
+      width: 134px;
+      padding: 5px !important;
+      height: auto !important;
+      line-height: normal !important;
+      display: flex !important;
+      align-items: center !important;
+      transition: none;
+      & > span {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+      i {
+        color: #fff;
+        position: static;
+        margin: 0 0 0 5px;
+      }
+    }
+  }
+  &[data-level='1'] > li {
+    float: left !important;
+  }
+  & > .hos-menu-item {
+    padding: 5px !important;
+    width: 134px;
+    min-width: auto !important;
+    display: flex;
+    height: auto !important;
+    line-height: normal !important;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    &:hover {
+      background-color: #636e84 !important;
+    }
+    & > span {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+  .hos-submenu.is-opened {
+    background-color: #636e84;
+    // & > .hos-submenu__title .hos-submenu__icon-arrow {
+    //   transform: rotateZ(0deg) !important;
+    // }
+  }
+}

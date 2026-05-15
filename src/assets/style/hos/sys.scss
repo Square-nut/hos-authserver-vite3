@@ -1,0 +1,538 @@
+// base-sys
+
+$-h-fit: 100%;
+$--border-color: #DBDBDB;
+
+// base-sys-dict
+.base-sys-dict {
+    .hos-aside {
+        border-radius: 4px;
+        padding: 0;
+        overflow: inherit!important;
+        //box-shadow: 0 0 10px $--border-color;
+        .tree-padding {
+            padding: 15px 15px 0 15px;
+        }
+        .hos-tree-node__content > .hos-tree-node__expand-icon {
+            padding: 6px 6px 6px 10px;
+        }
+        .hos-card {
+            height: 100%;
+            border-color: $--border-color;
+            //box-shadow: none;
+            .hos {
+                margin: 15px 0;
+            }
+            .hos-card__header {
+                margin-bottom: 0;
+            }
+
+            .hos-card__body {
+                height: calc(100% - 65px);
+                padding: 0;
+                //padding-left: 15px;
+                //box-shadow: none;
+            }
+            .categorybtn {
+                width: 100%;
+                .hos-button {
+                    min-width: 36px;
+                }
+            }
+            .langEn {
+                .hos-button {
+                    &:last-child {
+                        padding: 0;
+                    }
+                    min-width: auto;
+                    & > span {
+                        margin-left: 5px;
+                    }
+                }
+            }
+        }
+    }
+
+    .hos-main {
+        padding: 0;
+        margin-left: 15px;
+        overflow: inherit;
+        .userTab .hos-tabs__content {
+            box-sizing: border-box;
+        }
+    }
+
+    .main-tree {
+        height: calc(100% - 111px);
+        overflow: auto;
+        border-radius: 2px 2px 5px 5px
+    }
+    .main-tree1{
+        height: calc(100% - 64px);
+        overflow: auto;
+    }
+
+    .resource-tree-wrap {
+        height: calc(100% - 73px);
+        overflow: auto;
+    }
+
+    .hos-tag {
+        margin-right: 5px;
+    }
+}
+
+// base-sys-dict-edit
+.base-sys-dict-edit {
+    & > .hos-form {
+        margin-bottom: 15px;
+    }
+    .dict-form-item {
+        & > .hos-form-item {
+            margin-bottom: 0;
+        }
+    }
+    .hos-table {
+        border-radius: 5px;
+        .hos-form-item {
+            margin-bottom: 0;
+        }
+
+        .hos-table__body-wrapper {
+            //   max-height: 100px;
+            overflow: auto;
+            overflow-x: hidden;
+        }
+    }
+
+    .tableData .hos-form-item--small.hos-form-item {
+        margin-bottom: 0px;
+    }
+}
+.base-sys-dict-view {
+    .hos-table--fit {
+        margin-bottom: 15px;
+    }
+}
+
+//用户管理样式问题
+.user-tab {
+    .user-aside {
+        border-radius: 5px 5px 5px 5px;
+        margin-right: 15px;
+        margin-top: 1px;
+        padding: 15px 15px 0 15px;
+        height: calc(100% - 2px);
+        box-shadow: 0px 0px 4px 1px #dbdbdb;
+        background: #fff;
+
+        .hos-input {
+            margin: auto;
+            margin-bottom: 10px;
+        }
+    }
+
+    .hos-tabs {
+        background: none;
+
+        .hos-tabs__header {
+            margin-bottom: 15px;
+            background: #fff;
+        }
+    }
+
+    .user-aside>.hos-tree {
+        overflow: auto;
+        margin: 0 -15px;
+        height: calc(100% - 30px);
+    }
+
+    .hos-main {
+        padding: 0;
+        overflow: inherit;
+
+        .hos-button-group.hos {
+            width: 515px;
+        }
+    }
+
+    .hos-tabs__header {
+        margin: auto;
+    }
+
+    .hos-tabs__content {
+        overflow: inherit;
+        height: calc(100% - 54px) !important;
+    }
+
+    .hos-tabs__header .hos-tabs__nav {
+        width: 100%;
+    }
+
+    .hos-tabs--border-card>.hos-tabs__header .hos-tabs__item:last-child {
+        float: right;
+    }
+
+    .hos-tabs--top.hos-tabs--border-card>.hos-tabs__header .hos-tabs__item:last-child {
+        padding-right: 15px;
+    }
+
+    .hos-tabs--system .hos-tabs__nav-wrap .hos-tabs__item:last-child {
+        float: right;
+        border-bottom: none;
+        line-height: 34px;
+    }
+
+    .hos-tabs--system .hos-tabs__nav-wrap .hos-tabs__item:last-child:after {
+        background: none;
+    }
+
+    .hos-tabs--top .hos-tabs__item.is-top:last-child {
+        position: relative;
+        float: right;
+        margin-right: 15px;
+        line-height: 38px;
+    }
+}
+
+.user_card .hos-input-number {
+    width: 100% !important;
+}
+
+.user-add-tree {
+    //height: 657px;
+    padding: 0 15px;
+
+    .hos-input {
+        padding: 10px 0 15px;
+        margin: auto;
+    }
+    .hos-org-transfer-tree .transfer-panel {
+        padding-top: 0;
+    }
+    .hos-org-transfer-tree {
+        padding: 0;
+    }
+    .user-checkbox {
+        margin: 10px 0 10px 0;
+    }
+
+    .hos-tree {
+       // overflow: auto;
+        //margin: 0 -15px;
+        //height: 391px;
+
+        .hos-tree-node__content>.hos-tree-node__expand-icon {
+            margin-left: 9px;
+        }
+    }
+
+    .hos-input__icon {
+        margin-top: 10px;
+        height: 30px;
+        line-height: 30px;
+    }
+
+    .dialog-footer {
+        padding: 20px 0;
+    }
+}
+
+.add-user {
+    .dialog-footer {
+        padding: 20px 0;
+    }
+
+    .hos-card {
+        margin-bottom: 15px;
+    }
+
+    .hos-form {
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: 416px;
+        padding: 0 5px;
+
+        .hos-card:first-child {
+            margin-top: 5px;
+        }
+
+        .circulate {
+            float: right;
+            margin-right: 2px;
+            line-height: 28px;
+        }
+
+        .mained {
+            width: 30px;
+        }
+
+        .add-show {
+            color: #dddddd;
+            pointer-events: none;
+        }
+
+        .pl40 {
+            padding-left: 40px;
+        }
+
+        .userrole {
+            position: absolute;
+            float: right;
+            margin-left: 605px;
+            z-index: 9999999999999999999;
+        }
+
+        .hos-icom-cancel:before,
+        .hos-icom-add:before {
+            cursor: pointer;
+        }
+
+        .treeuser2 {
+            .vue-treeselect {
+                width: 204px;
+            }
+        }
+
+        .ml30 {
+            position: relative;
+            margin-left: -30px;
+        }
+    }
+}
+
+
+// 系统参数
+.base-sys-config {
+    position: relative;
+
+    .data-log-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+}
+
+.sys-config-edit {
+    .hos-dialog__body {
+        position: relative;
+    }
+}
+
+//系统日志
+.syslog {
+    .hos-date-editor.hos-input__inner {
+        min-width: 225px;
+    }
+
+    .hos-col-11 {
+        padding: 0 !important;
+    }
+}
+
+
+.mw225 {
+    min-width: 225px;
+}
+
+.padding30 {
+    padding-left: 30px !important;
+}
+
+.login-manner {
+    background-color: #fff;
+    font-size: 14px;
+
+    .manner-card {
+        margin-bottom: 15px;
+
+        .manner-card-divide {
+            height: 120px;
+        }
+
+        .default-card {
+            >span {
+                display: inline-block;
+                width: 80px;
+                text-align: end;
+                margin-right: 15px;
+            }
+
+            margin-left: 20px;
+            padding-bottom: 15px;
+        }
+
+        .third-card {
+            display: inline-block;
+            width: 170px;
+            height: 70px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+
+            .third-card-box {
+                padding: 10px;
+
+                .third-img {
+                    width: 48px;
+                    height: 48px;
+                }
+
+                .third-card-text {
+                    display: inline-block;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    width: 100%;
+                    text-align: center;
+                }
+            }
+        }
+    }
+}
+
+.CAconfig {
+    height: 400px;
+    overflow: auto;
+    padding: 4px;
+
+    .hos-card {
+        margin-bottom: 15px;
+    }
+
+    .caConfig-input-number {
+        width: calc(100% - 80px);
+    }
+}
+
+.job-role-manage {
+    .hos-main {
+        padding: 0;
+        padding-left: 15px;
+    }
+
+    .job-role-manage-dialog {
+        .job-role-manage-tree {
+            height: calc(100% - 135px);
+        }
+    }
+}
+.pRole {
+    margin: 0 15px 15px 15px;
+}
+.account-manage {
+    height: calc(100% - 15px);
+    .hos-aside {
+        .hos {
+            margin: 15px 0;
+        }
+        .hos-card__body{
+            padding: 0;
+        }
+       
+    }
+    .hos-tabs .hos-tabs__content {
+        box-shadow: none;
+        height: calc(100% - 50px);
+    }
+
+    .hos-main {
+        padding: 0 15px;
+    }
+}
+
+//短信配置
+.shortConfig {
+
+    /* .hos-tabs--second-level .hos-tabs__header {
+        margin-bottom: 0;
+    } */
+    .hos-keywords .keywords-box .hos-radio-button {
+        margin: 0 16px 0 0;
+    }
+
+    .hos-alert--info.is-light {
+        margin-bottom: 15px;
+    }
+}
+
+.SMS {
+    display: flex;
+    justify-content: center;
+    // 因有padding上下15px,此处height应减30px
+    height: calc(100% - 30px);
+    background-color: #fff;
+    padding: 15px;
+
+    .hos-keywords .keywords-box .hos-checkbox-button {
+        margin: 0 16px 0 0;
+    }
+    .hos-input-number {
+        width: 256PX;
+    }
+}
+
+// 多因素认证
+.multi-factor {
+    & .text-content {
+        width: 190px;
+        margin-right: 10px;
+      }
+}
+
+//基础字典
+//行政区域
+.base-dict {
+    .hos-main {
+        padding: 0 0 0 15px
+    }
+    .hos-tree-node__content > .hos-tree-node__expand-icon {
+        padding: 6px 6px 6px 10px;
+    }
+    .aside-tree {
+        padding: 15px;
+    }
+
+    .hos-card__body {
+        padding: 0;
+        height: calc(100% - 30px);
+    }
+
+    .hos-aside .hos-button-group.hos {
+        margin: 15px 0 0 0;
+    }
+
+    .hos-aside,
+    .hos-card {
+        height: 100%;
+    }
+
+    .hos-tree {
+        height: calc(100% - 81px);
+        overflow: auto;
+    }
+}
+//短信配置
+.view {
+    .hos-table {
+        box-shadow: none;
+    }
+    .hos-tab-pane:first-child {
+        padding: 15px;
+    }
+}
+//账号管理-查看角色
+.pRole {
+    height: 400px;
+    overflow: auto;
+    padding: 4px;
+    .hos-table--border::after {
+        width:0;
+     }
+     .hos-table::before {
+        height:0
+     }
+     .hos-table--border {
+        border: none;
+     }
+}

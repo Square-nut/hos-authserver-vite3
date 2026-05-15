@@ -1,0 +1,11 @@
+// 实体管理右侧列表
+.delete-comfirm-dialog {
+  .content {
+    padding: 0 !important;
+    .hos-radio {
+      &:first-child {
+        margin-bottom: 10px;
+      }
+    }
+  }
+}

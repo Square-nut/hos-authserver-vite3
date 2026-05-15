@@ -1,0 +1,159 @@
+
+// --------------- 登录岗位 --------------------
+// 下拉选表格样式
+.select-table-v2-popover {
+	width: 750px !important;
+	padding: 10px;
+	background-color: rgba(25, 47, 95, 1);
+	border: 1px solid rgba(65, 165, 255, 0.43);
+	box-shadow: none;
+	.mb15 {
+		margin-bottom: 0;
+	}
+	.hos-biz-table {
+		.hos-biz-form {
+			// display: none;
+			padding: 0;
+			background-color: transparent;
+			box-shadow: none;
+			.hos-form-item {
+				margin-bottom: 10px;
+			}
+			.hos-form-item__label {
+				color: #fff;
+				// text-align: left;
+			}
+			.hos-form-item__content {
+				// float: left;
+			}
+			.hos-input__inner {
+				color: #fff;
+				border: 1px solid rgba(65, 165, 255, 0.43);
+				background-color: transparent;
+			}
+		}
+		.hos-biz-toolbar {
+			display: none;
+		}
+		.hos-table {
+			color: #fff;
+			border: none;
+			box-shadow: none;
+			background: transparent;
+			padding: 0;
+			border-radius: 0;
+			thead {
+				color: #fff;
+			}
+			.hos-table__header-wrapper {
+				background: rgba(19, 28, 69, 1);
+			}
+			th.hos-table__cell {
+				background-color: transparent;
+			}
+			tr {
+				background-color: transparent;
+			}
+			.hos-table__empty-text {
+				svg {
+					display: none;
+				}
+				.table-empty-text {
+					margin-top: 0;
+					line-height: 160px;
+				}
+			}
+			&.hos-table--enable-row-hover
+				.hos-table__body
+				tr:hover
+				> td.hos-table__cell {
+				background: rgba(41, 95, 159, 1);
+			}
+			td.hos-table__cell,
+			th.hos-table__cell.is-leaf {
+				border-bottom: 1px solid rgba(65, 165, 255, 0.43);
+			}
+			.hos-loading-mask {
+				background-color: rgba(19, 28, 69, 0.53);
+			}
+		}
+
+		&.pagination-pos-bottom {
+			.hos-biz-pagination {
+				padding: 0;
+				box-shadow: none;
+				background: transparent;
+			}
+		}
+		.hos-biz-pagination {
+			padding-top: 5px;
+			.hos-pagination {
+				padding: 0 5px;
+
+				.hos-pagination__ssizes {
+					.hos-input__suffix {
+						.hos-input__validateIcon {
+							display: none;
+						}
+					}
+				}
+				.hos-button {
+					background-color: rgba(80, 179, 255, 1);
+					color: #fff;
+				}
+				.hos-pager li {
+					color: #fff;
+					&.active {
+						background: rgba(41, 95, 159, 1);
+						box-shadow: none;
+					}
+				}
+
+				.hos-pagination__total {
+					color: #fff;
+					float: initial !important;
+					span {
+						color: #fff !important;
+						min-width: auto;
+					}
+				}
+			}
+		}
+	}
+	.popper__arrow {
+		// background-color: rgba(25, 47, 95, 1);
+		border-top-color: rgba(65, 165, 255, 1) !important;
+		border-bottom-color: rgba(65, 165, 255, 1) !important;
+	}
+	.popper__arrow::after {
+		border-top-color: rgb(25, 47, 95) !important;
+		border-bottom-color: rgb(25, 47, 95) !important;
+	}
+}
+
+.select-table-popover-select {
+	&.hos-select {
+		.hos-input{
+			.hos-select__caret {
+				font-family: Mw_mifonts !important;
+		
+				// transform: rotateZ(0) !important;
+			}
+			.hos-icon-arrow-up:before {
+				content: '\f581';
+			}
+		}
+		
+	}
+}
+.hos-tooltip__popper {
+	&.is-select-table-tooltip {
+		max-width: 350px;
+		font-size: 14px;
+		line-height: 1.5;
+		opacity: .9;
+		color: #fff;
+		background: #000;
+	}
+	
+}

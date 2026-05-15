@@ -1,0 +1,103 @@
+.transfer-list {
+  --border-color: #e2e2e2;
+
+  height: 100%;
+  width: 100%;
+  & .transfer-list--content {
+    display: flex;
+    height: 100%;
+    border: 1px solid var(--border-color);
+    & .transfer-left--container {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      & .hos-biz-table {
+        border-radius: 0;
+
+        & .hos-biz-form {
+          border: none;
+          border-radius: 0;
+        }
+        & .hos-table {
+          border-left: none;
+          border-right: none;
+          &::after {
+            content: none;
+            display: none;
+          }
+          .hos-table__body {
+            & > tbody > tr {
+              td:last-child {
+                border-right: 0;
+              }
+            }
+          }
+          .hos-table__header {
+            & > thead > tr {
+              th:nth-last-child(2) {
+                border-right: 0;
+              }
+            }
+          }
+        }
+        & .hos-biz-pagination {
+          border: 0;
+          border-radius: 0;
+          border-bottom-right-radius: 0 !important;
+          border-bottom-left-radius: 0 !important;
+        }
+      }
+    }
+    & .transfer-right--container {
+      display: flex;
+      flex-direction: column;
+      width: 40%;
+      border-left: 1px solid var(--border-color);
+      & .transfer-right--top {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 10px;
+        border-bottom: 1px solid var(--border-color);
+        & .title {
+        }
+        & .clear {
+        }
+      }
+
+      & .transfer-list--result {
+        padding: 10px;
+        padding-right: 0;
+        flex: 1;
+        min-height: 0;
+
+        & .transfer-list--result__content {
+          height: 100%;
+          overflow: auto;
+          padding-right: 10px;
+        }
+        & .result-item {
+          display: flex;
+          justify-content: space-between;
+          & .result-tip {
+            width: 60%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+          & .delete-btn {
+            width: 25px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+          }
+        }
+      }
+    }
+  }
+  & .transfer-list--footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+  }
+}

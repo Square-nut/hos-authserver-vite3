@@ -1,0 +1,27 @@
+@import url('./metadata-entity/entity-right-list.scss');
+@import url('./metadata-entity/main-busi-dialog.scss');
+@import url('./metadata-entity/module.scss');
+@import url('./metadata-entity/entity-manage.scss');
+@import url('./metadata-entity/sync-log.scss');
+@import url('./metadata-entity/generate-code.scss');
+@import url('./metadata-entity/metadata-list.scss');
+@import url('./metadata-entity/low-code-designer.scss');
+// 元数据纯净样式
+
+// 复制新增弹窗
+.copy-data {
+  padding: 0 !important;
+  .left-modules-bar {
+    height: 550px !important;
+  }
+  .select-copy-table {
+    padding: 0 0 0 15px !important;
+  }
+}
+
+// 修改编辑元数据
+.meta-data-dialog {
+  .bussiness-code-tabpane .hos-biz-table .hos-biz-toolbar {
+    padding: 0 !important;
+  }
+}

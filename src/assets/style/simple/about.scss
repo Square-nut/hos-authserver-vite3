@@ -1,0 +1,116 @@
+.HOS-help {
+  position: relative;
+  display: flex;
+  .top-decorate {
+    margin: 25px 0;
+  }
+  .content {
+    width: 100%;
+  }
+  .left-img {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .pic-about-simple-ill {
+      margin: 0 0 80px 30px;
+    }
+    .pic-about-hos-ill,
+    .pic-about-hos-ill-en {
+      margin-bottom: 15px;
+    }
+  }
+  .HOS-help-title {
+    font-size: 40px;
+    font-family: 'Regular';
+    color: #00388d;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  .top-logo {
+    width: 256px;
+    height: 43px;
+    background-image: url(../../../assets/images/donghuaDigitalHealthLogo.png);
+    margin-bottom: 20px;
+  }
+  .about-logo {
+    display: inline-block;
+  }
+  .pic-about-hos-medical-en {
+    width: 314px;
+    height: 77px;
+  }
+  .pic-about-hos-logo-en {
+    width: 90px;
+    height: 16px;
+  }
+  ul {
+    height: 300px;
+    overflow: auto;
+    list-style: none;
+    line-height: 40px;
+    font-size: 14px;
+    font-family: Source Han Sans CN-Regular, Source Han Sans CN;
+    color: #000000;
+    .imedical-pic-btn {
+      align-items: center;
+      display: flex;
+    }
+    li {
+      color: #666666;
+      .viewLisence {
+        margin-left: 15px;
+        border-radius: 5px;
+        span {
+          color: #fff;
+        }
+      }
+      span {
+        color: #000000;
+      }
+      &.footer {
+        span {
+          color: #666666;
+          margin-left: 10px;
+        }
+      }
+    }
+  }
+  .card-bottom-msg {
+    position: absolute;
+    margin-top: 50px;
+    bottom: -50px;
+    & > img {
+      width: 90px;
+      height: 16px;
+    }
+    & > span {
+      margin-left: 5px;
+      font-size: 12px;
+      color: #999999;
+    }
+  }
+  .bottom-msg {
+    position: absolute;
+    margin-top: 50px;
+    bottom: -80px;
+    & > img {
+      width: 90px;
+      height: 16px;
+    }
+    & > span {
+      margin-left: 5px;
+      font-size: 12px;
+      color: #999999;
+    }
+  }
+  .bottom-decorate {
+    position: absolute;
+    height: 30px;
+    bottom: 25px;
+    right: 0px;
+  }
+  .bgc-simple-position {
+    width: 250px;
+    float: right;
+  }
+}

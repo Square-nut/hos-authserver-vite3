@@ -1,0 +1,142 @@
+// 元数据管理 || 代码生成
+// 左侧菜单样式
+.app-manager-details {
+  
+  background-color: transparent !important;
+  border-radius: 6px;
+  .common-menu {
+    height: calc(100vh - 117px) !important;
+    margin-right: 15px !important;
+    .app-center-menu.hos-menu {
+      height: calc(-231px + 100vh) !important;
+      background:#f1f7fe !important;
+      box-shadow: none;
+      border-radius: 6px;
+      padding: 0 15px;
+      .hos-menu-item  {
+        background:#f1f7fe !important;
+        padding-left: 13px!important;
+        &.is-active {
+          border-radius: 6px;
+          background:#d7e9ff!important;
+        }
+        &>div {
+          background-color: transparent !important;
+          color: #191919;
+          // &:hover {
+          //   background-color: #d7e9ff !important;
+          // }
+        }
+      }
+      .hos-submenu__title {
+        height: 38px;
+        line-height: 38px;
+        background:#f1f7fe !important;
+        padding: 0!important;
+        & i {
+          color: #939393;
+        }
+        .hos-submenu-title--text {
+          & span {
+            font-size: 16px;
+            color:#424656;
+          }
+        }
+      }
+    }
+    .back-app {
+      margin-bottom: 10px !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-radius: 6px !important;
+    }
+    .app-card {
+      box-shadow: none !important;
+      border: none !important;
+      border-radius: 6px !important;
+      margin-bottom: 10px !important;
+    }
+  }
+  .details-center {
+    background-color: transparent !important;
+    .left-modules-bar {
+      border-radius: 6px;
+      .hos-biz-table {
+        margin: 0;
+        .hos-biz-toolbar .hos-button-group {
+          padding-left: 0;
+        }
+      }
+      .search-module {
+        .hos-card__body {
+          padding: 5px 15px 0 15px;
+        }
+      }
+      .metaM {
+        .hos-card__body {
+          padding: 0;
+        }
+      }
+    }
+    .orgperson-tabs-main {
+      padding: 0 0 0 10px;
+    }
+    .mata-data-tabs .codeGenerate div:nth-child(2) {
+      float: right;
+    }
+  }
+  
+}
+.meta-data-dialog {
+  &.is-fullscreen {
+    height: 100% !important;
+  }
+}
+.delCustomClass {
+  width: 30%;
+}
+.btn-pointer {
+  cursor: pointer;
+}
+.codeGenerate {
+  .hos-card__body {
+    display: none;
+  }
+  div:nth-child(2) {
+    height: 0 !important;
+  }
+}
+
+.main-table {
+  &::v-deep .long-switch .hos-switch__core {
+    width: 80px;
+  }
+
+  &::v-deep .hos-dialog {
+    box-shadow: none;
+  }
+}
+
+.meta-dialog-title {
+  line-height: 24px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #000;
+}
+
+.meta-full-screen {
+  position: absolute;
+  top: 23px !important;
+  right: 50px;
+  height: 16px;
+  padding: 0;
+  background: 0 0;
+  border: none;
+  outline: 0;
+  cursor: pointer;
+  font-size: 12px;
+  color: #666;
+  &:hover {
+    color: #008fff;
+  }
+}

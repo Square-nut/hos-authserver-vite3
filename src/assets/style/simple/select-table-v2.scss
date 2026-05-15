@@ -1,0 +1,38 @@
+
+.select-table-v2-popover {
+	width: 750px !important;
+  height: 370px !important;
+  .hos-table--fit {
+    padding: 0;
+  }
+  .hos-biz-pagination {
+    border-right: none;
+    border-bottom: none;
+    border-left: none;
+  }
+  .hos-table--border::after {
+    width: 0;
+  }
+  .hos-biz-form {
+    border: none;
+  } 
+  .hos-pager li {
+    height: 32px;
+    line-height: 32px;
+  }
+  .mb15 {
+    margin-bottom: 0;
+  }
+}
+
+.hos-tooltip__popper {
+  &.is-select-table-tooltip {
+    max-width: 350px;
+    font-size: 14px;
+    line-height: 1.5;
+    opacity: .9;
+    color: #fff;
+    background: #000;
+  }
+  
+}

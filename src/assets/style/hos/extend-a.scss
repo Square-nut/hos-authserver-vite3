@@ -1,0 +1,39 @@
+.pure-card {
+  //在hos版里去掉card的样式,达到虽有card标签但无card样式的效果
+  box-shadow: none !important;
+  .hos-card__body {
+    box-shadow: none !important;
+    padding: 0;
+    border-radius: 0;
+    background-color: transparent;
+  }
+}
+
+//父模板管理弹框原来的样式,只有hos中起作用
+.parentTemplateForm {
+  .hos-table {
+    min-height: 300px;
+  }
+  .parentTemplateForm-card {
+    margin: 0 10px;
+  }
+}
+
+//SQL导出页样式迁移
+.exportDetails {
+  padding: 15px;
+}
+.tastView {
+  margin: 15px;
+  height: 600px;
+  .hos-tabs__content {
+    height: calc(100% - 34px);
+  }
+  .hos-tab-pane {
+    height: 100%;
+  }
+  .dialog-footer {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+}

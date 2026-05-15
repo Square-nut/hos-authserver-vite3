@@ -1,0 +1,31 @@
+// 此文件为全局通用样式,会作用于每一种风格下
+.dialog-menu {
+  .hos-dialog__body-content {
+    height: 100%;
+  }
+}
+
+// 此处为仅针对Chrome49的样式.需对Chrome49进行样式兼容性处理
+.chrome49 {
+  // 需求号: 4701021.<i>标签等focus时,会被浏览器默认的user agent stylesheet影响样式,出现outline.
+  & :focus {
+    outline: 0 none transparent;
+  }
+}
+
+// table组件有固定列时,表格内容会遮挡滚动条导致无法滚动,故增加此样式.
+// 之前仅写在hos-biz-table组件中,本次修改为作用于所有表格组件.
+.hos-table {
+  & .hos-table__body-wrapper {
+    outline: none; // 聚焦时会有outline,主动取消outline样式
+  }
+  & [class^='hos-table__fixed'] {
+    // 处于表格固定列内的横向滚动条无法拖动. 如果列数过多,固定列宽度大于横向滚动条长度时,会导致整个滚动条无法拖动.
+    // 以下样式用于修复此问题.使得在固定列内的横向滚动条也可以拖动.
+    pointer-events: none;
+    // 将直接子元素显式声明为默认值"auto"
+    & > * {
+      pointer-events: auto;
+    }
+  }
+}

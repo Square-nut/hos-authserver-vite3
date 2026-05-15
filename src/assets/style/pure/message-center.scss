@@ -1,0 +1,926 @@
+// bell-index.vue
+.msgBell {
+  .bell-reference-icon {
+    line-height: 28px;
+  }
+}
+.message-center-popover {
+  .popper__arrow {
+    display: none;
+  }
+}
+
+.bell-reference {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  &:hover {
+    opacity: 0.8;
+  }
+  color: #fff;
+  .redDot {
+    width: 12px;
+    height: 12px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #ff3d3d;
+    color: #fff;
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+  }
+  .redOval {
+    width: 16px;
+    height: 13px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px 9px 9px 9px;
+    background-color: #ff3d3d;
+    color: #fff;
+    position: absolute;
+    bottom: 7px;
+    right: 4px;
+  }
+  .hos-badge__content.is-dot {
+    height: 6px;
+    width: 6px;
+    border: none;
+    top: 5px;
+  }
+}
+.bell-popover {
+  box-sizing: border-box;
+  padding: 15px 0;
+  padding-right: 0;
+  height: 300px;
+  border-radius: 6px !important;
+  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.2);
+}
+.bell-index {
+  display: flex;
+  flex-direction: column;
+  .msgHeader {
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    color: #000;
+    justify-content: space-between;
+    line-height: 20px;
+    margin-bottom: 15px;
+  }
+  .msgList {
+    // 总高度300px -上下padding10*2 -header20 -margin15 = 245px
+    height: 245px;
+    flex: 1;
+    overflow: auto;
+  }
+  .msgMore {
+    cursor: pointer;
+    color: #4781f3;
+    display: flex;
+    align-items: center;
+    span {
+      margin-right: 5px;
+    }
+    i {
+      font-size: 10px;
+    }
+  }
+  .main {
+    padding: 10px 20px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    &:hover {
+      background: #ebf5ff;
+    }
+    .mian-title {
+      display: flex;
+      align-items: center;
+    }
+    .mian-content {
+      margin-top: 4px;
+      line-height: 20px;
+      color: #666666;
+      padding-left: 14px;
+      width: 100%;
+      box-sizing: border-box;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      height: 20px;
+    }
+  }
+  .read {
+    color: #fff;
+    background-color: #5db42f;
+  }
+  .msgStatus {
+    &.unread {
+      width: 6px;
+      height: 6px;
+      background: #f54b45;
+      border-radius: 50%;
+      margin-right: 8px;
+      padding: 0;
+    }
+    &.read {
+      background: transparent;
+    }
+  }
+  .headTitle {
+    font-weight: bold;
+  }
+  .msgTitle {
+    overflow: hidden;
+    color: #000;
+    width: 100px;
+    font-weight: 400;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 20px;
+    flex: 1;
+    padding-right: 5px;
+  }
+  .msgDate {
+    width: 80px;
+    color: #999999;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .noMsgBox {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    img {
+      width: 80px;
+      height: 80px;
+    }
+    p {
+      color: #2f2e3f;
+      opacity: 0.35;
+    }
+  }
+}
+
+// bell弹窗样式
+.bell-dialog {
+  .hos-header {
+    height: unset !important;
+    background-color: #fff;
+    padding-top: 5px;
+    // box-shadow: 0px 0px 4px 1px #dbdbdb;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    padding: 15px;
+    color: #191919;
+    font-size: 14px;
+    .hos-form {
+      width: 100%;
+      .mgb0 {
+        .hos-form-item {
+          margin-bottom: 0;
+        }
+      }
+      .hos-form-item {
+        margin-bottom: 10px;
+        .hos-form-item__label {
+          padding: 0;
+          color: #191919;
+          line-height: 32px;
+        }
+        .hos-form-item__content {
+          padding-left: 10px;
+        }
+        .hos-keywords {
+          .keywords-box {
+            margin-bottom: 0;
+            .hos-radio-button {
+              margin: 0;
+              margin-right: 10px;
+              &:last-child {
+                margin-right: 0px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  .hos-tabs {
+    .hos-tabs__header {
+      background: #fff;
+      .hos-tabs__nav-scroll {
+        border-bottom: 1px solid #e4e4e4;
+        .hos-tabs__item {
+          height: 45px;
+          line-height: 45px;
+          padding: 0;
+          margin-right: 30px;
+          font-size: 16px;
+          color: #191919;
+          &.is-active {
+            color: #008fff;
+          }
+        }
+      }
+    }
+  }
+  .container {
+    height: 400px;
+    padding: 15px;
+    background: #fff;
+  }
+  .hos-aside {
+    width: 404px !important;
+    margin-top: 15px;
+  }
+  .msgRight {
+    margin-left: 15px;
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #d7e9ff 0%, rgba(255, 255, 255, 0) 100%);
+    * {
+      box-sizing: border-box;
+    }
+    .rightMain {
+      height: 100%;
+      line-height: 20px;
+    }
+    .footer {
+      display: flex;
+      justify-content: center;
+      align-items: end;
+      height: 45px;
+    }
+  }
+  .hos-col {
+    padding-left: 0 !important;
+  }
+  .hos-form-item {
+    .hos-form-item__label {
+      line-height: 36px;
+    }
+  }
+  .hos-radio-button__inner {
+    padding: 5px 10px;
+  }
+  .closeBtn {
+    width: 86px;
+    height: 30px;
+    font-size: 14px;
+    color: #999;
+    background: #ffffff;
+    border-radius: 5px 5px 5px 5px;
+    border: 1px solid #cccccc;
+  }
+  .rightHeader {
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #d8d8d8;
+    .rightTitle {
+      font-size: 16px;
+      font-weight: bold;
+      color: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+  }
+  .noMsgRight {
+    height: 100%;
+    .hos-empty {
+      height: 100%;
+    }
+  }
+
+  .msgInfo {
+    display: flex;
+    align-items: center;
+    color: #666;
+    .sendTime {
+      span {
+        &:last-child {
+          color: #000000;
+          margin-right: 75px;
+        }
+      }
+    }
+    .sender {
+      span {
+        &:last-child {
+          color: #000000;
+        }
+      }
+    }
+  }
+  .msgContent {
+    height: calc(100% - 71px);
+    margin-top: 15px;
+    color: #000000;
+  }
+  .msgUrl {
+    color: #169bd5;
+    font-size: 14px;
+    font-weight: normal;
+    span {
+      cursor: pointer;
+    }
+  }
+  // 富文本框高度
+  .HomeDetails {
+    height: 100%;
+    .quill-editor {
+      height: 100%;
+    }
+    .ql-editor {
+      padding: 0;
+      height: 100%;
+      max-height: none;
+      overflow: auto;
+      // display: flex;
+      // justify-content: center;
+      // align-items: center;
+      // & > p {
+      //   width: 98%;
+      //   height: 98%;
+      //   overflow: auto;
+      // }
+    }
+  }
+}
+
+// bell-list弹窗样式
+.bell-list {
+  height: 100%;
+  & .msgLists {
+    height: 100%;
+    overflow: auto;
+  }
+  .main {
+    width: 100%;
+    * {
+      box-sizing: border-box;
+    }
+    & .batch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 95%;
+      margin-bottom: 10px;
+      padding: 0px 20px;
+    }
+    .list {
+      width: 95%;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      & .checkbox-container {
+        padding-right: 5px;
+        align-self: flex-start;
+      }
+      & .collectStatus {
+        padding-left: 5px;
+        font-size: 16px;
+      }
+      cursor: pointer;
+      padding: 10px 20px;
+      &:hover {
+        background: #ebf5ff;
+        border-radius: 6px;
+      }
+      &.hover {
+        background: #ebf5ff;
+        border-radius: 6px;
+      }
+      .mian-title {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
+        & .title-container {
+          display: flex;
+          width: 100%;
+          align-items: center;
+        }
+        .msgStatus {
+          &.unread {
+            width: 6px;
+            height: 6px;
+            background: #f54b45;
+            border-radius: 50%;
+            margin-right: 8px;
+            padding: 0;
+          }
+          &.read {
+            background: transparent;
+          }
+        }
+        .msgTitle {
+          overflow: hidden;
+          color: #000;
+          width: 100px;
+          font-weight: 400;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          font-weight: 700;
+          font-size: 14px;
+          line-height: 20px;
+          flex: 1;
+          padding-right: 5px;
+        }
+
+        .msgDate {
+          width: 80px;
+          color: #999999;
+          font-size: 14px;
+          line-height: 20px;
+        }
+      }
+      .mian-content {
+        margin-top: 4px;
+        line-height: 20px;
+        color: #666666;
+        padding-left: 14px;
+        width: 100%;
+        box-sizing: border-box;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        height: 20px;
+      }
+    }
+  }
+  .noMsgBox {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .scroll-loading {
+    margin-top: -20px;
+    position: static;
+  }
+}
+
+.security-card-tips {
+  .hos-alert {
+    padding: 4px 16px;
+    [class*=' hos-icon-'],
+    [class^='hos-icon-'] {
+      line-height: normal;
+    }
+    margin-bottom: 10px;
+  }
+}
+//安全配置
+.security-card {
+  margin-bottom: 10px;
+  .hos-card__body {
+    padding: 10px 15px 5px 15px;
+    height: 360px;
+    overflow: auto;
+    .sensitive__body {
+      background: #ffffff;
+      min-height: 168px;
+      border-radius: 6px;
+      border: 1px solid #cccccc;
+      padding: 10px 10px 30px 10px;
+      position: relative;
+      .hos-tag {
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+      .hos-alert {
+        padding: 4px 16px !important;
+      }
+      .clear {
+        text-align: end;
+        font-size: 14px;
+        height: 20px;
+        font-weight: 400;
+        color: #4781f3;
+        line-height: 20px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        position: absolute;
+        bottom: 0;
+        right: 10px;
+      }
+    }
+  }
+  .hos-org-transfer-tree {
+    padding: 0;
+    .transfer-panel {
+      margin-bottom: 0;
+    }
+  }
+}
+.var-tips {
+  color: #008fff;
+  padding-bottom: 10px;
+  .add-common-btn {
+    text-align: right;
+  }
+}
+.custom-tips {
+  color: #ffe3e3;
+  padding-bottom: 10px;
+}
+.custom-data {
+  padding-bottom: 15px;
+}
+.hos-alert-left78 {
+  .hos-alert {
+    margin-left: 78px;
+  }
+}
+.hos-alert-left70 {
+  .hos-alert {
+    margin-left: 70px;
+  }
+}
+.no-margin {
+  .hos-alert {
+    margin-left: 0 !important;
+  }
+}
+.channel-set {
+  //渠道设置弹框样式修改start
+  // padding: 0 15px;
+  margin-bottom: -5px;
+  .hos-alert {
+    margin-left: 66px;
+  }
+  .custom-data {
+    padding-bottom: 15px;
+  }
+  .hos-checkbox-button__inner {
+    font-weight: normal;
+  }
+  //渠道设置弹框样式修改end
+  font-size: 14px;
+  .channel-title {
+    line-height: 30px;
+    color: #000;
+  }
+  .title-style {
+    height: 24px;
+    font-size: 16px;
+    color: #000000;
+    font-weight: bold;
+    margin-top: 5px;
+  }
+  .template-view-hos {
+    height: 50px;
+    background: #f5f5f5;
+    //box-shadow: 0px 0px 4px 1px #dbdbdb;
+    border-radius: 5px 5px 2px 2px;
+    line-height: 50px;
+    padding-left: 15px;
+    color: #000;
+    margin: 15px 0;
+  }
+  .pd15 {
+    padding-bottom: 10px;
+  }
+  .cus-poi {
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .keywords-item {
+    .keywords-box {
+      margin-bottom: 0;
+      .hos-checkbox-button {
+        margin: 0 10px 0 0;
+      }
+    }
+  }
+}
+.content-template-dialog {
+  .dialog-footer {
+    padding-top: 20px;
+  }
+}
+.message-template-params-set {
+  font-size: 14px;
+  .pd15 {
+    padding-bottom: 15px;
+  }
+  .line-h-30 {
+    line-height: 30px;
+  }
+  .inline {
+    display: inline;
+  }
+  .pr10 {
+    padding-right: 10px;
+  }
+  .dialog-footer {
+    padding-top: 20px;
+  }
+}
+.secure-set {
+  .content-set {
+    max-height: 450px;
+  }
+}
+.param-set {
+  font-size: 14px;
+  .pt20 {
+    padding-top: 20px;
+  }
+  .param-title {
+    padding: 10px 15px 10px 35px;
+    height: 46px;
+    line-height: 26px;
+    box-sizing: border-box;
+    font-weight: 700;
+    font-size: 18px;
+    color: #424656;
+    position: relative;
+    background: #ffffff;
+    border-radius: 6px;
+    opacity: 1;
+    margin-bottom: 10px;
+    &:before {
+      content: '';
+      display: block;
+      position: absolute;
+      left: 15px;
+      top: calc((100% - 16px) / 2);
+      width: 16px;
+      height: 16px;
+      background: url('../../images/pure-card-title-icon.png') no-repeat center;
+      background-size: contain;
+    }
+  }
+  .param-content {
+    .pd15 {
+      padding-bottom: 15px;
+    }
+    .pt15 {
+      padding-top: 15px;
+    }
+    .line-h-30 {
+      line-height: 30px;
+      span {
+        padding-left: 5px;
+      }
+      .hos-input-number {
+        width: 25%;
+      }
+    }
+    .inline {
+      display: inline;
+    }
+    .pr10 {
+      padding-right: 10px;
+    }
+    // .two-card {
+    .hos-card__body {
+      height: 300px;
+    }
+    // }
+  }
+}
+.msg-detail-container {
+  height: 65vh;
+  .hos-aside {
+    overflow: auto !important;
+    border-radius: 6px;
+    position: relative;
+    border: 1px solid #fff;
+    box-sizing: border-box;
+    .bg__body {
+      height: 180px;
+      background:linear-gradient(180deg,#d7e9ff 0%,rgba(255, 255, 255, 0) 100%);
+      img {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+      }
+      .msg-item {
+        padding: 0 10px;
+      }
+      .msg-base {
+        position: relative;
+        padding: 10px 0 5px 15px;
+        height: 27px;
+        font-weight:700;
+        color:#424656;
+        font-size:18px;
+        .top-desc {
+          font-size: 16px;
+        }
+        // .bottom-line {
+        //   position: absolute;
+        //   background: linear-gradient(270deg, rgba(39, 129, 251, 0) 0%, #2781fb 100%);
+        //   height: 4px;
+        //   bottom: 19px;
+        //   left: 15px;
+        //   width: 102px;
+        // }
+      }
+      .msg-item {
+        display: flex;
+        font-weight: 400;
+        line-height: 32px;
+        font-size: 14px;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        .msg-label {
+          color: #666666;
+          text-align: right;
+          //margin-left: 10px;
+          &:after {
+            content: '：';
+            position: relative;
+            top: -0.5px;
+          }
+        }
+        .msg-value {
+          color: #191919;
+          flex: 1;
+          margin-right: 10px;
+        }
+      }
+    }
+    
+  }
+  .hos-main {
+    padding: 0 0 0 10px;
+    overflow-y: auto !important;
+    .hos-tabs,.hos-card {
+      margin-bottom: 10px;
+      &.target-list {
+        margin-bottom: 0;
+        .hos-biz-table .hos-biz-form {
+          margin-bottom: 0px;
+          padding-bottom: 0;
+        }
+      }
+      &.has-header .hos-card__body {
+        padding: 0 15px!important;
+      }
+    }
+    .distribute-list {
+      &.has-header .hos-card__body {
+        padding: 0 1px!important;
+        .hos-form {
+          padding-left: 0!important;
+        } 
+        .hos-table {
+          border: none;
+          .hos-table__expanded-cell {
+            padding: 10px 30px!important;
+            .msg-table-expand label {
+              color: #666!important;
+            } 
+          }
+        }
+      }
+    }
+    .sendTargetList {
+      .hos-form-item__label {
+        color: #666;
+      }
+    }
+    .msgActiveName {
+      .hos-tab-pane{
+        padding: 5px 15px!important;
+        div {
+          color: #191919;
+          span {
+            color: #666;
+          }
+        }
+      }
+    }
+  }
+}
+.distribute-list {
+  .hos-card__body {
+    padding: 0;
+    box-shadow: none;
+    .hos-table {
+      border-radius: 0 0 6px 6px;
+    }
+  }
+}
+.target-list {
+  .hos-tabs__content {
+    padding: 0;
+    box-shadow: none;
+    .hos-tab-pane {
+      padding: 0 !important;
+      .hos-table {
+        border-radius: 0 0 6px 6px;
+      }
+    }
+  }
+}
+
+.viewDetail {
+  height: 500px;
+  overflow: auto;
+}
+
+.cardTable {
+  .hos-card__body {
+    padding: 0;
+    box-shadow: none;
+    .hos-table {
+      border-radius: 0 0 6px 6px;
+    }
+  }
+}
+
+.detailForm,
+.contentForm {
+  .hos-form-item__label {
+    padding: 0;
+  }
+}
+
+.msgContent {
+  min-height: 120px;
+}
+
+.message-send {
+  background-color: #fff;
+  border-radius: 6px;
+  height: 100%;
+  > .hos-form:first-of-type {
+    width: 800px;
+    margin: 0 auto;
+    padding: 15px calc((100% - 800px) / 2);
+    padding-top: 15px;
+    height: auto;
+    max-height: calc(100% - 72px);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .send-to-tabs {
+    .hos-org-transfer-tree .transfer-panel {
+      height: 300px;
+    }
+  }
+  .pl15 {
+    padding-left: 15px;
+  }
+  .hos-form-item {
+    margin-bottom: 15px;
+  }
+  .hos-form-item__content {
+    .mess-tem-select-width {
+      width: 69%;
+    }
+  }
+
+  .ptb15 {
+    padding: 15px 0;
+  }
+  .dialog-footer {
+    position: relative;
+    bottom: 20px;
+    padding-top: 10px !important;
+  }
+  .custom-data {
+    margin-bottom: 5px;
+    margin-left: -12px;
+  }
+}
+
+// 渠道注册
+.channel-register-edit,
+.channel-register-view {
+  .hos-alert {
+    line-height: 20px;
+    .hos-alert__content {
+      line-height: 20px;
+    }
+  }
+}

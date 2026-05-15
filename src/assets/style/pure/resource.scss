@@ -1,0 +1,104 @@
+.hos-select-dropdown-current {
+  width: 480px;
+  .hos-select-dropdown__item {
+    display: inline-block;
+    width: 160px;
+  }
+}
+/*修改密码里用于密码策略信息提示和显示密码按钮的样式*/
+.length-str {
+  font-size: small;
+  font-weight: 200;
+  float: left;
+}
+.icon-position {
+  padding-right: 5px;
+}
+
+// 页面属性的间距
+.resource-attr {
+  // padding: 10px 10px 0 10px;
+  .hos-form {
+    padding: 0 !important;
+  }
+  // .hos-table--border {
+  //     border-bottom: 1px solid #E2E2E2;
+  // }
+  // .hos-table__body tbody .hos-table__cell {
+  //   padding: 5px 0;
+  //   .hos-form-item {
+  //     margin: 0;
+  //   }
+  // }
+}
+.resource-edit {
+  .cursorP {
+    cursor: pointer;
+  }
+  .tabs-padding {
+    padding: 15px 15px 5px;
+  }
+  .hos-form .block-space-mb {
+    margin-bottom: 0;
+  }
+  .iconsResource {
+    font-size: 16px;
+    padding: 0 8px;
+    background: #f1f1f1;
+    border-radius: 6px;
+    &.hos-icon-menu {
+      padding: 8px;
+    }
+  }
+  .iconHeight {
+    height: 42px;
+  }
+}
+
+.img-cntr {
+  display: flex;
+  height: 32px;
+  align-items: center;
+}
+//右上角菜单的样式RightTopMenu.vue--start--
+.right-top-menu-cntr {
+  display: flex;
+  // max-width: 100px;
+  // overflow: hidden;
+}
+.right-top-btn {
+  display: inline-flex;
+  align-items: center;
+  font-size: 18px;
+  color: #fff;
+  cursor: pointer;
+  height: 52px;
+  padding: 0 15px 0 23px;
+
+  .right-top-btn-name {
+    text-overflow: ellipsis;
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+  position: relative;
+  .lib-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
+  }
+  .sys-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.hos-icon-select-img-cntr {
+  height: 32px;
+  display: flex;
+  align-items: center;
+}
+//右上角菜单的样式RightTopMenu.vue--end--

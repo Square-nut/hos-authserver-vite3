@@ -1,0 +1,91 @@
+//该类写到hos-biz-table上或hos-table标签的上一级标签,例如hos-card上,目的是给表格增加一条白边
+.pure-white-line {
+  .hos-table {
+    border: 1px solid #fff !important;
+  }
+}
+
+// .pure-last-row-no-border-bottom {
+//   .hos-table {
+//     tr:last-child {
+//       td {
+//         border-bottom: none;
+//       }
+//     }
+//   }
+// }
+
+//查看日志详情给一个最大宽度,否则挤压变形
+.view-Log {
+  .hos-descriptions-item__content {
+    max-width: 560px;
+  }
+}
+
+//在卡片中有表格的话,则卡片本身不再有内边距,同时表格最后一行不再有下边框,表格本身有1px的白色边框
+.hos-card.has-table {
+  .hos-card__body {
+    padding: 0;
+  }
+  .hos-table {
+    border: 1px solid #ffffff;
+    tr:last-child {
+      td {
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+//SQL导出页样式中和,因为用了hos-main标签,这里需要去掉该标签的相关属性
+.tastView {
+  .hos-main {
+    padding: 0;
+  }
+}
+
+//tab内的form的上边距是10px,否则是15px
+.hos-tab-pane {
+  .hos-biz-table {
+    .hos-biz-form {
+      padding-top: 10px;
+    }
+  }
+}
+
+.post-dialog-class {
+  .pl15,
+  .pr15 .pt15 {
+    padding: 0;
+  }
+}
+//多因素认证
+.multi-factor {
+  .hos-card.has-header .hos-card__body {
+    padding: 15px;
+  }
+  .card-img {
+    margin-right: 15px;
+  }
+}
+
+//表格最右侧的边框不显示
+.hos-table--border .hos-table__header .hos-table__cell:nth-last-child(2) {
+  border-right: 1px solid transparent;
+}
+.hos-table--border .hos-table__header .hos-table__cell:nth-last-child(1) {
+  border-right: 1px solid transparent;
+}
+.hos-table--border .hos-table__body .hos-table__cell:nth-last-child(1) {
+  border-right: 1px solid transparent;
+}
+
+//页面建模
+.page-manage-index-container {
+  .hos-main {
+    padding: 0;
+  }
+  .hos-tabs--top {
+    background-color: #cde6ff;
+  }
+}

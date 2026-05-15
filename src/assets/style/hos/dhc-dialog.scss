@@ -1,0 +1,25 @@
+.DHCWebBrowser-dialog {
+  .hos-dialog__body {
+    padding: 0 40px 40px 40px !important;
+    line-height: 40px;
+    .text {
+      font-weight: 400;
+      color: #000000;
+    }
+    .downBut {
+      margin-left: 100px;
+    }
+    .hos-button {
+      margin: 20px 0;
+    }
+  }
+  .hos-dialog__header {
+    text-align: center;
+    padding: 40px 15px !important;
+    border-bottom: 0px solid #e2e2e2;
+  }
+  .hos-dialog__title {
+    font-size: 24px;
+    font-weight: bold;
+  }
+}

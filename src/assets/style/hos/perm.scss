@@ -1,0 +1,267 @@
+// base-perm-scope
+$-h-fit: 100%;
+$--border-color: #dbdbdb;
+$--border: 1px solid #DBDBDB;
+.base-perm-scope {
+   /*  .hos {
+        margin: 15px 0;
+    } */
+    .interface-hos {
+        // /margin: 15px 0!important;
+    }
+	.tabs-table .hos-tabs {
+		border-bottom: $--border;
+	}
+  .main-tree{
+    margin-left:-10px;
+  }
+	.hos-card {
+        height: calc(100% - 2px);
+		border-color: $--border-color;
+
+		.hos-card__header {
+			margin-bottom: 0;
+		}
+
+		.hos-card__body {
+			height: 100%;
+			padding: 0;
+			//padding-left: 10px;
+		}
+	}
+	.hos-tabs__content {
+		padding: 0 15px 15px;
+	}
+	.hos-main {
+		padding: 0;
+		margin-left: 15px;
+		// box-shadow: 0 0 10px $--border-color;
+
+    .userTab .hos-tabs__content {
+        box-sizing: border-box;
+		padding: 10px;
+		background: #fff;
+    }
+	}
+
+	.main-tree {
+		height: calc(100% - 64px);
+		overflow: auto;
+	}
+
+	.resource-tree-wrap {
+		height: calc(100% - 130px);
+		overflow: auto;
+	}
+    .tc {
+		margin: 20px 0 10px 0;
+	}
+	.userTree {
+		height: calc(100% - 64px);
+
+    .hos-tree {
+        height: calc(100% - 100px);
+        overflow: auto;
+        }
+    }
+	.backg {
+		width: 100%;
+		background-color: white;
+		margin-left: 15px;
+		img {
+			width: 300px;
+			margin: 0 auto;
+			display: block;
+			margin-top: 180px;
+		}
+		div {
+			text-align: center;
+			margin-top: 30px;
+		}
+	}
+}
+//角色管理
+.margin10 {
+    margin:15px 0;
+}
+/* .margin1 {
+    margin:0 10px 10px 0
+} */
+.roleatt .hos-input-number {
+	width: 94%;
+}
+.role-tabs {
+    padding: 0 15px;
+    .tab3 .hos-input__icon {
+        height: 0;
+    }
+    img {
+        top: 40%;
+        left: 50%;
+        position: relative;
+        transform: translate(-50%,-50%);
+    }
+    .no-data {
+        text-align: center;
+        margin-top: 165px;
+        color: #CCCCCC;
+    }   
+	.authtab {
+		.hos-tabs--second-level {
+			& + div{
+				padding:0;
+			}
+		}
+		.hos-input {
+			margin:0;
+			width: 100%;
+            padding-bottom: 15px;
+		}
+		.hos-main .hos-tabs--second-level .hos-tabs__header {
+			margin: 0;
+		}
+	}
+	&.hos-tabs--system .hos-tabs__header {
+		margin-top: 10px;
+		border-radius: 4px;
+	}
+	.hos-tab-pane {
+		padding: 15px 0 0 0;
+		}
+		.hos-input {
+			margin: auto;
+			margin-top: 15px;
+		}
+		.dialog-footer {
+			padding: 20px 10px 20px 0;
+		}
+	.w200 {
+		width: 200px!important;
+		height: 455px;
+		padding: 15px;
+        margin-bottom: 15px;
+	}
+	.hos-main {
+		padding:0 0 0 15px;
+        overflow: inherit;
+        width: 921px;
+	}
+	.hos-aside {
+		border-radius: 5px;
+		box-shadow: 0px 0px 4px 1px #DBDBDB;
+        overflow: hidden;
+	}
+	.hos-tabs__content {
+		overflow: inherit;
+        padding: 0 15px;
+        margin-bottom: 15px;
+	}
+	.hos-tree {
+        overflow: auto;
+        // height: 100%;
+		height: calc(100% - 5px);
+        margin: 0 -15px;
+        .hos-tree-node__content > .hos-tree-node__expand-icon {
+            margin-left: 9px;
+        }
+	}
+	.hos-tabs {
+		height: 40px;
+        margin-bottom: 5px;
+	}
+	.authtab {
+		.hos-aside .role-tabs .hos-input {
+			margin-top: 0;
+		}
+		.dialog-footer {
+			margin-left: -210px;
+			//margin-bottom: 10px;
+		}
+	}
+    .dialog-footer {
+        padding: 20px 0;
+    }
+	
+}
+
+.style-button {
+    color: #409EFF;
+	border-color: #c6e2ff;
+	background-color: #ecf5ff;
+}
+.user-tree {
+	height:380px;
+	.hos-tree {
+	margin: 0 -15px;
+	.hos-tree{
+        overflow:auto;
+		height:380px;
+		.hos-tree-node__content > .hos-tree-node__expand-icon {
+            margin-left: 9px;
+        }
+	}
+}
+}
+.role-edit {
+    form + .dialog-footer {
+        padding-top: 5px;
+    }
+    .h89 {
+        height: 89px;
+    }
+    .rules-span {
+        //color:red;
+        font-size:12px;
+		//line-height: 80px;
+    }
+    .w300 {
+        width: 300px;
+    }
+    .avatar {
+        width: 80px;
+        height: 80px;
+    }
+    .hos-upload--picture-card {
+		width: 80px;
+		height: 80px;
+		line-height: 80px;
+		i {
+			margin-top: 25px;
+		}
+	}
+	
+	.disuoload {
+		height: 80px;
+	}
+	
+	.uoload {
+		height: 80px;
+	}
+	
+	.disuoload .hos-upload--picture-card {
+		display: none;
+		/* 上传按钮隐藏 */
+	}
+	
+	.hos-upload-list--picture-card .hos-upload-list__item {
+		width: 80px;
+		height: 80px;
+	}
+}
+.all-view {
+    .hos-form-item__label {
+        color: #666;
+        padding: 0;
+    }
+    .hos-form-item__content {
+        color: #000;
+    }
+}
+
+.post-role {
+	.hos-aside .hos-pagination {
+			.hos-select {
+					width: 90px;
+			}
+	}
+}

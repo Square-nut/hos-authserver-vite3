@@ -1,0 +1,19 @@
+.center-workspace {
+  height: 100%;
+  .hos-tabs__content {
+    height: calc(100% - 46px);
+  }
+  .hos-tab-pane {
+    height: 100%;
+  }
+  .designer-empty {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: #909399;
+  }
+}

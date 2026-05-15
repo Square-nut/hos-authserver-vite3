@@ -1,0 +1,203 @@
+// 穿梭树index下拉框文件样式
+.shuttle-tree-input {
+  position: relative;
+
+  .hos-select__input {
+    margin-left: 0;
+    padding-left: 6px;
+    padding-right: 15px;
+  }
+
+  .icon-operation-area {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: flex;
+    padding-right: 5px;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 2;
+  }
+  .hos-icom-template {
+    color: #c0c4cc;
+    &:hover {
+      color: #339eff;
+      cursor: pointer;
+    }
+    &.disabled {
+      cursor: not-allowed;
+    }
+  }
+  .hos-icon-circle-close {
+    color: #c0c4cc;
+    margin-right: 5px;
+    &:hover {
+      cursor: pointer;
+      color: #339eff;
+    }
+    &.disabled {
+      cursor: not-allowed;
+    }
+  }
+}
+.select-dropdown-item {
+  margin-left: 20px;
+  color: #999999;
+}
+// 穿梭树main弹框文件样式
+.tree-left-tabs-autocomplete {
+  margin: 0 15px 15px 15px;
+  width: calc(100% - 30px);
+}
+.tree-search-item {
+  margin-left: 20px;
+  color: #5e93fd;
+  font-weight: 600;
+}
+.shuttle-tree-main {
+  margin: 0 15px;
+  display: flex;
+  .hos-card {
+    box-shadow: none;
+  }
+  .tree-left-tabs {
+    width: 50%;
+    margin-right: 7px;
+    .hos-tabs__content {
+      height: 480px;
+      overflow-y: auto;
+    }
+    .hos-tree-node__content {
+      height: 40px;
+    }
+  }
+  .tree-custom-node {
+    display: block;
+    width: 100%;
+  }
+  .tree-right-list {
+    width: 50%;
+    margin-left: 7px;
+    .selected-title {
+      line-height: 50px;
+    }
+    .hos-card__body {
+      padding: 0;
+      height: 480px;
+      overflow-y: auto;
+    }
+    .clear-btn {
+      float: right;
+      margin-top: 10px;
+      margin-right: 15px;
+    }
+  }
+}
+.node-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .left-node-container {
+    display: flex;
+    align-items: center;
+  }
+  .icon {
+    color: #339eff;
+    font-size: 14px;
+  }
+  .node-description {
+    display: flex;
+    flex-direction: column;
+    .description {
+      margin-right: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 250px;
+    }
+    .description-small {
+      font-size: 12px;
+    }
+  }
+  .right-node-container {
+    cursor: pointer;
+    font-size: 10px;
+    line-height: 20px;
+    height: 20px;
+    margin-right: 10px;
+    background: #f7f8fa;
+    .cancel-child {
+      color: #EE0F0F;
+      &.disabled {
+        color: #cccccc;
+        cursor: not-allowed;
+      }
+    }
+    .select-all-child {
+      &.disabled {
+        color: #cccccc;
+        cursor: not-allowed;
+      }
+    }
+  }
+  .tree-node-operation {
+    padding: 2px 5px;
+  }
+}
+
+.list-item-body {
+  box-sizing: border-box;
+  :hover {
+    background-color: rgb(229, 229, 229);
+  }
+}
+.list-item {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  .left-list-container {
+    display: flex;
+    align-items: center;
+    line-height: 1;
+    .list-item-img {
+      min-width: 30px;
+      margin-left: 5px;
+      background-color: #e8f2ff;
+      min-height: 30px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+  .icon {
+    color: #339eff;
+    font-size: 14px;
+  }
+  .list-description {
+    display: flex;
+    flex-direction: column;
+    .description {
+      margin-right: 10px;
+      line-height: 1.2
+    }
+    .description-small {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+  }
+  .right-list-container {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    .delete {
+      cursor: pointer;
+      font-size: 16px;
+      :hover {
+        color: #EE0F0F;
+      }
+    }
+  }
+}

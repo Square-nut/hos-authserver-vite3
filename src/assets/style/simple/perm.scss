@@ -1,0 +1,281 @@
+// base-perm-scope
+$-h-fit: 100%;
+
+.base-perm-scope {
+    .tabs-table .hos-tabs {
+        border-bottom: 1px solid #e2e2e2;
+    }
+    .aside-tree {
+        margin: 10px 10px 0 0;
+    }
+    .hos-card {
+        height: calc(100% - 2px);
+        width: calc(100% - 2px) !important;
+        border-color: #e2e2e2;
+
+        .hos-card__body {
+            height: calc(100% - 35px);
+            padding: 0;
+            padding-left: 10px;
+        }
+    }
+
+    .hos-tabs__content {
+        padding: 0 15px 15px;
+    }
+
+    .hos-main {
+        padding: 0;
+        margin-left: 10px;
+
+        .userTab .hos-tabs__content {
+            box-sizing: border-box;
+            padding: 10px;
+            background: #fff;
+        }
+    }
+
+    .main-tree {
+        height: calc(100% - 35px);
+        overflow: auto;
+    }
+
+    .resource-tree-wrap {
+        height: calc(100% - 130px);
+        overflow: auto;
+    }
+
+    .tc {
+        margin: 20px 0 10px 0;
+    }
+
+    .userTree {
+        height: calc(100% - 64px);
+
+        .hos-tree {
+            height: calc(100% - 100px);
+            overflow: auto;
+        }
+    }
+
+    .backg {
+        width: 100%;
+        background-color: white;
+
+        img {
+            width: 300px;
+            margin: 0 auto;
+            display: block;
+            margin-top: 180px;
+        }
+
+        div {
+            text-align: center;
+            margin-top: 30px;
+        }
+    }
+}
+
+//角色管理
+.margin10 {
+    margin: 10px 0 0 0;
+}
+
+.margin1 {
+    margin: 0 10px 10px 0
+}
+
+.user-add-tree .dialog-footer {
+    margin-right: 10px;
+}
+
+.role-tabs {
+    img {
+        top: 50%;
+        left: 50%;
+        position: relative;
+        transform: translate(-50%,-50%);
+    }
+    .hos-table {
+        margin-top: 10px;
+        border-bottom: 1px solid #E2E2E2!important;
+    }
+    .no-data {
+        text-align: center;
+        margin-top: 165px;
+    } 
+    .authtab {
+        .hos-tabs--second-level {
+            &+div {
+                padding: 0;
+            }
+        }
+
+        .hos-input {
+            margin: 0;
+            width: 100%;
+        }
+
+        .hos-main .hos-tabs--second-level .hos-tabs__header {
+            margin: 0 0 10px 0;
+        }
+        .hos-empty {
+            margin-top: 50px;
+        }
+    }
+
+    & .hos-tabs__header {
+        margin: 10px 10px 0 10px;
+        border-radius: 4px;
+    }
+
+    .hos-tab-pane {
+        padding: 10px 0 0 10px;
+    }
+
+    .hos-input {
+        margin: auto;
+        margin-top: 10px;
+        width: calc(100% - 10px);
+    }
+
+    .hos-alert {
+        width: auto;
+        padding: 4px 8px;
+        margin-right: 10px;
+    }
+
+    .dialog-footer {
+        padding: 20px 10px 20px 0;
+    }
+
+    .w200 {
+        width: 200px !important;
+        height: 450px;
+        padding: 10px;
+        margin-bottom: 10px;
+        margin-right: 10px;
+    }
+
+    .hos-main {
+        padding: 0 10px 0 10px;
+    }
+
+    .hos-tabs__content .hos-aside {
+        border: 1px solid #e2e2e2;
+        // border-radius: 4px; // 此属性会导致展开树显示模糊
+        box-shadow: none !important;
+    }
+
+    .hos-tree {
+        overflow: auto;
+        height: calc(100% - 28px);
+    }
+
+    .hos-tabs {
+        height: 30px!important;
+    }
+
+    .authtab {
+        .hos-aside .role-tabs .hos-input {
+            margin-top: 0;
+        }
+
+        .dialog-footer {
+            margin-left: -210px;
+        }
+    }
+
+}
+
+.style-button {
+    border-color: #c6e2ff;
+    background-color: #ecf5ff;
+    color: #409EFF;
+}
+
+.user-tree {
+    height: 380px;
+
+    .hos-tree {
+        overflow: auto;
+        height: 380px;
+    }
+}
+
+.role-edit {
+    .h89 {
+        height: 89px;
+    }
+
+    .rules-span {
+        //color:red;
+        font-size: 12px;
+        //line-height: 80px;
+    }
+
+    .w300 {
+        width: 300px;
+    }
+
+    .avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .uoload .hos-upload--picture-card {
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+    }
+
+    .disuoload {
+        height: 80px;
+    }
+
+    .uoload {
+        height: 80px;
+    }
+
+    .disuoload .hos-upload--picture-card {
+        display: none;
+        /* 上传按钮隐藏 */
+    }
+
+    .hos-upload-list--picture-card .hos-upload-list__item {
+        width: 80px;
+        height: 80px;
+    }
+}
+.sys-perm-page-simple {
+    padding: 0 10px;
+    .hos-table--border {
+        margin-top: 10px;
+    }
+    .dialog-footer {
+        padding: 20px 0;
+    }
+}
+.all-view {
+    .hos-form-item__label {
+        color: #666;
+        padding: 0;
+    }
+    .hos-form-item__content {
+        color: #000;
+    }
+}
+
+.post-role {
+    .hos-aside .hos-pagination {
+        .hos-select {
+            width: 90px;
+        }
+        .hos-pager {
+            li {
+              height: 32px;
+              line-height: 32px;
+            }
+        }
+    }
+}
