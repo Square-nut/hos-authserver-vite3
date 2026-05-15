@@ -1,0 +1,194 @@
+/**
+ * HOS 登录页布局（与设计稿对齐：左插画 / 右表单、表单区垂直居中）
+ * 仅布局与间距，不覆盖 Element 组件配色。
+ */
+
+body.userLayout #app {
+	max-width: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	width: 100% !important;
+	min-height: 100vh;
+}
+
+body.userLayout .el-container.is-vertical,
+body.userLayout .el-container {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+/* 与历史 hos 类名并存 */
+.hos-img-login-content,
+.el-img-login-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	min-height: 0;
+	width: 100%;
+}
+
+.hos-img-login-content .hos-login-main,
+.hos-img-login-content .el-login-main,
+.el-img-login-content .hos-login-main,
+.el-img-login-content .el-login-main {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: center;
+	padding: 0 clamp(16px, 3vw, 48px) 72px;
+	overflow: auto;
+	height: auto !important;
+	opacity: 1;
+}
+
+.hos-login-card,
+.el-login-card {
+	width: 100%;
+	max-width: 1280px;
+	margin: 0 auto;
+}
+
+/* 主区域：左约 60% 插画 + 右表单 */
+.login-box {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: clamp(16px, 3vw, 48px);
+	width: 100%;
+	max-width: none;
+	min-height: min(720px, calc(100vh - 120px));
+	height: auto;
+	margin: 0 auto;
+}
+
+.login-box .illustration-box {
+	flex: 1 1 58%;
+	max-width: 58%;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.login-box .illustration-box.illustration-fullscreen {
+	flex: 1 1 100%;
+	max-width: 100%;
+}
+
+.login-box > .el-card {
+	flex: 0 0 38%;
+	max-width: 440px;
+	min-width: 280px;
+	position: relative !important;
+	left: auto !important;
+	top: auto !important;
+	margin: 0;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+/* 覆盖布局内历史固定宽高，便于表单随内容增高、与设计稿右栏比例一致 */
+.hos-login-card .el-card,
+.el-login-card .el-card {
+	width: 100% !important;
+	max-width: 440px;
+	height: auto !important;
+	min-height: 0;
+	box-sizing: border-box;
+}
+
+.login-box .illustration-box .illustration {
+	max-width: 100%;
+	width: auto;
+	height: auto;
+	max-height: min(560px, 72vh);
+	object-fit: contain;
+}
+
+/* 标题：第一行欢迎 + 徽标/语言，第二行主标题 */
+.title-container .title {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 10px;
+	width: 100% !important;
+	max-width: 100%;
+	margin-bottom: 28px;
+	box-sizing: border-box;
+}
+
+.title-container .title .title-welcome-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 12px;
+	font-size: 18px;
+	line-height: 1.4;
+	width: 100%;
+}
+
+.title-container .title .title-welcome-text {
+	white-space: nowrap;
+}
+
+.title-container .title .title-name {
+	width: 100% !important;
+	margin-top: 0;
+	box-sizing: border-box;
+	word-break: break-word;
+}
+
+/* 其他登录方式：横向排布 */
+.login-box .ca-box {
+	width: 100% !important;
+	max-width: 440px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 16px;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 8px 12px;
+	box-sizing: border-box;
+}
+
+.login-box .ca-box .other-login {
+	width: 100%;
+	flex: 0 0 100%;
+}
+
+.login-box .ca-box .ca-login-icon {
+	flex: 1 1 0;
+	min-width: 0;
+	width: auto !important;
+	max-width: none;
+	text-align: center;
+	margin-bottom: 0;
+	box-sizing: border-box;
+}
+
+@media screen and (max-width: 1024px) {
+	.login-box {
+		flex-direction: column;
+		align-items: stretch;
+		min-height: auto;
+	}
+
+	.login-box .illustration-box {
+		flex: 0 0 auto;
+		max-width: 100%;
+		width: 100%;
+		min-height: 200px;
+	}
+
+	.login-box > .el-card {
+		flex: 1 1 auto;
+		max-width: 100%;
+		width: 100%;
+	}
+}

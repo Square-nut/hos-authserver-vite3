@@ -30,50 +30,54 @@
 			>
 				<!--欢迎登录,-->
 				<h3 class="title">
-					{{ $t('欢迎登录') }}<span v-if="systemConfigTitle !== ''">，</span>
-					<el-popover
-						v-if="licenseInfo?.showLicense"
-						placement="top-end"
-						ref="dcPopover"
-						trigger="manual"
-						:title="
-							licenseInfo.productionName +
-							' ' +
-							licenseInfo.productionVersion +
-							' ' +
-							licenseInfo.authType
-						"
-						v-model="yorn"
-					>
-						<div
-							style="padding: 0 15px 15px 15px"
-							v-html="licenseInfo.licenseText"
-							@click="triggerClick"
-						></div>
-						<template #reference>
-							<span
-								@click="yorn = !yorn"
-								class="el-edition"
-								:class="{
-									'button-yellow': licenseType == 2,
-									'button-red': licenseType != 1 && licenseType != 2,
-								}"
-							>
-								{{ licenseEdition }}
-							</span>
-						</template>
-					</el-popover>
-					<el-select
-						v-if="i18nStatus && isHos"
-						class="login-language-select"
-						v-model="currLang"
-						:placeholder="$t('请选择语言')"
-						:data="langOpts"
-						@change="languageChange"
-						option-label="label"
-						option-value="value"
-					>
-					</el-select>
+					<span class="title-welcome-row">
+						<span class="title-welcome-text">
+							{{ $t('欢迎登录') }}<span v-if="systemConfigTitle !== ''">，</span>
+						</span>
+						<el-popover
+							v-if="licenseInfo?.showLicense"
+							placement="top-end"
+							ref="dcPopover"
+							trigger="manual"
+							:title="
+								licenseInfo.productionName +
+								' ' +
+								licenseInfo.productionVersion +
+								' ' +
+								licenseInfo.authType
+							"
+							v-model="yorn"
+						>
+							<div
+								style="padding: 0 15px 15px 15px"
+								v-html="licenseInfo.licenseText"
+								@click="triggerClick"
+							></div>
+							<template #reference>
+								<span
+									@click="yorn = !yorn"
+									class="el-edition"
+									:class="{
+										'button-yellow': licenseType == 2,
+										'button-red': licenseType != 1 && licenseType != 2,
+									}"
+								>
+									{{ licenseEdition }}
+								</span>
+							</template>
+						</el-popover>
+						<el-select
+							v-if="i18nStatus && isHos"
+							class="login-language-select"
+							v-model="currLang"
+							:placeholder="$t('请选择语言')"
+							:data="langOpts"
+							@change="languageChange"
+							option-label="label"
+							option-value="value"
+						>
+						</el-select>
+					</span>
 					<h4 v-if="systemConfigTitle === 'isNull'" class="title-name">
 						{{ $t('医院综合业务操作系统HOS2.0') }}
 					</h4>

@@ -136,7 +136,7 @@
 					@click="userHandleLogin(true)"
 					>{{ $t('登录') }}
 				</el-button>
-				<el-row
+				<div
 					class="Password_settings"
 					v-if="
 						(loginPageInfo?.easyHideRetrievePassword ||
@@ -144,9 +144,9 @@
 						grantType != 'AD'
 					"
 				>
-					<!--忘记密码-->
 					<a @click="handleForgetPass">{{ $t('忘记密码？') }}</a>
-				</el-row>
+					<a @click="handleForgetPass">{{ $t('找回密码') }}</a>
+				</div>
 			</el-form-item>
 		</el-col>
 		<!-- 忘记密码 -->
@@ -462,6 +462,12 @@ function openLoginBtn() {
 </script>
 <style scoped lang="scss">
 .Password_settings {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	flex-wrap: wrap;
+	gap: 8px 12px;
 	a {
 		cursor: pointer;
 	}

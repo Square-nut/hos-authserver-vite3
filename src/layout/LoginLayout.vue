@@ -1,11 +1,11 @@
 <template>
 	<el-container>
 		<template v-if="isSimple == 1">
-			<div class="el-img-login-bg"></div>
-			<div class="el-img-login-content">
+			<div class="hos-img-login-bg el-img-login-bg"></div>
+			<div class="hos-img-login-content el-img-login-content">
 				<!-- <el-header> </el-header> -->
-				<el-main class="el-login-main">
-					<div class="el-login-card">
+				<el-main class="hos-login-main el-login-main">
+					<div class="hos-login-card el-login-card">
 						<!-- <route-view></route-view> -->
 						<LoginIndex />
 					</div>
@@ -346,6 +346,10 @@ onBeforeUnmount(() => {
 	document.body.classList.remove('userLayout');
 });
 </script>
+
+<style lang="scss">
+@import '@/assets/login-page-layout.scss';
+</style>
 
 <style lang="scss" scoped>
 .el-header {
