@@ -12,7 +12,7 @@ import type { DialogUid } from '@/stores/hosBizDialog';
 import { event as bizEventKey, uid } from '../../utils/store-config';
 
 export default defineComponent({
-	name: 'HosBizDialog',
+	name: 'ElBizDialog',
 	inheritAttrs: false,
 	props: {
 		uid: {

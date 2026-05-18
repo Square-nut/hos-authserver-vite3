@@ -1,6 +1,6 @@
 <template>
 	<el-container>
-		<template v-if="isSimple == 1">
+		<template v-if="isHosTheme()">
 			<div class="hos-img-login-bg el-img-login-bg"></div>
 			<div class="hos-img-login-content el-img-login-content">
 				<!-- <el-header> </el-header> -->
@@ -127,6 +127,7 @@ const i18nStore = useI18nStore();
 const userStore = useUserStore();
 
 const isSimple = ref(import.meta.env.VITE_APP_THEME_STYLE);
+const isHosTheme = () => String(isSimple.value) === '1';
 const carouselImage = ref([...defaultCarouselImage]);
 const loginPageDataDTO = ref({});
 const DHCWebBrowserStatus = ref(''); //医为客户端状态
@@ -254,7 +255,7 @@ function getDefaultLoginTypeInfo() {
 }
 
 function configPageType() {
-	const upData = { pageType: isSimple.value == 1 ? 'hos' : 'easy' };
+	const upData = { pageType: isHosTheme() ? 'hos' : 'easy' };
 	proxy
 		.$api('getLoginConfig', upData)
 		.then((res) => {
@@ -347,11 +348,7 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style lang="scss">
-@import '@/assets/login-page-layout.scss';
-</style>
-
-<style lang="scss" scoped>
+<style scoped>
 .el-header {
 	margin-bottom: 48px;
 }
@@ -361,29 +358,6 @@ onBeforeUnmount(() => {
 	font-family: Microsoft YaHei;
 	font-weight: bold;
 	color: #000000;
-}
-img {
-	width: 550px;
-	height: 430px;
-	opacity: 1;
-	border-radius: 0px;
-}
-.el-login-main {
-	display: flex;
-	height: 502px;
-	opacity: 1;
-	border-radius: 0px;
-	.el-img-login {
-		padding-left: 166px;
-	}
-	.el-login-card {
-		.el-card {
-			width: 350px;
-			height: 375px;
-			opacity: 1;
-			border-radius: 0px;
-		}
-	}
 }
 
 .login-layout-device-info {
@@ -400,5 +374,5 @@ img {
 	color: #9da7b6;
 	background: transparent;
 }
-// @import "../../assets/css/login.css";
+/* @import "../../assets/css/login.css"; */
 </style>

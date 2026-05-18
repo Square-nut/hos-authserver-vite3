@@ -7,7 +7,8 @@ import Params, { addRule } from '../../utils/params-util';
 import { Base64 } from 'js-base64';
 import { isFunction, isArray, isObject } from '../../utils/get-type';
 import trySyncData from '../../utils/data-patch-v1/try-sync-data';
-import { defineComponent, h, resolveComponent } from 'vue';
+import { defineComponent, h } from 'vue';
+import { ElForm } from 'element-plus';
 
 export const COMPONENT_NAME = 'F';
 
@@ -21,7 +22,7 @@ addRule(COMPONENT_NAME, {
 });
 
 export default defineComponent({
-	name: 'HosBizForm',
+	name: 'ElBizForm',
 	props: {
 		uid: {
 			type: [Number, String],
@@ -128,10 +129,9 @@ export default defineComponent({
 		},
 	},
 	render() {
-		const LForm = resolveComponent('l-form');
 		const defaultSlot = this.$slots.default;
 		return h(
-			LForm,
+			ElForm,
 			{
 				ref: 'form',
 				...this.$attrs,

@@ -1,32 +1,31 @@
 <template>
 	<div>
-		<hos-dropdown placement="bottom" @command="clickMenu" class="userInfo">
+		<el-dropdown placement="bottom" @command="clickMenu" class="userInfo">
 			<!-- 菜单内的帮助文档 -->
 			<div class="drop-user">
-				<hos-avatar
+				<el-avatar
 					style="vertical-align: sub"
 					:size="18"
 					:src="avatar"
-				></hos-avatar>
+				></el-avatar>
 				<span style="padding-left: 3px">{{ userInfo.name }}</span>
 			</div>
 			<template #dropdown>
-				<hos-dropdown-menu>
-					<hos-dropdown-item
+				<el-dropdown-menu>
+					<el-dropdown-item
 						v-for="(item, index) in dropDownMenus"
 						:key="index"
 						:command="item"
-						:icon="item.meta.icon ? item.meta.icon : 'hos-icon-menu'"
 					>
 						{{ item.meta.title }}
-					</hos-dropdown-item>
-					<hos-dropdown-item @click="setPssword" icon="hos-icon-setting">
-						修改密码</hos-dropdown-item
+					</el-dropdown-item>
+					<el-dropdown-item @click="setPssword" :icon="Setting">
+						修改密码</el-dropdown-item
 					>
-					<hos-dropdown-item @click="handlerLogout" icon="hos-icon-switch-button">
-						退出登录</hos-dropdown-item
+					<el-dropdown-item @click="handlerLogout" :icon="SwitchButton">
+						退出登录</el-dropdown-item
 					>
-					<!-- <hos-dropdown-item v-if="simple == 0">
+					<!-- <el-dropdown-item v-if="simple == 0">
           <span
             >左侧菜单：
             <hos-switch
@@ -40,12 +39,12 @@
             >
             </hos-switch>
           </span>
-        </hos-dropdown-item> -->
-				</hos-dropdown-menu>
+        </el-dropdown-item> -->
+				</el-dropdown-menu>
 			</template>
-		</hos-dropdown>
+		</el-dropdown>
 		<!--  设置按钮 SZWW  -->
-		<hos-dropdown
+		<el-dropdown
 			v-if="simple == 0"
 			placement="bottom"
 			trigger="click"
@@ -53,15 +52,15 @@
 			:hide-on-click="false"
 		>
 			<div class="drop-user">
-				<i class="hos-icon-setting"></i>
+				<el-icon><Setting /></el-icon>
 			</div>
 			<template #dropdown>
-				<hos-dropdown-menu class="headMenu_setUp">
-					<hos-dropdown-item>
+				<el-dropdown-menu class="headMenu_setUp">
+					<el-dropdown-item>
 						<img src="@/assets/images/helpImg.png" />
 						<span @click="openHelpDoc()">帮助文档</span>
-					</hos-dropdown-item>
-				<!--        <hos-dropdown-item>-->
+					</el-dropdown-item>
+				<!--        <el-dropdown-item>-->
 				<!--          <img src="@/assets/images/colorImg.png" />-->
 				<!--          <span>系统颜色转换</span>-->
 				<!--          <div class="color">-->
@@ -81,8 +80,8 @@
 				<!--              >紫</span-->
 				<!--            >-->
 				<!--          </div>-->
-				<!--        </hos-dropdown-item>-->
-				<!--        <hos-dropdown-item>-->
+				<!--        </el-dropdown-item>-->
+				<!--        <el-dropdown-item>-->
 				<!--          <img src="@/assets/images/fontImg.png" />-->
 				<!--          <span>文字大小转换</span>-->
 				<!--          <div class="font">-->
@@ -102,8 +101,8 @@
 				<!--              >小</span-->
 				<!--            >-->
 				<!--          </div>-->
-				<!--        </hos-dropdown-item>-->
-				<!--        <hos-dropdown-item>-->
+				<!--        </el-dropdown-item>-->
+				<!--        <el-dropdown-item>-->
 				<!--          <img src="@/assets/images/fontImg.png" />-->
 				<!--          <span>中英文切换</span>-->
 				<!--          <div class="font">-->
@@ -118,29 +117,30 @@
 				<!--              >英文</span-->
 				<!--            >-->
 				<!--          </div>-->
-				<!--        </hos-dropdown-item>-->
-				</hos-dropdown-menu>
+				<!--        </el-dropdown-item>-->
+				</el-dropdown-menu>
 			</template>
-		</hos-dropdown>
+		</el-dropdown>
 		<!--  设置按钮 EZWW  -->
-		<hos-biz-dialog
+		<el-biz-dialog
 			:title="dialogTitle"
 			:width="width"
 			uid="menuDialog"
 			:close-on-click-modal="false"
 		>
-		</hos-biz-dialog>
-		<hos-biz-dialog
+		</el-biz-dialog>
+		<el-biz-dialog
 			title="修改密码"
 			width="800px"
 			uid="setPassword"
 			:close-on-click-modal="false"
-		></hos-biz-dialog>
+		></el-biz-dialog>
 	</div>
 </template>
 
 <script>
 import { defineAsyncComponent } from 'vue';
+import { Setting, SwitchButton } from '@element-plus/icons-vue';
 import themeConfig from '@/utils/theme/themeConfig';
 import { useUserStore } from '@/stores/user';
 import setPassword from './setPassword.vue';
@@ -167,6 +167,7 @@ function resolveFrameImporter() {
 }
 export default {
 	name: 'DropDownMenu',
+	components: { Setting, SwitchButton },
 
 	data() {
 		return {

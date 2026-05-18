@@ -1,13 +1,13 @@
 <template>
-	<l-popover
-		v-model="visible"
+	<el-popover
+		v-model:visible="visible"
 		placement="bottom-start"
 		:width="popoverWidth"
 		popper-class="select-table-v2-popover"
 		trigger="click"
 		:disabled="disabled"
 	>
-		<l-biz-table
+		<el-biz-table
 			v-bind="$attrs"
 			:uid="tableUID"
 			:ref="tableUID"
@@ -28,36 +28,27 @@
 			<template v-if="$slots.toolbar" #toolbar>
 				<slot name="toolbar"></slot>
 			</template>
-		</l-biz-table>
+		</el-biz-table>
 		<template #reference>
-			<l-select
+			<el-select
 				class="select-table-v2-popover-select"
 				popper-class="select-table-v2-dropdown-select"
 				ref="select"
 				v-bind="$attrs"
 				v-model="defaultValue"
 				:disabled="disabled"
-				:select-value="selectLabel"
 				@visible-change="visibleChange"
 			>
 				<template #prefix>
-					<i
-						v-if="selectPrefix && theme == 1"
-						class="l-input__icon l-icom-post"
-					></i>
 					<img
-						v-if="selectPrefix && theme != 1"
+						v-if="selectPrefix"
 						src="../../../../assets/images/login/z61.png"
-						class=" "
 						alt=""
 					/>
 				</template>
-				<template #suffix>
-					<i class="l-input__icon l-icom-table-picker"></i>
-				</template>
-			</l-select>
+			</el-select>
 		</template>
-	</l-popover>
+	</el-popover>
 </template>
 
 <script>
@@ -67,7 +58,7 @@ const themeStyle =
 	import.meta.env.VITE_APP_THEME_STYLE ?? import.meta.env.VUE_APP_THEME_STYLE;
 
 export default {
-	name: 'HosBizSelectTable2',
+	name: 'ElBizSelectTable2',
 	props: {
 		value: { type: [String, Number, Array], default: '' },
 		multiple: { type: Boolean, default: false },
@@ -285,17 +276,15 @@ export default {
 	padding-top: 12px;
 }
 </style>
-<style lang="scss">
+<style>
 .select-table-v2-dropdown-select {
 	display: none;
 }
 .select-suffix {
 	position: absolute;
 }
-.post-select {
-	.l-input__prefix {
-		left: 0;
-		right: auto;
-	}
+.post-select .el-input__prefix {
+	left: 0;
+	right: auto;
 }
 </style>

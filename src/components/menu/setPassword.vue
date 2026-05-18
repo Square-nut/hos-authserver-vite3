@@ -5,19 +5,19 @@
 		:class="personUuid ? 'setWidth' : ''"
 	>
 		<div class="force-setpassword-tip">
-			<i class="hos-icom-tip-blue"></i>
+			<el-icon class="force-setpassword-tip-icon"><InfoFilled /></el-icon>
 			{{ msg }}
 		</div>
-		<hos-card>
-			<hos-form
+		<el-card>
+			<el-form
 				ref="passwordForm"
 				:model="passwordForm"
 				:rules="rules"
 				label-width="auto"
 			>
-				<hos-row v-if="isError">
-					<hos-col>
-						<hos-alert
+				<el-row v-if="isError">
+					<el-col>
+						<el-alert
 							center
 							:title="policyErrorDesc"
 							type="warning"
@@ -26,90 +26,75 @@
 							:close-text="$t('重新登录')"
 							@close="logout"
 						>
-						</hos-alert>
-					</hos-col>
-				</hos-row>
-				<hos-row>
-					<hos-col>
-						<hos-form-item :label="$t('原密码')">
-							<hos-input
+						</el-alert>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col>
+						<el-form-item :label="$t('原密码')">
+							<el-input
 								:type="flag ? 'text' : 'password'"
 								v-model="passwordForm.oldPassword"
 							>
 								<template #suffix>
-									<i
-										class="iconPos"
-										:class="['hos-icon-view']"
-										autocomplete="auto"
-										@click.stop="flag = !flag"
-									/>
+									<el-icon class="iconPos" @click.stop="flag = !flag"><View /></el-icon>
 								</template>
-							</hos-input>
-						</hos-form-item>
-					</hos-col>
-				</hos-row>
-				<hos-row>
-					<hos-col>
-						<hos-form-item :label="$t('新密码')" prop="newPasswordOne">
-							<hos-input
+							</el-input>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col>
+						<el-form-item :label="$t('新密码')" prop="newPasswordOne">
+							<el-input
 								:type="flag1 ? 'text' : 'password'"
 								v-model="passwordForm.newPasswordOne"
 							>
 								<template #suffix>
-									<i
-										class="iconPos"
-										:class="['hos-icon-view']"
-										autocomplete="auto"
-										@click.stop="flag1 = !flag1"
-									/>
+									<el-icon class="iconPos" @click.stop="flag1 = !flag1"><View /></el-icon>
 								</template>
-							</hos-input>
+							</el-input>
 							<span v-if="showPwdStr" class="lengthStrClass"
 								>({{ lengthStr }})</span
 							>
-						</hos-form-item>
-					</hos-col>
-				</hos-row>
-				<hos-row>
-					<hos-col>
-						<hos-form-item :label="$t('密码强度')">
-							<hos-progress
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col>
+						<el-form-item :label="$t('密码强度')">
+							<el-progress
 								:percentage="percentage"
 								:color="customColorMethod"
 								:format="percentageFormat"
 								style="line-height: 22px"
 							>
-							</hos-progress>
-						</hos-form-item>
-					</hos-col>
-				</hos-row>
-				<hos-row>
-					<hos-col>
-						<hos-form-item :label="$t('确认密码')" prop="newPasswordTwo">
-							<hos-input
+							</el-progress>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col>
+						<el-form-item :label="$t('确认密码')" prop="newPasswordTwo">
+							<el-input
 								:type="flag2 ? 'text' : 'password'"
 								v-model="passwordForm.newPasswordTwo"
 							>
 								<template #suffix>
-									<i
-										class="iconPos"
-										:class="['hos-icon-view']"
-										autocomplete="auto"
-										@click.stop="flag2 = !flag2"
-									/>
+									<el-icon class="iconPos" @click.stop="flag2 = !flag2"><View /></el-icon>
 								</template>
-							</hos-input>
-						</hos-form-item>
-					</hos-col>
-				</hos-row>
-			</hos-form>
-		</hos-card>
+							</el-input>
+						</el-form-item>
+					</el-col>
+				</el-row>
+			</el-form>
+		</el-card>
 		<div class="dialog-footer">
-			<hos-button type="primary" @click="cancel()">{{ $t('取消') }}</hos-button>
-			<hos-button type="success" @click="save()">{{ $t('保存') }}</hos-button>
+			<el-button type="primary" @click="cancel()">{{ $t('取消') }}</el-button>
+			<el-button type="success" @click="save()">{{ $t('保存') }}</el-button>
 			<!-- v-if="showLastBtn" -->
-			<hos-button @click="useLastPwd()" type="warning" v-if="isPasswordExpires">
-				{{ $t('延用密码') }}</hos-button
+			<el-button @click="useLastPwd()" type="warning" v-if="isPasswordExpires">
+				{{ $t('延用密码') }}</el-button
 			>
 		</div>
 	</div>
@@ -120,8 +105,10 @@ import { getLocale } from '@/utils/i18n/i18n-util';
 import { useUserStore } from '@/stores/user';
 import { closeHosBizDialog } from '@/composables/useHosBiz';
 import { getPolicyErrorCode } from '@/utils/base/user-store-util';
+import { InfoFilled, View } from '@element-plus/icons-vue';
 
 export default {
+	components: { View, InfoFilled },
 	props: ['personUuid', 'code', 'msg', 'callback'],
 	data() {
 		return {
@@ -580,10 +567,10 @@ export default {
 };
 </script>
 <style scoped>
-.change-pass :deep(.hos-form-item) {
+.change-pass :deep(.el-form-item) {
 	margin-bottom: 20px;
 }
-.change-pass .hos-form {
+.change-pass .el-form {
 	width: 460px;
 	padding: 0 15px;
 	margin: auto;
@@ -592,10 +579,10 @@ export default {
 	text-align: center;
 	padding-bottom: 15px;
 }
-.change-pass .dialog-footer .hos-button + .hos-button {
+.change-pass .dialog-footer .el-button + .el-button {
 	margin-left: 80px;
 }
-.change-pass :deep(.hos-input__suffix) {
+.change-pass :deep(.el-input__suffix) {
 	right: 10px;
 }
 .setWidth {

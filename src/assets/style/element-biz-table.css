@@ -1,0 +1,116 @@
+/**
+ * Element Plus 业务表格封装样式（原 hos-biz-table / l-biz-table）
+ */
+.el-biz-table {
+	position: relative;
+	height: 100%;
+	border-radius: 5px;
+}
+
+.el-biz-table.flex {
+	display: flex;
+	flex-flow: column;
+}
+
+.el-biz-table.pagination-pos-bottom .el-table {
+	border-radius: 2px;
+}
+
+.el-biz-table.pagination-pos-bottom .el-biz-pagination {
+	padding: 10px 15px;
+	margin-bottom: 0;
+	margin-top: 5px;
+	box-shadow: 0 0 4px 1px #dbdbdb;
+	border-radius: 2px 2px 5px 5px;
+	background: #fff;
+}
+
+.el-biz-table .el-biz-form {
+	padding: 15px 15px 0;
+	box-shadow: 0 0 4px 1px #dbdbdb;
+	border-radius: 5px 5px 2px 2px;
+	background-color: #fff;
+}
+
+.el-biz-table .el-biz-toolbar {
+	display: flex;
+	justify-content: flex-end;
+	padding: 15px 0;
+}
+
+.el-biz-table .el-biz-toolbar-left {
+	flex: 1;
+}
+
+.el-biz-table .el-biz-toolbar-right {
+	text-align: right;
+}
+
+.el-biz-table .el-table {
+	border-radius: 2px 2px 5px 5px;
+	box-shadow: 0 0 4px 1px #dbdbdb;
+	background: #fff;
+}
+
+.el-biz-table .el-biz-pagination {
+	padding: 10px 15px;
+	background: #fff;
+	box-shadow: 0 0 4px 1px #dbdbdb;
+	border-radius: 2px;
+}
+
+.el-biz-table .el-biz-pagination .btn-refresh {
+	cursor: pointer;
+	margin-left: 8px;
+	vertical-align: middle;
+	font-size: 16px;
+	color: #606266;
+}
+
+.el-biz-table .el-biz-pagination .btn-refresh:hover {
+	color: #409eff;
+}
+
+.el-biz-table .top-toolbar-table-setting {
+	margin-left: 8px;
+	cursor: pointer;
+}
+
+.el-biz-table .top-toolbar-table-setting .el-icon {
+	font-size: 18px;
+	color: #606266;
+}
+
+.el-biz-table .mb15 {
+	margin-bottom: 15px;
+}
+
+/* 登录页深色主题下的业务表格（岗位选择等） */
+.hos-login-card .el-biz-table .el-biz-form,
+.el-login-card .el-biz-table .el-biz-form {
+	background: rgba(25, 47, 95, 0.6);
+	box-shadow: none;
+}
+
+.hos-login-card .el-biz-table .el-table,
+.el-login-card .el-biz-table .el-table {
+	background: transparent;
+	box-shadow: none;
+	color: #fff;
+}
+
+.hos-login-card .el-biz-table .el-form-item__label,
+.el-login-card .el-biz-table .el-form-item__label {
+	color: #fff;
+}
+
+.hos-login-card .el-biz-table .el-input__wrapper,
+.el-login-card .el-biz-table .el-input__wrapper {
+	background: rgba(65, 165, 255, 0.5);
+	box-shadow: none !important;
+}
+
+.hos-login-card .el-biz-table .el-input__inner,
+.el-login-card .el-biz-table .el-input__inner {
+	color: #fff;
+}

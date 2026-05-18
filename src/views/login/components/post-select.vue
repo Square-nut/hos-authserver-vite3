@@ -10,14 +10,17 @@
 			option-label="name"
 		>
 			<template #prefix>
-				<i v-if="theme" class="el-input__icon el-icom-post"></i>
-				<img v-else src="../../../assets/images/login/z61.png" class=" " />
+				<el-icon v-if="isHosTheme"><Briefcase /></el-icon>
+				<img v-else src="../../../assets/images/login/z61.png" alt="" />
 			</template>
 		</el-select>
 	</div>
 </template>
 <script>
+import { Briefcase } from '@element-plus/icons-vue';
+
 export default {
+	components: { Briefcase },
 	props: {
 		type: String,
 		personId: String,
@@ -25,8 +28,8 @@ export default {
 	components: {},
 	data() {
 		return {
-			theme:
-				import.meta.env.VITE_APP_THEME_STYLE,
+			isHosTheme: String(import.meta.env.VITE_APP_THEME_STYLE) === '1',
+			theme: import.meta.env.VITE_APP_THEME_STYLE,
 			postList: [],
 			post: '',
 		};
@@ -74,5 +77,3 @@ export default {
 	},
 };
 </script>
-<style lang="scss" scoped></style>
-<style lang="scss"></style>

@@ -1,6 +1,5 @@
 /**
- * HOS 登录页布局（与设计稿对齐：左插画 / 右表单、表单区垂直居中）
- * 仅布局与间距，不覆盖 Element 组件配色。
+ * HOS 登录页布局（左插画 / 右表单）
  */
 
 body.userLayout #app {
@@ -18,7 +17,6 @@ body.userLayout .el-container {
 	flex-direction: column;
 }
 
-/* 与历史 hos 类名并存 */
 .hos-img-login-content,
 .el-img-login-content {
 	flex: 1;
@@ -51,7 +49,6 @@ body.userLayout .el-container {
 	margin: 0 auto;
 }
 
-/* 主区域：左约 60% 插画 + 右表单 */
 .login-box {
 	display: flex;
 	flex-direction: row;
@@ -91,7 +88,6 @@ body.userLayout .el-container {
 	box-sizing: border-box;
 }
 
-/* 覆盖布局内历史固定宽高，便于表单随内容增高、与设计稿右栏比例一致 */
 .hos-login-card .el-card,
 .el-login-card .el-card {
 	width: 100% !important;
@@ -109,7 +105,6 @@ body.userLayout .el-container {
 	object-fit: contain;
 }
 
-/* 标题：第一行欢迎 + 徽标/语言，第二行主标题 */
 .title-container .title {
 	display: flex;
 	flex-direction: column;
@@ -142,7 +137,6 @@ body.userLayout .el-container {
 	word-break: break-word;
 }
 
-/* 其他登录方式：横向排布 */
 .login-box .ca-box {
 	width: 100% !important;
 	max-width: 440px;

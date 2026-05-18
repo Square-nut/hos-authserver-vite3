@@ -39,8 +39,12 @@ export function setLoginPortalUrl(url: string) {
 	useLoginSessionStore().SET_PORTAL_URL(url);
 }
 
-export function setLoginAuthInfo(data: Record<string, unknown>) {
-	useLoginSessionStore().SET_AUTH_INFO(data);
+export function setLoginAuthInfo(data: unknown) {
+	const payload =
+		data && typeof data === 'object' && !Array.isArray(data)
+			? (data as Record<string, unknown>)
+			: {};
+	useLoginSessionStore().SET_AUTH_INFO(payload);
 }
 
 export function setLoginPageStyle(config: Record<string, unknown>) {

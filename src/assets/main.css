@@ -7,6 +7,22 @@
   font-weight: normal;
 }
 
+/* 登录页全屏，避免 Vite 模板 #app 限宽与 grid 破坏布局 */
+body.userLayout {
+  display: block;
+  place-items: unset;
+}
+
+body.userLayout #app {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  display: block;
+  grid-template-columns: unset;
+}
+
 a,
 .green {
   text-decoration: none;

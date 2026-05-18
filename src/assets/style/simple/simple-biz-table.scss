@@ -17,14 +17,15 @@ $--border: 1px solid $--border-color;
     border-right: $--border;
     border-left: $--border;
     border-radius: 4px 4px 0 0;
+    overflow: hidden;
   }
+
   .hos-biz-toolbar {
-    display: flex;
 		overflow: hidden;
 		height: 28px;
     padding: 2px;
     background: #ffffff;
-    border-top: 1px dashed $--border-color;
+    border-top: 1px dotted $--border-color;
 		border-left: $--border;
 		border-right: $--border;
 
@@ -40,7 +41,7 @@ $--border: 1px solid $--border-color;
 			width: 100%;
 
 			&.hasSetting {
-				// width: calc(100% - 35px);
+				width: calc(100% - 35px);
 			}
 
 			.hos-input__inner {
@@ -48,9 +49,6 @@ $--border: 1px solid $--border-color;
 				line-height: 23px;
 			}
 		}
-    .hos-biz-toolbar-left{
-      flex: 1;
-    }
 		.top-toolbar-table-setting {
 			width: 32px;
 			height: 28px;
@@ -66,9 +64,9 @@ $--border: 1px solid $--border-color;
     line-height: 32px;
     background: #ffffff;
     border: $--border;
+    border-top: none;
     border-radius: 0 0 4px 4px;
     overflow: hidden;
-    border-top: none;
 
     .hos-pagination {
       padding-top: 0;
@@ -81,7 +79,7 @@ $--border: 1px solid $--border-color;
         color: #999999;
         cursor: pointer;
       }
-      span:not([class*=suffix],.hos-pagination__ssizes) {
+      span:not([class*=suffix]) {
         height: 32px;
         line-height: 32px;
       }
@@ -96,32 +94,14 @@ $--border: 1px solid $--border-color;
 
       .hos-select {
         .hos-input__inner {
-          // border: none;
+          border: none;
         }
 
       }
       .hos-input__inner:hover {
         background-color: #ffffff;
       }
-      .hos-button--primary.is-disabled {
-        background: #fff;
-      }
-      .hos-pagination__ssizes {
-        line-height: 26px;
-        padding-top: 3px;
-      }
     }
-  }
-
-  .hos-table {
-    border-radius: 0;
-    // border-top: 0 !important;
-    // border-right: 0 !important;
-    border-bottom: 1px solid #E2E2E2;
-  }
-  .hos-switch{
-    margin-top: 1px;
-    vertical-align: top;
   }
 }
 .tabs-table {
@@ -173,6 +153,7 @@ $--border: 1px solid $--border-color;
       .hos-biz-form{
         border-top: none;
         border-right: none;
+        border-top-left-radius: 0;
       }
       .hos-table{
         border-right: none!important;
@@ -186,6 +167,7 @@ $--border: 1px solid $--border-color;
       .hos-biz-pagination {
         border-right: none;
         border-bottom: none;
+        border-bottom-left-radius: 0;
       }
     }
 
@@ -247,8 +229,4 @@ $--border: 1px solid $--border-color;
   .hos-radio {
     margin-right: 15px;
   }
-}
-
-.top-toolbar-table-setting-item {
-  padding: 10px;
 }

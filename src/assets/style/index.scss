@@ -1,31 +1,139 @@
-// 此文件为全局通用样式,会作用于每一种风格下
-.dialog-menu {
-  .hos-dialog__body-content {
+//左侧asdie添加container-height样式
+.hos-container .main .base-container {
+  height: 100%;
+  //左侧菜单的阴影
+  .hos-aside {
+    background-color: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 4px 0px #dbdbdb;
+  }
+
+  .hos-main {
+    padding: 0px !important;
+    margin-left: 10px;
     height: 100%;
   }
 }
 
-// 此处为仅针对Chrome49的样式.需对Chrome49进行样式兼容性处理
-.chrome49 {
-  // 需求号: 4701021.<i>标签等focus时,会被浏览器默认的user agent stylesheet影响样式,出现outline.
-  & :focus {
-    outline: 0 none transparent;
-  }
+.hos-main{
+  padding:0px !important;
 }
 
-// table组件有固定列时,表格内容会遮挡滚动条导致无法滚动,故增加此样式.
-// 之前仅写在hos-biz-table组件中,本次修改为作用于所有表格组件.
-.hos-table {
-  & .hos-table__body-wrapper {
-    outline: none; // 聚焦时会有outline,主动取消outline样式
-  }
-  & [class^='hos-table__fixed'] {
-    // 处于表格固定列内的横向滚动条无法拖动. 如果列数过多,固定列宽度大于横向滚动条长度时,会导致整个滚动条无法拖动.
-    // 以下样式用于修复此问题.使得在固定列内的横向滚动条也可以拖动.
-    pointer-events: none;
-    // 将直接子元素显式声明为默认值"auto"
-    & > * {
-      pointer-events: auto;
+//工作区间的样式
+.hos-main-workspace {
+  height: calc(100% - 56px);
+  background: #f5f5f5;
+  padding: 10px;
+
+  //表格上的按钮
+  .hos-button-group {
+    margin: 10px 0px;
+    border-radius: 2px;
+    box-shadow: 0px 0px 4px 0px #dbdbdb;
+
+    .el-icon {
+      font-size: 16px;
+    }
+
+    .hos-button--small {
+      padding: 9px;
+    }
+
+    .hos-button {
+      border: none;
+      color: #807f89;
+    }
+
+    //button的分割线
+    .hos-divider--vertical {
+      height: 26px;
+      margin: 5px 0 0 0;
+      float:left;
+      background: #dae2ee;
     }
   }
 }
+
+//给表格的检索条件添加阴影
+.base-form {
+  background: #ffffff;
+  border-radius: 2px;
+  padding-top: 10px;
+  padding-left: 10px;
+  box-shadow: 0px 0px 4px 0px #dbdbdb;
+}
+
+//给table添加阴影
+.hos-table {
+  height: calc(100% - 126px);
+  border-radius: 2px 2px 5px 5px;
+  box-shadow: 0px 0px 4px 0px #dbdbdb;
+
+  .hos-form-item{
+    margin:0px;
+  }
+}
+
+//表格上的操作按钮的样式
+.hos-biz-pagination {
+  padding: 0;
+
+  .hos-pagination {
+    padding: 10px 0px;
+  }
+}
+
+
+////表格
+//.hos-table {
+//  overflow: auto !important;
+//  //操作按钮的样式
+//  .hos-tooltip {
+//    padding-left: 5px;
+//    padding-right: 5px;
+//  }
+//}
+
+.hos-table__body-wrapper{
+  overflow: auto !important;
+}
+
+//弹出层footer的位置，以及每个button之间的间距
+.dialog-footer {
+  text-align: center;
+  padding-top: 20px;
+
+  .hos-button + .hos-button {
+    margin-left: 80px;
+  }
+}
+
+
+.hos-form{
+ /*  .hos-col{
+    min-height: 51px;
+  } */
+
+  //对日期控制的宽度控制
+  .hos-date-editor--daterange.hos-input, .hos-date-editor--daterange.hos-input__inner, .hos-date-editor--timerange.hos-input, .hos-date-editor--timerange.hos-input__inner{
+    width:100%;
+  }
+
+  .hos-date-editor.hos-input, .hos-date-editor.hos-input__inner{
+    width:auto;
+  }
+}
+
+
+
+//只针对图标的下拉框样式处理
+.hos-select-dropdownCurrent{
+  width: 400px!important;
+    .hos-select-dropdown__item {
+    display: inline;
+  }
+}
+
+
+

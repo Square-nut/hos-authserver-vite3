@@ -74,12 +74,12 @@
     .left-group-box {
       height: 30px;
       width: 120px;
-      background: url('~@base/assets/images/login/55.png') center center no-repeat;
+      background: url('../../images/login/55.png') center center no-repeat;
     }
     .right-group-box {
       height: 30px;
       width: 120px;
-      background: url('~@base/assets/images/login/56.png') center center no-repeat;
+      background: url('../../images/login/56.png') center center no-repeat;
     }
     .center {
       flex: 1;
@@ -141,10 +141,6 @@
         // margin-top: 30px;
         // margin-bottom: 30px;
         // margin-left: 18px;
-
-        .img {
-          height: 16px;
-        }
 
         .title-name {
           font-size: 20px;
@@ -224,15 +220,24 @@
       .login-card .hos-tabs__content {
         height: auto;
       }
-      .hos-tabs--top:not(.hos-tabs--border-card):not(.hos-tabs--second-level) > .hos-tabs__content {
+      .login-card .hos-tabs--top:not(.hos-tabs--separate):not(.hos-tabs--second-level) {
+        border: none;
+      }
+      .login-card .hos-tabs--top:not(.hos-tabs--border-card):not(.hos-tabs--second-level) > .hos-tabs__content {
         border: none;
       }
       .login-card .tenantSelect {
         margin-top: 8px;
       }
       .login-card .hos-input__prefix {
+        position: absolute;
+        left: -39px;
         // line-height: 40px;
         color: #c1c1c1;
+        right: auto;
+        width: 45px;
+        font-size: 18px;
+        line-height: 45px;
       }
       .login-card .hos-input:hover .hos-input__icon {
         color: #c1c1c1;
@@ -318,7 +323,7 @@
     }
   }
   .simple-login-feature {
-    display: flex;
+    display: none;
     justify-content: center;
     margin-top: 55px;
     font-size: 12px;
@@ -327,7 +332,7 @@
       width: 210px;
       text-align: left;
       &:last-child {
-        // width: auto;
+        width: auto;
       }
       .feature-item-header {
         height: 22px;
@@ -344,9 +349,6 @@
       .feature-item-body {
         color: #666666;
         line-height: 17px;
-      }
-      .feature-single-img {
-        height: 75px; // 基于UI设计的其他系统特性的高度
       }
       // width: 125px;
 
@@ -405,6 +407,9 @@
         }
       }
     }
+    .simple-login-feature {
+      display: flex;
+    }
   }
 }
 // 登录页版本
@@ -440,7 +445,7 @@
     width: 90px;
     height: 14px;
     display: inline-block;
-    background: url('~@base/assets/images/login/logo.png') center center no-repeat;
+    background: url('../../images/login/logo.png') center center no-repeat;
   }
   .simple-foot-font {
     padding-left: 8px;
@@ -535,6 +540,7 @@
 }
 
 .select-table-v2-popover {
+	width: 545px !important;
   .hos-pager li {
     height: 32px;
     line-height: 32px;

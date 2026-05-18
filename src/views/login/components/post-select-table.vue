@@ -171,11 +171,7 @@ export default {
 </script>
 <style lang="scss" scoped></style>
 <style lang="scss">
-.post-select-table {
-	.el-input__prefix {
-		left: 0;
-		.el-icom-post {
-		}
-	}
+.post-select-table .el-input__prefix {
+	left: 0;
 }
 </style>

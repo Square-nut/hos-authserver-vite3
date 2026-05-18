@@ -4,7 +4,8 @@
  * @Last Modified time: 2026-05-09
  */
 import Params, { addRule } from '../../utils/params-util';
-import { defineComponent, h, resolveComponent } from 'vue';
+import { defineComponent, h } from 'vue';
+import { ElPagination } from 'element-plus';
 
 export const COMPONENT_NAME = 'P';
 
@@ -32,7 +33,7 @@ addRule(COMPONENT_NAME, {
 });
 
 export default defineComponent({
-	name: 'HosBizPagination',
+	name: 'ElBizPagination',
 	props: uidProp,
 	data() {
 		return {
@@ -54,7 +55,6 @@ export default defineComponent({
 		},
 	},
 	render() {
-		const LPagination = resolveComponent('l-pagination');
 		const attrs = this.$attrs as Record<string, unknown>;
 		const props: Record<string, unknown> = { ...attrs };
 		props.layout =
@@ -70,7 +70,7 @@ export default defineComponent({
 		const defaultSlot = this.$slots.default;
 
 		return h(
-			LPagination,
+			ElPagination,
 			{
 				...props,
 				onCurrentChange: (val: number) => {

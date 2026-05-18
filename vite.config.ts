@@ -9,8 +9,13 @@ export default defineConfig({
     vue(),
   ],
   css: {
-    // Workaround for intermittent `sass-embedded` dispatcher crash on macOS.
-    preprocessorMaxWorkers: 0,
+    preprocessorOptions: {
+      scss: {
+        // Use the `sass` package (JS API), not `sass-embedded` native binary.
+        api: 'modern',
+        silenceDeprecations: ['legacy-js-api', 'import'],
+      },
+    },
   },
   server: {
     proxy: {
@@ -25,7 +30,8 @@ export default defineConfig({
   resolve: {
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.vue'],
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@sys/styles': fileURLToPath(new URL('./src/assets/style', import.meta.url)),
     },
   },
 })

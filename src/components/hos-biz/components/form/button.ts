@@ -1,5 +1,6 @@
 import type { PropType } from 'vue';
-import { defineComponent, h, resolveComponent } from 'vue';
+import { defineComponent, h } from 'vue';
+import { ElButton } from 'element-plus';
 import { isPromise, isFunction } from '../../utils/get-type';
 
 /**
@@ -35,7 +36,7 @@ function runCommand(this: RunCommandCtx, commands: string[]): void | Promise<voi
 }
 
 export default defineComponent({
-	name: 'HosBizButton',
+	name: 'ElBizButton',
 	props: {
 		run: {
 			type: [String, Array] as PropType<string | string[] | undefined>,
@@ -51,9 +52,8 @@ export default defineComponent({
 		};
 	},
 	render() {
-		const LButton = resolveComponent('l-button');
 		const defaultSlot = this.$slots.default;
-		return h(LButton, {
+		return h(ElButton, {
 			...this.$attrs,
 			loading: this.loading,
 			onClick: (val: unknown) => {

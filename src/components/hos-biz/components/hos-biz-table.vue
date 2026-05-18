@@ -6,7 +6,7 @@
 */ -->
 <template>
 	<div
-		class="l-biz-table"
+		class="el-biz-table"
 		:class="{
 			flex: isFit,
 			'pagination-pos-bottom': pagePos === 'bottom',
@@ -14,7 +14,7 @@
 		}"
 	>
 		<div
-			:class="{ mb15: !showToolbar && uiStyle == 1, 'l-biz-form': $slots.form }"
+			:class="{ mb15: !showToolbar && uiStyle == 1, 'el-biz-form': $slots.form }"
 			v-if="form"
 		>
 			<Form
@@ -28,13 +28,13 @@
 			</Form>
 		</div>
 		<slot name="top"></slot>
-		<div class="l-biz-toolbar" v-if="showToolbar">
-			<div class="l-biz-toolbar-left" v-if="$slots.toolbar">
+		<div class="el-biz-toolbar" v-if="showToolbar">
+			<div class="el-biz-toolbar-left" v-if="$slots.toolbar">
 				<slot name="toolbar"></slot>
 			</div>
 			<div
 				v-if="pagePos === 'top' && page !== false"
-				class="l-biz-toolbar-right l-biz-pagination"
+				class="el-biz-toolbar-right el-biz-pagination"
 			>
 				<Page
 					v-bind="pageConfig"
@@ -67,7 +67,7 @@
 						</div>
 					</div>
 					<template #reference>
-						<i class="l-icom-config"></i>
+						<el-icon class="top-toolbar-table-setting-trigger"><Setting /></el-icon>
 					</template>
 				</el-popover>
 			</div>
@@ -113,7 +113,7 @@
 				:prev-text="uiStyle == 0 ? $t('el.pagination.prev') : null"
 				:next-text="uiStyle == 0 ? $t('el.pagination.next') : null"
 			>
-				<i class="l-icon-refresh btn-refresh" @click="refresh"></i>
+				<el-icon class="btn-refresh" @click="refresh"><Refresh /></el-icon>
 			</Page>
 		</div>
 	</div>
@@ -135,9 +135,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { deepClone, returnGlobalValue } from '@/utils/index';
 import { subscribeHosBizTableMutations } from '@/stores/hosBizTable';
 import { updateHosBizTable } from '@/composables/useHosBiz';
+import { Refresh, Setting } from '@element-plus/icons-vue';
 
 export default {
-	name: 'HosBizTable',
+	name: 'ElBizTable',
+	components: { Refresh, Setting },
 	mixins: [otherMethods],
 	watch: {
 		page: {
@@ -190,9 +192,8 @@ export default {
 		pageConfig() {
 			const simple = 'ssizes, home, prev, spager, next, end, slot, stotal';
 			const hos = 'jumper, home, prev, pager, next, end, ssizes, total';
-			const pure = 'stotal, ssizes, prev, pager, next, jumper';
 			let config = {
-				layout: this.uiStyle == 0 ? simple : this.uiStyle == 1 ? hos : pure,
+				layout: this.uiStyle == 1 ? hos : simple,
 				total: this.total,
 				currentPage: this.params.pagination.current,
 				pageSize: this.params.pagination.size,
@@ -639,58 +640,40 @@ export default {
 	},
 };
 </script>
-<style lang="scss" scoped>
-.l-biz-table {
+<style scoped>
+.el-biz-table {
 	flex-direction: column;
 	height: 100%;
 	background: transparent;
-	&.flex {
-		display: flex;
-	}
-	.l-table {
-		::v-deep .l-table__body-wrapper {
-			outline: none; // 聚焦时会有outline,主动取消outline样式
-		}
-		::v-deep .l-table__fixed {
-			// 处于表格固定列内的横向滚动条无法拖动. 如果列数过多,固定列宽度大于横向滚动条长度时,会导致整个滚动条无法拖动.
-			// 以下样式用于修复此问题.使得在固定列内的横向滚动条也可以拖动.
-			pointer-events: none;
-			// 将直接子元素显式声明为默认值"auto"
-			& > * {
-				pointer-events: auto;
-			}
-		}
-	}
-	// .l-biz-toolbar {
-	// 	overflow: hidden;
-	// }
+}
+.el-biz-table.flex {
+	display: flex;
+}
+.el-biz-table :deep(.el-table__body-wrapper) {
+	outline: none;
+}
+.el-biz-table :deep(.el-table__fixed) {
+	pointer-events: none;
+}
+.el-biz-table :deep(.el-table__fixed) > * {
+	pointer-events: auto;
 }
 .none {
 	display: none;
 }
 </style>
 
-<style lang="scss">
-//分页未对齐的兼容问题
-.chrome49.l-biz-table {
-	.l-pagination button,
-	.l-pagination span:not([class*='suffix']) {
-		line-height: 31px;
-	}
-	.l-pagination span.l-pagination__ssizes:not([class*='suffix']) {
-		line-height: 26px;
-	}
+<style>
+/* 分页未对齐的兼容问题 */
+.chrome49.el-biz-table .el-pagination button,
+.chrome49.el-biz-table .el-pagination span:not([class*='suffix']) {
+	line-height: 31px;
 }
-// 隐藏biz-table的input__validateIcon校验图标
-.l-biz-table {
-	& .l-biz-pagination {
-		& .l-pagination__ssizes {
-			.l-input__suffix {
-				.l-input__validateIcon {
-					display: none;
-				}
-			}
-		}
-	}
+.chrome49.el-biz-table .el-pagination span.el-pagination__sizes:not([class*='suffix']) {
+	line-height: 26px;
+}
+/* 隐藏分页尺寸选择器的校验图标 */
+.el-biz-table .el-biz-pagination .el-pagination__sizes .el-input__suffix .el-input__validateIcon {
+	display: none;
 }
 </style>

@@ -3,30 +3,29 @@ $-h-fit: 100%;
 $--border-color: #dbdbdb;
 $--border: 1px solid #DBDBDB;
 .base-perm-scope {
-   /*  .hos {
-        margin: 15px 0;
-    } */
-    .interface-hos {
-        // /margin: 15px 0!important;
-    }
 	.tabs-table .hos-tabs {
 		border-bottom: $--border;
 	}
-  .main-tree{
-    margin-left:-10px;
-  }
+	
 	.hos-card {
-        height: calc(100% - 2px);
+    height: calc(100% - 2px);
+		width: calc(100% - 2px) !important;
 		border-color: $--border-color;
+		box-shadow: 0 0 5px 10px $--border-color;
 
 		.hos-card__header {
 			margin-bottom: 0;
 		}
 
 		.hos-card__body {
-			height: 100%;
+			height: calc(100% - 35px);
 			padding: 0;
-			//padding-left: 10px;
+			padding-left: 10px;
+		}
+		.hos-card__body {
+			height: calc(100% - 35px);
+			padding: 0;
+			padding-left: 10px;
 		}
 	}
 	.hos-tabs__content {
@@ -34,13 +33,13 @@ $--border: 1px solid #DBDBDB;
 	}
 	.hos-main {
 		padding: 0;
-		margin-left: 15px;
-		// box-shadow: 0 0 10px $--border-color;
+		margin-left: 10px;
+		box-shadow: 0 0 5px 10px $--border-color;
 
     .userTab .hos-tabs__content {
-        box-sizing: border-box;
-		padding: 10px;
-		background: #fff;
+      box-sizing: border-box;
+			padding: 10px;
+			background: #fff;
     }
 	}
 
@@ -60,10 +59,10 @@ $--border: 1px solid #DBDBDB;
 		height: calc(100% - 64px);
 
     .hos-tree {
-        height: calc(100% - 100px);
-        overflow: auto;
-        }
+      height: calc(100% - 100px);
+      overflow: auto;
     }
+  }
 	.backg {
 		width: 100%;
 		background-color: white;
@@ -82,31 +81,16 @@ $--border: 1px solid #DBDBDB;
 }
 //角色管理
 .margin10 {
-    margin:15px 0;
+    margin:10px 0 0 0;
 }
-/* .margin1 {
+.margin1{
     margin:0 10px 10px 0
-} */
-.roleatt .hos-input-number {
-	width: 94%;
+}
+.user-add-tree .dialog-footer {
+	margin-right: 10px;
 }
 .role-tabs {
-    padding: 0 15px;
-    .tab3 .hos-input__icon {
-        height: 0;
-    }
-    img {
-        top: 40%;
-        left: 50%;
-        position: relative;
-        transform: translate(-50%,-50%);
-    }
-    .no-data {
-        text-align: center;
-        margin-top: 165px;
-        color: #CCCCCC;
-    }   
-	.authtab {
+	.authtab{
 		.hos-tabs--second-level {
 			& + div{
 				padding:0;
@@ -115,59 +99,49 @@ $--border: 1px solid #DBDBDB;
 		.hos-input {
 			margin:0;
 			width: 100%;
-            padding-bottom: 15px;
 		}
 		.hos-main .hos-tabs--second-level .hos-tabs__header {
 			margin: 0;
 		}
 	}
 	&.hos-tabs--system .hos-tabs__header {
-		margin-top: 10px;
+		margin: 10px 10px 0 10px;
 		border-radius: 4px;
 	}
 	.hos-tab-pane {
-		padding: 15px 0 0 0;
+		padding: 10px 0 0 10px;
 		}
 		.hos-input {
+			width: calc(100% - 10px);
 			margin: auto;
-			margin-top: 15px;
+			margin-top: 10px;
+		}
+		.hos-alert {
+			width: 378px;
+			padding: 4px 8px;
 		}
 		.dialog-footer {
 			padding: 20px 10px 20px 0;
 		}
 	.w200 {
 		width: 200px!important;
-		height: 455px;
-		padding: 15px;
-        margin-bottom: 15px;
+		height: 440px;
+		padding: 10px;
 	}
 	.hos-main {
-		padding:0 0 0 15px;
-        overflow: inherit;
-        width: 921px;
+		padding: 0 10px 0 10px;
 	}
 	.hos-aside {
-		border-radius: 5px;
-		box-shadow: 0px 0px 4px 1px #DBDBDB;
-        overflow: hidden;
-	}
-	.hos-tabs__content {
-		overflow: inherit;
-        padding: 0 15px;
-        margin-bottom: 15px;
+		border: $--border;
+		border-radius: 4px;
+		box-shadow: none!important;
 	}
 	.hos-tree {
-        overflow: auto;
-        // height: 100%;
-		height: calc(100% - 5px);
-        margin: 0 -15px;
-        .hos-tree-node__content > .hos-tree-node__expand-icon {
-            margin-left: 9px;
-        }
+		height: calc(100% - 28px);
+    	overflow: auto;
 	}
 	.hos-tabs {
-		height: 40px;
-        margin-bottom: 5px;
+		height: 30px;
 	}
 	.authtab {
 		.hos-aside .role-tabs .hos-input {
@@ -175,12 +149,9 @@ $--border: 1px solid #DBDBDB;
 		}
 		.dialog-footer {
 			margin-left: -210px;
-			//margin-bottom: 10px;
+			margin-bottom: 10px;
 		}
 	}
-    .dialog-footer {
-        padding: 20px 0;
-    }
 	
 }
 
@@ -191,21 +162,13 @@ $--border: 1px solid #DBDBDB;
 }
 .user-tree {
 	height:380px;
-	.hos-tree {
-	margin: 0 -15px;
 	.hos-tree{
-        overflow:auto;
 		height:380px;
-		.hos-tree-node__content > .hos-tree-node__expand-icon {
-            margin-left: 9px;
-        }
+		overflow:auto
 	}
 }
-}
-.role-edit {
-    form + .dialog-footer {
-        padding-top: 5px;
-    }
+
+.role-edit{
     .h89 {
         height: 89px;
     }
@@ -221,13 +184,10 @@ $--border: 1px solid #DBDBDB;
         width: 80px;
         height: 80px;
     }
-    .hos-upload--picture-card {
+    .uoload .hos-upload--picture-card {
 		width: 80px;
 		height: 80px;
 		line-height: 80px;
-		i {
-			margin-top: 25px;
-		}
 	}
 	
 	.disuoload {
@@ -246,22 +206,5 @@ $--border: 1px solid #DBDBDB;
 	.hos-upload-list--picture-card .hos-upload-list__item {
 		width: 80px;
 		height: 80px;
-	}
-}
-.all-view {
-    .hos-form-item__label {
-        color: #666;
-        padding: 0;
-    }
-    .hos-form-item__content {
-        color: #000;
-    }
-}
-
-.post-role {
-	.hos-aside .hos-pagination {
-			.hos-select {
-					width: 90px;
-			}
 	}
 }

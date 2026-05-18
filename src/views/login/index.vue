@@ -103,7 +103,7 @@
 						v-if="loginTypeInfo.password.enable"
 					>
 						<userLogin
-							ref="userLogin"
+							ref="userLoginRef"
 							grantType="password"
 							:showPostType="loginPostVersion"
 							:passwordInfo="loginTypeInfo.password"
@@ -187,16 +187,9 @@
 					:key="index"
 					@click="openCADialog(item)"
 				>
-					<i class="el-icom-u-key-login" v-if="item.loginType === 'UKEY'"></i>
-					<i
-						class="el-icom-code-scanning-login"
-						v-if="item.loginType === 'PHONE'"
-					></i>
-					<i class="el-icom-key" v-if="item.loginType === 'PINPHONE'"></i>
-					<i
-						class="el-icom-facial-recognition"
-						v-if="item.loginType === 'FACE'"
-					></i>
+					<el-icon v-if="caLoginTypeIconMap[item.loginType]">
+						<component :is="caLoginTypeIconMap[item.loginType]" />
+					</el-icon>
 					{{ item.loginName }}
 				</span>
 			</div>
@@ -265,6 +258,7 @@ import i18n from '@/i18n';
 import { computed, getCurrentInstance, onBeforeMount, ref, watch } from 'vue';
 import { openHosBizDialog, setLoginAuthInfo } from '@/composables/useHosBiz';
 import { useLoginSessionStore } from '@/stores/loginSession';
+import { caLoginTypeIconMap } from '@/utils/login-element-icons';
 
 const { proxy } = getCurrentInstance();
 const loginSessionStore = useLoginSessionStore();
@@ -371,7 +365,7 @@ async function getSysAuthInfo() {
 	try {
 		const { code, data } = await proxy.$api('oauth.info');
 		if (code == '200') {
-			authInfo.value = data;
+			authInfo.value = data ?? {};
 			licenseState();
 			setLoginAuthInfo(data);
 		} else {
@@ -382,6 +376,8 @@ async function getSysAuthInfo() {
 		console.log(e);
 	}
 }
+
+const userLoginRef = ref(null);
 
 function getClientId() {
 	const redirect = proxy.$route.query.redirect;
@@ -457,8 +453,13 @@ function licenseState() {
 	} else {
 		currentClientId = authInfo.value.client_id;
 	}
-	proxy.$api('licenseState', { clientId: currentClientId }).then((res) => {
-		if (res && res.code == 200) {
+	if (!currentClientId) {
+		return;
+	}
+	proxy
+		.$api('licenseState', { clientId: currentClientId })
+		.then((res) => {
+		if (res && res.code == 200 && res.data) {
 			const data = res.data;
 			data.licenseText = '';
 			licenseInfo.value = data;
@@ -523,7 +524,10 @@ function licenseState() {
 				)}<span class="install-license">${proxy.$t('更新许可')}</span>。`;
 			}
 		}
-	});
+	})
+		.catch(() => {
+			// License check is optional; avoid uncaught promise when API fails or is aborted.
+		});
 }
 
 function openCADialog(row) {
@@ -701,7 +705,7 @@ onBeforeMount(async () => {
 	loginTypeFn();
 });
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .is-short {
 	width: 350px;
 }

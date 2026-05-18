@@ -90,7 +90,7 @@ $--border: 1px solid $--border-color;
 
 	.hos-biz-toolbar {
 		display: flex;
-		justify-content: flex-end;
+		justify-content: right;
 		padding: 15px 0;
 
 		// & > div {
@@ -103,7 +103,7 @@ $--border: 1px solid $--border-color;
 
 		.hos-biz-toolbar-right {
 			display: flex;
-			justify-content: flex-end;
+			justify-content: right;
 			// flex: 0 0 33.3333%;
 			min-width: 500px;
 		}

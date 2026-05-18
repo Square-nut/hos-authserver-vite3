@@ -134,7 +134,7 @@
 							<img src="@/assets/images/ca/fake.png" />
 							<div class="mask">
 								<span>{{ $t('二维码生成错误') }}</span>
-								<i @click="refreshQR" class="el-icom-big-refresh"></i>
+								<el-icon class="refresh-qr" @click="refreshQR"><Refresh /></el-icon>
 							</div>
 						</div>
 						<!-- <span>请使用<span class="colorF59">北京CA的APP</span>扫码登录</span> -->
@@ -221,9 +221,10 @@ import postSelectTable from './components/post-select-table.vue';
 import postDialog from './post-dialog.vue';
 import { useUserStore } from '@/stores/user';
 import { closeHosBizDialog, openHosBizDialog } from '@/composables/useHosBiz';
+import { Refresh } from '@element-plus/icons-vue';
 export default {
 	name: 'CA',
-	components: { postSelect, postSelectTable },
+	components: { postSelect, postSelectTable, Refresh },
 	props: {
 		// 获取登录类型和方式
 		info: {

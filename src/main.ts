@@ -1,6 +1,17 @@
 import './assets/main.css'
+import './assets/login-page-layout.css'
+import './assets/style/login-hos-theme.css'
+import './assets/style/element-biz-table.css'
+
+if (import.meta.env.VITE_APP_THEME_STYLE === '1') {
+  import('./assets/style/hos/index.scss')
+} else {
+  import('./assets/style/simple/index.scss')
+}
 
 import { createApp } from 'vue'
+import HosBiz from '@/components/hos-biz'
+import elementAliases from '@/plugins/element-aliases'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
@@ -28,5 +39,7 @@ app.use(router)
 app.use(i18n)
 
 app.use(ElementPlus, { size: 'small', zIndex: 3000, locale: zhCn, })
+app.use(elementAliases)
+app.use(HosBiz)
 
 app.mount('#app')

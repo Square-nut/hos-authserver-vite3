@@ -25,14 +25,13 @@
 						>
 						</el-option>
 					</el-select>
-					<i class="el-icon-s-home"></i>
+					<el-icon><House /></el-icon>
 				</el-form-item>
 			</el-col>
 
 			<el-col :span="24">
 				<el-form-item prop="loginName">
 					<el-input
-						prefix-icon="el-icom-person"
 						ref="loginName"
 						v-model="otpLoginForm.loginName"
 						:placeholder="$t('请输入手机号')"
@@ -41,7 +40,11 @@
 						v-focus
 						@keyup.enter="keyEnterLogin('smsCode')"
 						@change="changeLoginName"
-					/>
+					>
+						<template #prefix>
+							<el-icon><User /></el-icon>
+						</template>
+					</el-input>
 				</el-form-item>
 			</el-col>
 			<!--短信验证码的区域-->
@@ -53,10 +56,12 @@
 								v-model="otpLoginForm.smsCode"
 								ref="smsCode"
 								:placeholder="$t('请输入验证码')"
-								prefix-icon="el-icom-select-grant"
 								type="text"
 								@keyup.enter="keyEnterLogin"
 							>
+								<template #prefix>
+									<el-icon><Message /></el-icon>
+								</template>
 							</el-input>
 							<span class="get-opt-code" @click="getCode()">{{
 								!btnShow ? `${count}${$t('s后重新获取')}` : $t('获取验证码')
@@ -70,13 +75,15 @@
 				<el-form-item prop="captchaCode">
 					<el-col :span="16">
 						<el-input
-							prefix-icon="el-icom-select-grant"
 							v-model="otpLoginForm.captchaCode"
 							ref="captchaCode"
 							:placeholder="$t('请输入图形验证码')"
 							type="text"
 							@keyup.enter="keyEnterLogin"
 						>
+							<template #prefix>
+								<el-icon><Picture /></el-icon>
+							</template>
 						</el-input>
 					</el-col>
 					<el-col :span="8" class="VCode">
@@ -146,9 +153,10 @@ import postSelectTable from './components/post-select-table.vue';
 import forgetPassword from './forgetPassword.vue';
 import { useUserStore } from '@/stores/user';
 import { openHosBizDialog } from '@/composables/useHosBiz';
+import { House, Message, Picture, User } from '@element-plus/icons-vue';
 export default {
 	name: 'otplogin',
-	components: { postSelect, postSelectTable },
+	components: { postSelect, postSelectTable, User, Message, Picture, House },
 	directives: {
 		focus: {
 			// 指令的定义

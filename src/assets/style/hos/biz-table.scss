@@ -1,0 +1,60 @@
+.hos-biz-table {
+  height: 100%;
+  &.flex {
+    display: flex;
+    flex-flow: column;
+  }
+  .hos-biz-form {
+    padding: 15px;
+    padding-bottom: 0;
+    background-color: #fff;
+  }
+  .hos-biz-toolbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+
+    & > div {
+      flex: 1;
+    }
+
+    .hos-biz-toolbar-right {
+      display: flex;
+      justify-content: right;
+
+    }
+
+    .top-toolbar-table-setting {
+      
+    }
+  }
+  .hos-table {
+    border-radius: 0;
+  }
+}
+
+.tabs-table {
+  // tabs 中 biz-table的适配
+  .hos-tabs {
+    height: 100%;
+    
+    .hos-tabs__header {
+      margin-bottom: 0;
+    }
+
+    .hos-tabs__content {
+      height: calc(100% - 40px);
+    
+      .hos-tab-pane {
+        height: 100%;
+      }
+    }  
+  }
+
+}
+
+.calc-sign{
+  height: calc(100% - 80px);
+  box-sizing: border-box;
+  // overflow: auto;
+}
