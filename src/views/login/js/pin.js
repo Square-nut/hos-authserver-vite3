@@ -1,4 +1,5 @@
 import { Base64 } from 'js-base64'
+import { fetchAuthPinPhone } from '@/api/ca'
 export const pinMixinData = {
   data(){
     return{
@@ -33,7 +34,7 @@ export const pinMixinData = {
         accountCode:this.pinForm.accountCode, // 用户名
         passwordPin: Base64.encode(this.pinForm.passwordPin), // PIN码
       }
-      this.$api('ca.authPinPhone', upData).then((res) => {
+      fetchAuthPinPhone(upData).then((res) => {
         if(res && res.code == "200"){
           this.pinPhoneToken = res.data.phoneToken
 

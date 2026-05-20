@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import apiRequest from '@/axios'
+import { login as loginApi, logout as logoutApi } from '@/api/login'
+import { fetchWebsysCmd } from '@/api/websys'
 import i18n from '@/i18n'
 import { useDeviceStore } from '@/stores/device'
 import { lsGet, lsRemove, lsSet } from '@/utils/ls'
@@ -123,7 +124,7 @@ export const useUserStore = defineStore('user', {
       const mac = deviceStore.mac || localStorage.getItem(USER_CONSTANT.Mac)
       if (!ip || !mac) {
         try {
-          const cmdResponse = (await apiRequest('websys.cmd')) as any
+          const cmdResponse = (await fetchWebsysCmd()) as any
           if (String(cmdResponse?.status) === '200') {
             const config = JSON.parse(cmdResponse.rtn)
             setLocal(USER_CONSTANT.IP, config.IP)
@@ -140,7 +141,7 @@ export const useUserStore = defineStore('user', {
         }
       }
 
-      const response = (await apiRequest('login', loginForm, headers)) as any
+      const response = (await loginApi(loginForm, headers)) as any
       if (response?.code !== '200') {
         throw response
       }
@@ -189,7 +190,7 @@ export const useUserStore = defineStore('user', {
 
     async Logout(_params: Record<string, unknown> = {}) {
       try {
-        await apiRequest('logout')
+        await logoutApi()
       } finally {
         this.resetUserState()
         clearLoginCache()

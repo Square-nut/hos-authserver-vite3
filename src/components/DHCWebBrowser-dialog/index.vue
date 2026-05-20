@@ -1,190 +1,137 @@
 <template>
 	<!-- 下载医为客户端 S -->
 	<el-dialog
-		:title="$t('安装医为客户端基础环境')"
-		:visible.sync="DHCWebBrowser"
+		v-model="dbdialogStatus"
+		:title="title1"
 		width="45%"
-		:append-to-body="true"
-		custom-class="DHCWebBrowser-dialog"
+		append-to-body
+		class="DHCWebBrowser-dialog"
 		:close-on-click-modal="false"
 		:close-on-press-escape="false"
 		:show-close="true"
 	>
-		<el-row>
-			<el-col :span="16"
-				><div class="grid-content bg-purple text">
+		<el-row :gutter="20">
+			<el-col :span="16">
+				<div class="grid-content bg-purple text">
 					<div>
-						{{ $t('1. 需要安装医为客户端，请点击按钮下载最新安装包！') }}
+						{{ title2 }}
 						<div class="downBut">
-							<el-button type="primary" @click="download" size="large">
-								{{ $t('点击下载安装') }}</el-button
-							>
+							<el-button type="primary" size="large" @click="download">
+								{{ t('点击下载安装') }}
+							</el-button>
 						</div>
 					</div>
 					<div>
-						{{ $t('2. 安装已下载好的msi安装包，') }}
-						{{ $t('或 "我曾经安装过" ,点击按钮运行管理程序。') }}
+						{{ t('2. 安装已下载好的医为客户端，') }}
+						{{ t('或 "我曾经安装过" ,点击按钮运行管理程序。') }}
 					</div>
 					<div class="downBut">
-						<el-button
-							type="success"
-							size="large"
-							@click="openWebsysServerSetup"
-							>{{ $t('运行管理程序') }}</el-button
-						>
+						<el-button type="success" size="large" @click="openWebsysServerSetup">
+							{{ t('运行管理程序') }}
+						</el-button>
 					</div>
-					<div>{{ $t('成功启动客户端管理程序后,重新进入登录界面即可。') }}</div>
-				</div></el-col
-			>
-			<el-col :span="8"
-				><div class="grid-content bg-purple-light">
-					<img src="@/assets/images/dhcDialog.png" /></div
-			></el-col>
+					<div>{{ t('成功启动客户端管理程序后,重新进入登录界面即可。') }}</div>
+				</div>
+			</el-col>
+			<el-col :span="8">
+				<div class="grid-content bg-purple-light">
+					<img src="@/assets/images/dhcDialog.png" alt="" />
+				</div>
+			</el-col>
 		</el-row>
 	</el-dialog>
-	<!-- 下载医为客户端 S -->
+	<!-- 下载医为客户端 E -->
 </template>
 
-<script>
+<script setup lang="ts">
 import UserConstant from '@/constant/user-constant';
-let CmdShell = null;
+import { returnGlobalValue } from '@/utils';
+import { ls } from '@/utils/ls';
+import { useSysStore } from '@/stores/sys';
+import { storeToRefs } from 'pinia';
+import { watch, ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { fetchWebsysCmd } from '@/api/websys';
 
-const initializeCmdShell = async () => {
-	let platform = window.navigator.platform;
-	let windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
+const { t } = useI18n();
+const router = useRouter();
 
-	if (windowsPlatforms.includes(platform)) {
-	} else if (/Linux/.test(platform)) {
-		const module = await import('@/utils/websys.addins.linux.js');
-		CmdShell = module; // 将模块赋值给 CmdShell
+defineProps({
+	status: {
+		type: Number,
+		default: 0,
+	},
+});
+
+const sysStore = useSysStore();
+const { showDbdialog } = storeToRefs(sysStore);
+const dbdialogStatus = ref(false);
+const hideMedical = ref(returnGlobalValue('VUE_APP_HIDE_MEDICAL'));
+const title1 = ref('');
+const title2 = ref('');
+
+watch(showDbdialog, (newVal) => {
+	dbdialogStatus.value = newVal;
+});
+
+onMounted(() => {
+	if (hideMedical.value) {
+		title1.value = t('安装客户端基础环境');
+		title2.value = t('1. 需要安装客户端，请点击按钮下载最新安装包！');
 	} else {
-		console.error('无法确定当前系统类型');
-		throw new Error('未知系统类型');
+		title1.value = t('安装医为客户端基础环境');
+		title2.value = t('1. 需要安装医为客户端，请点击按钮下载最新安装包！');
 	}
+});
+
+type WebsysCmdResponse = {
+	status?: string | number;
+	rtn?: string;
 };
 
-export default {
-	name: 'DHCWebBrowser',
-	props: ['status'],
-	data() {
-		return {
-			DHCWebBrowser: false,
-		};
-	},
-	created() {
-		let platform = window.navigator.platform;
-		let windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
-		if (windowsPlatforms.includes(platform)) {
-			// windows系统
-			this.getClientConfig().then((status) => {
-				if (status != 200) {
-					this.DHCWebBrowser = true;
-				}
-			});
-		} else if (/Linux/.test(platform)) {
-			debugger;
-			// linux系统
-			this.initializeApplication();
-		} else {
-			console.error('无法确定当前系统类型');
-			throw new Error('未知系统类型');
-		}
-	},
-	mounted() {},
-	computed: {},
-	watch: {},
-	methods: {
-		async initializeApplication() {
-			await initializeCmdShell();
-			// 可在此处调用其它方法，例如:
-			CmdShell.default.CmdShell.notReturn = 0;
-			var ip = '';
-			var hostName = '';
-			var mac = '';
-			var state = 404;
+function getClientConfig() {
+	return new Promise<string | number>((resolve) => {
+		fetchWebsysCmd()
+			.then((res) => {
+				const { status, rtn } = res as WebsysCmdResponse;
+				if (String(status) !== '200' || !rtn) return resolve(500);
+				const config = JSON.parse(rtn) as {
+					IP?: string;
+					HostName?: string;
+					Mac?: string;
+				};
+				if (!config) return resolve(500);
+				ls.set(UserConstant.IP, config.IP);
+				ls.set(UserConstant.HostName, config.HostName);
+				ls.set(UserConstant.Mac, config.Mac);
+				resolve(status ?? 200);
+			})
+			.catch(() => resolve(500));
+	});
+}
 
-			// 获得 IP,MAC,计算机名
-			CmdShell.default.CmdShell.GetConfig(function (data) {
-				state = 200;
-				if ('string' == typeof data) {
-					var json = JSON.parse(data);
-					ip = json.IP;
-					hostName = json.HostName;
-					mac = json.Mac;
-				} else {
-					ip = data.IP;
-					hostName = data.HostName;
-					mac = data.Mac;
-				}
-			});
+function download() {
+	const a = document.createElement('a');
+	a.href = '/static/WebsysServerSetup.msi';
+	a.download = 'WebsysServerSetup.msi';
+	a.click();
+	a.remove();
+}
 
-			setTimeout(() => {
-				window.postMessage({ DHCWebBrowserStatus: state }, '*');
-				this.$ls.set(UserConstant.IP, ip);
-				this.$ls.set(UserConstant.Mac, mac);
-				this.$ls.set(UserConstant.HostName, hostName);
-			}, 500);
-		},
-		getClientConfig() {
-			return new Promise((resolve, reject) => {
-				this.$api('websys.cmd')
-					.then((res) => {
-						if (res.status == '200') {
-							var rtn = res.rtn;
-							var config = JSON.parse(rtn);
-							if (config) {
-								this.$ls.set(UserConstant.IP, config.IP);
-								this.$ls.set(UserConstant.HostName, config.HostName);
-								this.$ls.set(UserConstant.Mac, config.Mac);
-								resolve(res.status);
-							}
-						}
-						resolve(500);
-					})
-					.catch((error) => {
-						resolve(500);
-					});
-			});
-		},
-		download() {
-			let a = document.createElement('a');
-			a.href = '/static/WebsysServerSetup.msi';
-			a.download = 'WebsysServerSetup.msi';
-			a.click();
-			a.remove();
-		},
-		openWebsysServerSetup() {
-			location.href = 'RunWebsysServer://1';
-			this.$router.go(0);
-			return false;
-		},
-	},
-};
+function openWebsysServerSetup() {
+	location.href = 'RunWebsysServer://1';
+	router.go(0);
+}
+
+defineExpose({
+	getClientConfig,
+});
 </script>
 <style lang="scss">
-.DHCWebBrowser-dialog {
+.DHCWebBrowser-dialog.el-dialog {
 	.el-dialog__body {
-		padding: 0 40px 40px 40px !important;
-		line-height: 40px;
-		.text {
-			font-weight: 400;
-			color: #000000;
-		}
-		.downBut {
-			margin-left: 100px;
-		}
-		.el-button {
-			margin: 20px 0;
-		}
-	}
-	.el-dialog__header {
-		text-align: center;
-		padding: 40px 15px !important;
-		border-bottom: 0px solid #e2e2e2;
-	}
-	.el-dialog__title {
-		font-size: 24px;
-		font-weight: bold;
+		overflow: hidden !important;
 	}
 }
 </style>

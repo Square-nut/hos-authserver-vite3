@@ -212,6 +212,7 @@
 </template>
 <script>
 import QRCode from 'qrcode';
+import { fetchQRData, fetchQRResultData } from '@/api/ca';
 import { ukMixinData } from './js/uk';
 import { pinMixinData } from './js/pin';
 import AuthConstant from '@/constant/auth-constant';
@@ -432,7 +433,7 @@ export default {
 				venderCode: this.info.venderCode, // 厂商代码
 				loginType: this.info.loginType, // 签名方式代码
 			};
-			this.$api('ca.getQRData', upData)
+			fetchQRData(upData)
 				.then((res) => {
 					if (res && res.code == '200') {
 						if (res.data.qrType == 4) {
@@ -480,7 +481,7 @@ export default {
 				loginType: this.info.loginType, // 签名方式代码
 				signGUID: this.QRcodeInfo.signGUID, // 二维码唯一标识
 			};
-			this.$api('ca.getQRResultData', upData).then((res) => {
+			fetchQRResultData(upData).then((res) => {
 				if (res && res.code == '200') {
 					// signStatus = 'TOSIGN' 继续轮询结果，否则停止并显示遮罩
 					if (

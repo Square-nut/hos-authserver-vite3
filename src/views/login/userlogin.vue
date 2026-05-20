@@ -1,8 +1,8 @@
 <template>
 	<el-form
-		ref="loginForm"
+		ref="loginFormRef"
 		:model="loginForm"
-		:rules="theme == 1 ? loginRules : {}"
+		:rules="theme == '1' ? loginRules : {}"
 		class="login-form"
 		auto-complete="on"
 		label-position="left"
@@ -10,10 +10,11 @@
 		<el-col :span="24" v-if="openTenant">
 			<el-form-item prop="tenantId">
 				<el-select
+					ref="tenantSelectRef"
 					@change="changeTenant"
 					class="tenantSelect"
 					popper-class="tenantPop"
-					:placeholder="$t('请选择租户')"
+					:placeholder="t('请选择租户')"
 					v-model="loginForm.tenantId"
 				>
 					<el-option
@@ -31,10 +32,10 @@
 		<el-col :span="24">
 			<el-form-item prop="loginName">
 				<el-input
-					ref="loginName"
+					ref="loginNameRef"
 					v-model="loginForm.loginName"
 					:placeholder="
-						grantType != 'AD' ? passwordInfo.accountInfo : $t('AD账号')
+						grantType != 'AD' ? passwordInfo.accountInfo : t('AD账号')
 					"
 					name="loginName"
 					type="text"
@@ -51,11 +52,11 @@
 		<el-col :span="24">
 			<el-form-item prop="password">
 				<el-input
+					ref="passwordRef"
 					key="password"
-					ref="password"
 					v-model="loginForm.password"
 					:type="passwordType"
-					:placeholder="$t('密码')"
+					:placeholder="t('密码')"
 					name="password"
 					@keyup.enter="keyEnterLogin('captchaCode')"
 				>
@@ -74,8 +75,7 @@
 				<el-col :span="16" style="padding-right: 15px">
 					<el-input
 						v-model="loginForm.captchaCode"
-						ref="captchaCode"
-						:placeholder="$t('请输入图形验证码')"
+						:placeholder="t('请输入图形验证码')"
 						type="text"
 						@keyup.enter="keyEnterLogin"
 					>
@@ -96,7 +96,7 @@
 			<el-form-item prop="post">
 				<postSelect
 					v-if="showPostType == 'professional'"
-					ref="userLoginSelect_post"
+					ref="userLoginSelectPostRef"
 					:type="loginForm.loginName === 'admin' ? '' : 'id'"
 					:personId="personId"
 					:disabled="!personId"
@@ -105,18 +105,18 @@
 				></postSelect>
 				<post-select-table
 					v-if="showPostType == 'wrought'"
-					ref="userLoginSelectTable_post"
+					ref="userLoginSelectTablePostRef"
 					uid="userLoginSelectTable_post"
 					v-model="loginForm.post"
 					:disabled="!personId"
-					:placeholder="$t('点击登录按钮获取人员定岗数据')"
+					:placeholder="t('点击登录按钮获取人员定岗数据')"
 					:type="loginForm.loginName === 'admin' ? '' : 'id'"
 					:personId="personId"
 					@change="changePost"
 				></post-select-table>
 			</el-form-item>
 		</el-col>
-		<div v-if="theme == 0 && loginErr" class="loginErrBox">
+		<div v-if="theme == '0' && loginErr" class="loginErrBox">
 			<span>{{ loginErr }}</span>
 		</div>
 		<el-col :span="24">
@@ -126,7 +126,7 @@
 					type="primary"
 					style="width: 100%; margin-bottom: 20px"
 					@click="userHandleLogin(true)"
-					>{{ $t('登录') }}
+					>{{ t('登录') }}
 				</el-button>
 				<div
 					class="Password_settings"
@@ -136,14 +136,14 @@
 						grantType != 'AD'
 					"
 				>
-					<a @click="handleForgetPass">{{ $t('忘记密码？') }}</a>
-					<a @click="handleForgetPass">{{ $t('找回密码') }}</a>
+					<a @click="handleForgetPass">{{ t('忘记密码？') }}</a>
+					<a @click="handleForgetPass">{{ t('找回密码') }}</a>
 				</div>
 			</el-form-item>
 		</el-col>
 		<!-- 忘记密码 -->
 		<el-biz-dialog
-			:title="$t('找回密码')"
+			:title="t('找回密码')"
 			uid="forgetPassDialog"
 			:append-to-body="true"
 			:close-on-click-modal="false"
@@ -152,8 +152,10 @@
 	</el-form>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ElMessage } from 'element-plus';
 import { isOpenDb } from '@/utils/is-open-db';
+import { useI18n } from 'vue-i18n';
 import postSelect from './components/post-select.vue';
 import postSelectTable from './components/post-select-table.vue';
 import forgetPassword from './forgetPassword.vue';
@@ -161,311 +163,357 @@ import { openHosBizDialog } from '@/composables/useHosBiz';
 import { Picture, View } from '@element-plus/icons-vue';
 import AuthConstant from '@/constant/auth-constant';
 import { useUserStore } from '@/stores/user';
+import { loginApi } from '@/api/login';
+import cryptUtil from '@/utils/crypt/index.js';
+import { ref, watch, onMounted, reactive, nextTick } from 'vue';
+import type { FormInstance, FormRules, InputInstance } from 'element-plus';
 
-export default {
-	name: 'userlogin',
-	components: { postSelect, postSelectTable, Picture, View },
-	props: {
-		// 账号密码登录
-		passwordInfo: {
-			type: Object,
-			default: () => {},
-		},
-		// 登录配置
-		loginPageInfo: {
-			type: Object,
-			default: () => {},
-		},
-		grantType: {
-			type: String,
-			required: true,
-		},
-		// 岗位组件类型 true：下拉选，false：表格
-		showPostType: {
-			type: String,
-		},
-		toggleLoading: {
-			type: Number,
-			default: 0,
-		},
+const loginFormRef = ref<FormInstance>();
+const userLoginSelectPostRef = ref<InstanceType<typeof postSelect> | null>(
+	null
+);
+const userLoginSelectTablePostRef = ref<InstanceType<
+	typeof postSelectTable
+> | null>(null);
+const loginNameRef = ref<InputInstance | null>(null);
+const passwordRef = ref<InputInstance | null>(null);
+
+const { t } = useI18n();
+const props = defineProps({
+	passwordInfo: {
+		type: Object,
+		default: () => {},
 	},
-	directives: {
-		focus: {
-			mounted(el) {
-				el.querySelector('input')?.focus();
-			},
-		},
+	loginPageInfo: {
+		type: Object,
+		default: () => {},
 	},
-	data() {
-		///校验是否是手机号或者邮箱
-		return {
-			post: '',
-			personId: '',
-			postChainId: '',
-			passwordType: 'password',
-			loginErr: '', // 错误信息
-			theme:
-				import.meta.env.VITE_APP_THEME_STYLE, // 当前ui样式  hos / 极简
-			openTenant: false, //是否开启租户
-			openCaptcha: false, //开启图形验证码
-			imgUrl: '', //图形验证码,给个默认的图片
-			originalOpenCaptcha: false,
-			loginForm: {
-				grantType: this.grantType,
-				loginName: '',
-				password: '',
-				tenantId: '',
-				isRecordLogin: true,
-				captchaCode: '',
-				grantChainId: '',
-				captchaUUID: '', // 短信验证码用
-				selectRoleId: '',
-				post: '',
-			},
-			loginRules: {
-				loginName: [
-					{
-						required: true,
-						trigger: 'change',
-						message: this.$t('账号不能为空'),
-					},
-				],
-				password: [
-					{
-						required: true,
-						trigger: 'change',
-						message: this.$t('密码不能为空'),
-					},
-				],
-				///租户id
-				tenantId: [
-					{
-						required: true,
-						trigger: 'blur',
-						message: this.$t('租户不能为空'),
-					},
-				],
-				captchaCode: [
-					{
-						required: false,
-						trigger: 'blur',
-						message: this.$t('图形验证码不能为空'),
-					},
-				],
-				post: [
-					{
-						required: true,
-						trigger: 'blur',
-						validator: (rule, value, callback) => {
-							if (this.postChainId) {
-								if (!value) {
-									if (this.showPostType == 'wrought') {
-										callback(new Error(this.$t('人员定岗数据不能为空')));
-									} else {
-										callback(new Error(this.$t('岗位单元不能为空')));
-									}
-								} else {
-									callback();
-								}
-							} else {
-								callback();
-							}
-						},
-					},
-				],
-			},
-			loading: false,
-			tenantData: [],
-			inputValueChanged: false,
-			postPlaceholder: this.$t('点击登录按钮后获取岗位单元'),
-		};
+	grantType: {
+		type: String,
+		required: true,
 	},
-	watch: {
-		'loginForm.loginName': function (newVal, oldval) {
-			this.inputValueChanged = newVal !== oldval;
-		},
-		'loginForm.password': function (newVal, oldval) {
-			this.inputValueChanged = newVal !== oldval;
-		},
-		toggleLoading: function (val) {
-			this.loading = false;
-		},
+	showPostType: {
+		type: String,
 	},
-	created() {},
-	methods: {
-		togglePwd() {
-			this.passwordType =
-				this.passwordType === 'password' ? 'text' : 'password';
-		},
-		keyEnterLogin(name) {
-			///键盘enter事件
-			if (this.$refs[name]) {
-				this.$refs[name].focus();
-			} else {
-				this.userHandleLogin(true);
-			}
-		},
-		///登录操作
-		userHandleLogin(isLogin) {
-			this.$refs.loginForm.validate((valid) => {
-				if (valid) {
-					if (this.theme == 0) {
-						if (!this.loginForm.loginName) {
-							this.loginErr = this.$t('账号不能为空');
-							return false;
-						}
-						if (!this.loginForm.password) {
-							this.loginErr = this.$t('密码不能为空');
-							return false;
-						}
-						if (this.openCaptcha) {
-							if (!this.loginForm.captchaCode) {
-								this.loginErr = this.$t('图形验证码不能为空');
-								return false;
-							}
-						}
-						if (this.postChainId) {
-							if (!this.loginForm.post) {
-								this.loginErr = this.$t('岗位单元不能为空');
-								return false;
-							}
-						}
-					}
-					// 登录之前判断是否开启弹窗.如果开启,但获取不到IP/MAC,则提示错误信息
-					// if (!isOpenDb(this.loginForm.loginName)) return false;
-					let upData = Object.assign({}, this.loginForm, {
-						password: this.$m.crypt(this.loginForm.password),
-					});
-					if (this.postChainId) {
-						upData.postChainId = this.postChainId;
-					}
-					this.loading = true;
-					useUserStore().Login(upData)
-						.then((res) => {
-							// 登录成功跳转
-							if (res && res.code == 200) {
-								// 首次点击登录按钮，获取岗位信息并展示下拉列表
-								if (res.data.personId && this.showPostType != 'simple') {
-									this.loading = false;
-									this.postPlaceholder = this.$t('请选择岗位单元');
-									this.personId = res.data.personId;
-									this.postChainId = res.data.postChainId;
-									if (this.showPostType == 'professional') {
-										// 下拉选组件
-										this.$nextTick(() => {
-											this.$refs.userLoginSelect_post.getPostPage();
-										});
-									}
-									if (this.showPostType == 'wrought') {
-										// 表格组件
-										this.$nextTick(() => {
-											this.$refs.userLoginSelectTable_post.refresh();
-										});
-									}
-								} else if (res.data.againAuthType) {
-									// 需要二次认证
-									this.loading = false;
-									let grantChainId = res.data.grantChainId;
-									let authType = res.data.againAuthType;
-									let account = res.data.accountCode;
-									let caData = res.data.caData;
-									let phone = res.data.phone;
-									this.$emit(
-										'openTwoAuthDialog',
-										grantChainId,
-										authType,
-										account,
-										caData,
-										phone
-									);
-								} else {
-									// 不需要二次认证
-									this.$emit('loginSucessHandler');
-								}
-							}
-						})
-						.catch((err) => {
-							console.log(err);
-							this.loading = false;
-							// 开启图形验证码
-							if (err.code == '101-002-004-020') {
-								this.openCaptcha = true;
-								this.getCaptcha();
-							}
-							// 刷新图形验证码
-							if (
-								err.code == '101-002-004-004' ||
-								err.code == '101-002-004-005'
-							) {
-								this.getCaptcha();
-							}
-							if (!err.code.includes('101-002-005-')) {
-								this.$message.error(err.msg);
-							}
-							// 强制修改密码弹窗
-							if (err.code.includes(AuthConstant.forcedJumpSetPassword)) {
-								this.$emit('forcedJumpSetPassword', err);
-							}
-						});
-				} else {
-					console.log('error submit!!');
-					return false;
-				}
-			});
-		},
-		// 获取图形验证码
-		getCaptcha() {
-			this.$api('getCaptcha')
-				.then((response) => {
-					if (response && response.code == 200) {
-						this.imgUrl = 'data:image/gif;base64,' + response.data.img;
-						this.loginForm.captchaUUID = response.data.uuid;
-					} else {
-						///提示错误信息
-						this.$message.error(this.$t('获取验证码失败，请重新再试！'));
-					}
-				})
-				.catch((error) => {
-					console.log(error);
-				});
-		},
-		changeTenant(val) {
-			this.loginForm.tenantId = val;
-			this.reset();
-		},
-		// 忘记密码
-		handleForgetPass() {
-			openHosBizDialog({
-				component: forgetPassword,
-				_uid: 'forgetPassDialog',
-				ref: 'forgetPassDialog',
-				props: {},
-			});
-		},
-		changeLoginName() {
-			this.reset();
-		},
-		rowDisabledMethod(row) {
-			return row.activity === false;
-		},
-		reset() {
-			this.postPlaceholder = this.$t('点击登录按钮后获取岗位单元');
-			this.personId = '';
-			this.postChainId = '';
-			this.loginForm.post = '';
-			if (this.$refs.userLoginSelect_post)
-				this.$refs.userLoginSelect_post.clear();
-			if (this.$refs.userLoginSelectTable_post)
-				this.$refs.userLoginSelectTable_post.clear();
-		},
-		changePost(id, post) {
-			this.loginForm.post = post;
-		},
-		openLoginBtn() {
-			this.loading = false;
-		},
+	toggleLoading: {
+		type: Number,
+		default: 0,
+	},
+});
+
+const emit = defineEmits<{
+	(
+		e: 'openTwoAuthDialog',
+		grantChainId: string,
+		authType: string,
+		account: string,
+		caData: unknown,
+		phone: string
+	): void;
+	(e: 'loginSucessHandler'): void;
+	(e: 'forcedJumpSetPassword', err: unknown): void;
+}>();
+
+const vFocus = {
+	mounted(el: HTMLElement) {
+		el.querySelector('input')?.focus();
 	},
 };
+
+const postChainId = ref('');
+const passwordType = ref('password');
+const loginErr = ref('');
+const theme = ref(import.meta.env.VITE_APP_THEME_STYLE);
+const openTenant = ref(false);
+const openCaptcha = ref(false);
+const imgUrl = ref('');
+const originalOpenCaptcha = ref(false);
+
+interface LoginForm {
+	grantType: string;
+	loginName: string;
+	password: string;
+	tenantId: string;
+	isRecordLogin: boolean;
+	captchaCode: string;
+	grantChainId: string;
+	captchaUUID: string;
+	selectRoleId: string;
+	post: string;
+}
+
+/** 提交登录接口时的表单（含二次选岗后的 postChainId） */
+interface LoginSubmitPayload extends LoginForm {
+	postChainId?: string;
+}
+
+const loginForm = ref<LoginForm>({
+	grantType: props.grantType,
+	loginName: '',
+	password: '',
+	tenantId: '',
+	isRecordLogin: true,
+	captchaCode: '',
+	grantChainId: '',
+	captchaUUID: '', // 短信验证码用
+	selectRoleId: '',
+	post: '',
+});
+
+const loginRules = reactive<FormRules<LoginForm>>({
+	loginName: [
+		{
+			required: true,
+			trigger: 'change',
+			message: t('账号不能为空'),
+		},
+	],
+	password: [
+		{
+			required: true,
+			trigger: 'change',
+			message: t('密码不能为空'),
+		},
+	],
+	///租户id
+	tenantId: [
+		{
+			required: true,
+			trigger: 'blur',
+			message: t('租户不能为空'),
+		},
+	],
+	captchaCode: [
+		{
+			required: false,
+			trigger: 'blur',
+			message: t('图形验证码不能为空'),
+		},
+	],
+	post: [
+		{
+			required: true,
+			trigger: 'blur',
+			validator: (rule: any, value: string, callback: any) => {
+				if (postChainId.value) {
+					if (!value) {
+						if (props.showPostType == 'wrought') {
+							callback(new Error(t('人员定岗数据不能为空')));
+						} else {
+							callback(new Error(t('岗位单元不能为空')));
+						}
+					} else {
+						callback();
+					}
+				} else {
+					callback();
+				}
+			},
+		},
+	],
+});
+const loading = ref(false);
+interface TenantData {
+	tenantId: string;
+	name: string;
+}
+const tenantData = ref<TenantData[]>([]);
+const inputValueChanged = ref(false);
+const postPlaceholder = ref(t('点击登录按钮后获取岗位单元'));
+
+watch(
+	() => loginForm.value.loginName,
+	(newVal, oldval) => {
+		inputValueChanged.value = newVal !== oldval;
+	}
+);
+watch(
+	() => loginForm.value.password,
+	(newVal, oldVal) => {
+		inputValueChanged.value = newVal !== oldVal;
+	}
+);
+watch(
+	() => props.toggleLoading,
+	(val) => {
+		loading.value = false;
+	}
+);
+onMounted(() => {});
+function togglePwd() {
+	passwordType.value = passwordType.value === 'password' ? 'text' : 'password';
+}
+function keyEnterLogin(name: string) {
+	///键盘enter事件
+	const fieldRef =
+		name === 'password'
+			? passwordRef
+			: name === 'loginName'
+				? loginNameRef
+				: null;
+	if (fieldRef?.value) {
+		fieldRef.value.focus();
+	} else {
+		userHandleLogin(true);
+	}
+}
+
+const personId = ref('');
+///登录操作
+function userHandleLogin(isLogin: boolean) {
+	loginFormRef.value?.validate((valid) => {
+		if (valid !== true) {
+			console.log('error submit!!');
+			return;
+		}
+		if (theme.value == '0') {
+			if (!loginForm.value.loginName) {
+				loginErr.value = t('账号不能为空');
+				return;
+			}
+			if (!loginForm.value.password) {
+				loginErr.value = t('密码不能为空');
+				return;
+			}
+			if (openCaptcha.value) {
+				if (!loginForm.value.captchaCode) {
+					loginErr.value = t('图形验证码不能为空');
+					return;
+				}
+			}
+			if (postChainId.value) {
+				if (!loginForm.value.post) {
+					loginErr.value = t('岗位单元不能为空');
+					return;
+				}
+			}
+		}
+		// 登录之前判断是否开启弹窗.如果开启,但获取不到IP/MAC,则提示错误信息
+		// if (!isOpenDb(loginForm.loginName)) return;
+		const upData: LoginSubmitPayload = {
+			...loginForm.value,
+			password: cryptUtil.crypt(loginForm.value.password),
+			...(postChainId.value ? { postChainId: postChainId.value } : {}),
+		};
+		loading.value = true;
+		useUserStore()
+			.Login(upData)
+			.then((res) => {
+				// 登录成功跳转
+				if (res && res.code == 200) {
+					// 首次点击登录按钮，获取岗位信息并展示下拉列表
+					if (res.data.personId && props.showPostType != 'simple') {
+						loading.value = false;
+						postPlaceholder.value = t('请选择岗位单元');
+						personId.value = res.data.personId;
+						postChainId.value = res.data.postChainId;
+						if (props.showPostType == 'professional') {
+							// 下拉选组件
+							nextTick(() => {
+								userLoginSelectPostRef.value?.getPostPage();
+							});
+						}
+						if (props.showPostType == 'wrought') {
+							// 表格组件
+							nextTick(() => {
+								userLoginSelectTablePostRef.value?.refresh();
+							});
+						}
+					} else if (res.data.againAuthType) {
+						// 需要二次认证
+						loading.value = false;
+						let grantChainId = res.data.grantChainId;
+						let authType = res.data.againAuthType;
+						let account = res.data.accountCode;
+						let caData = res.data.caData;
+						let phone = res.data.phone;
+						emit(
+							'openTwoAuthDialog',
+							grantChainId,
+							authType,
+							account,
+							caData,
+							phone
+						);
+					} else {
+						// 不需要二次认证
+						emit('loginSucessHandler');
+					}
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+				loading.value = false;
+				// 开启图形验证码
+				if (err.code == '101-002-004-020') {
+					openCaptcha.value = true;
+					getCaptcha();
+				}
+				// 刷新图形验证码
+				if (err.code == '101-002-004-004' || err.code == '101-002-004-005') {
+					getCaptcha();
+				}
+				if (!err.code.includes('101-002-005-')) {
+					ElMessage.error(err.msg);
+				}
+				// 强制修改密码弹窗
+				if (err.code.includes(AuthConstant.forcedJumpSetPassword)) {
+					emit('forcedJumpSetPassword', err);
+				}
+			});
+	});
+}
+// 获取图形验证码
+function getCaptcha() {
+	loginApi
+		.getCaptcha()
+		.then((response) => {
+			const data = response?.data;
+			if (response?.code == 200 && data) {
+				imgUrl.value = 'data:image/gif;base64,' + data.img;
+				loginForm.value.captchaUUID = data.uuid;
+			} else {
+				///提示错误信息
+				ElMessage.error(t('获取验证码失败，请重新再试！'));
+			}
+		})
+		.catch((error) => {
+			console.log(error);
+		});
+}
+function changeTenant(val: string) {
+	loginForm.value.tenantId = val;
+	reset();
+}
+// 忘记密码
+function handleForgetPass() {
+	openHosBizDialog({
+		component: forgetPassword,
+		_uid: 'forgetPassDialog',
+		ref: 'forgetPassDialog',
+		props: {},
+	});
+}
+function changeLoginName() {
+	reset();
+}
+function rowDisabledMethod(row: any) {
+	return row.activity === false;
+}
+function reset() {
+	postPlaceholder.value = t('点击登录按钮后获取岗位单元');
+	personId.value = '';
+	postChainId.value = '';
+	loginForm.value.post = '';
+	userLoginSelectPostRef.value?.clear();
+	userLoginSelectTablePostRef.value?.clear();
+}
+function changePost(id: string, post: any) {
+	loginForm.value.post = post;
+}
+function openLoginBtn() {
+	loading.value = false;
+}
 </script>
 <style scoped>
 .Password_settings {
@@ -476,15 +524,19 @@ export default {
 	flex-wrap: wrap;
 	gap: 8px 12px;
 }
+
 .Password_settings a {
 	cursor: pointer;
 }
+
 .pwd-toggle {
 	cursor: pointer;
 }
+
 .VCode {
 	height: 45px;
 }
+
 .VCode img {
 	width: 120px;
 	height: 45px;

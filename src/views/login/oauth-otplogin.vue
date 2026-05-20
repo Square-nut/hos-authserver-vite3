@@ -66,6 +66,7 @@ import { getLoginErrorDesc } from './js/login';
 import { validPhone11, validEmail } from '@/utils/validateUtil';
 import { useUserStore } from '@/stores/user';
 import { closeHosBizDialog } from '@/composables/useHosBiz';
+import { getOTPCode as fetchOTPCode } from '@/api/login';
 export default {
 	props: {
 		// 登录成功的回调
@@ -210,7 +211,7 @@ export default {
 			}
 		},
 		getOTPCode() {
-			this.$api('getOTPCode', {
+			fetchOTPCode({
 				phoneNumber: this.otpForm.loginName,
 				smsType: 'templateCode',
 			})

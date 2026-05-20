@@ -32,7 +32,6 @@ function missingFunc(
 }
 
 const i18n = createI18n({
-  legacy: true,
   locale: getLocale(),
   missing: (locale, key, vm, values) => missingFunc(locale, key, vm, values),
   missingWarn: false,

@@ -259,6 +259,9 @@ import { computed, getCurrentInstance, onBeforeMount, ref, watch } from 'vue';
 import { openHosBizDialog, setLoginAuthInfo } from '@/composables/useHosBiz';
 import { useLoginSessionStore } from '@/stores/loginSession';
 import { caLoginTypeIconMap } from '@/utils/login-element-icons';
+import { fetchLicenseState } from '@/api/login';
+import { fetchOauthInfo } from '@/api/oauth';
+import { fetchLangList, fetchLoginPageElements } from '@/api/i18n';
 
 const { proxy } = getCurrentInstance();
 const loginSessionStore = useLoginSessionStore();
@@ -363,7 +366,7 @@ const illustrationStyle = computed(() => {
 
 async function getSysAuthInfo() {
 	try {
-		const { code, data } = await proxy.$api('oauth.info');
+		const { code, data } = await fetchOauthInfo();
 		if (code == '200') {
 			authInfo.value = data ?? {};
 			licenseState();
@@ -456,9 +459,7 @@ function licenseState() {
 	if (!currentClientId) {
 		return;
 	}
-	proxy
-		.$api('licenseState', { clientId: currentClientId })
-		.then((res) => {
+	fetchLicenseState({ clientId: currentClientId }).then((res) => {
 		if (res && res.code == 200 && res.data) {
 			const data = res.data;
 			data.licenseText = '';
@@ -633,7 +634,7 @@ function openTwoAuthDialog(
 
 async function getlangs() {
 	try {
-		const { data, code } = await proxy.$api('getLangs');
+		const { data, code } = await fetchLangList();
 		if (code == 200) {
 			const defaultLang = data.find((item) => {
 				return item.isDefault;
@@ -664,9 +665,7 @@ function languageChange(val) {
 }
 
 async function loginPageElements() {
-	const { code, data } = await proxy.$api('loginPageElements', {
-		moduleCode: 'loginPage',
-	});
+	const { code, data } = await fetchLoginPageElements('loginPage');
 	if (code == '200') {
 		i18n.mergeLocaleMessage(currLang.value, data);
 	}

@@ -19,6 +19,31 @@ export type DialogComponentEntry = {
 
 const dialogComponents: Record<string, DialogComponentEntry> = {};
 
+export type HosBizDialogMutationType = 'OPEN_DIALOG' | 'CLOSE_DIALOG';
+
+type HosBizDialogMutationListener = (
+	type: HosBizDialogMutationType,
+	payload: Record<string, unknown>,
+) => void;
+
+const hosBizDialogMutationListeners = new Set<HosBizDialogMutationListener>();
+
+export function subscribeHosBizDialogMutations(
+	listener: HosBizDialogMutationListener,
+) {
+	hosBizDialogMutationListeners.add(listener);
+	return () => {
+		hosBizDialogMutationListeners.delete(listener);
+	};
+}
+
+function emitHosBizDialogMutation(
+	type: HosBizDialogMutationType,
+	payload: Record<string, unknown>,
+) {
+	hosBizDialogMutationListeners.forEach((fn) => fn(type, payload));
+}
+
 export const useHosBizDialogStore = defineStore('hosBizDialog', {
 	state: () => ({
 		[timestamp]: Date.now(),
@@ -42,6 +67,7 @@ export const useHosBizDialogStore = defineStore('hosBizDialog', {
 			};
 			common(this.$state as unknown as Record<string, unknown>, _params);
 			this[event] = 'open';
+			emitHosBizDialogMutation('OPEN_DIALOG', { ..._params });
 		},
 		CLOSE_DIALOG(payload: Record<string, unknown> & { _uid?: DialogUid }) {
 			const _params = { ...payload };
@@ -53,6 +79,7 @@ export const useHosBizDialogStore = defineStore('hosBizDialog', {
 			};
 			common(this.$state as unknown as Record<string, unknown>, _params);
 			this[event] = 'close';
+			emitHosBizDialogMutation('CLOSE_DIALOG', { ..._params });
 		},
 	},
 });

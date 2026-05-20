@@ -1,5 +1,6 @@
 // 此文件为 UKEY 登录的 mixins 混入到 ca.vue 中
 // 参数定义以 uk 开头 避免参数冲突
+import { fetchCAInitParams } from '@/api/ca';
 import { loadCaVendorExports } from '@/utils/load-ca-vendor';
 
 export const ukMixinData = {
@@ -128,7 +129,7 @@ export const ukMixinData = {
         venderCode: this.info.venderCode,   // 厂商代码
         loginType: this.info.loginType,   // 签名方式代码
       }
-      this.$api('ca.getCAInitParams', upData).then((res) => {
+      fetchCAInitParams(upData).then((res) => {
         if(res && res.code == "200"){
           this.ukDefaultForm = res.data
         }

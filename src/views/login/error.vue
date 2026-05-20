@@ -8,6 +8,7 @@
 </template>
 
 <script>
+import { fetchOauthAuthorize } from '@/api/oauth';
 export default {
 	name: 'oauth_error',
 	data() {
@@ -25,7 +26,7 @@ export default {
       this.result = msg;
 			let upData = {code: code}
 			if(!upData.scope) upData.scope = 'openid%20profile'
-			this.$api('oauth.authorize', upData)
+			fetchOauthAuthorize(upData)
 				.then((response) => {
 					//处理回调
 					if (response && response.code == 200) {

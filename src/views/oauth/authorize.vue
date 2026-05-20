@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import { fetchOauthAuthorize } from '@/api/oauth';
 import { getToken } from '@/utils/base/token-util';
 import { getLocale } from '@/utils/i18n/i18n-util';
 export default {
@@ -42,7 +43,7 @@ export default {
 			const IP = this.$ls.get('IP');
 			const MAC = this.$ls.get('MAC');
 			if (!upData.scope) upData.scope = 'openid';
-			this.$api('oauth.authorize', upData)
+			fetchOauthAuthorize(upData)
 				.then((response) => {
 					//处理回调
 					if (response && response.code == 200) {

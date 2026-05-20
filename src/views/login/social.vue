@@ -26,6 +26,7 @@
 import hosUrl from '@/assets/images/social/hos.png';
 import giteeUrl from '@/assets/images/social/gitee.png';
 import weixinUrl from '@/assets/images/social/weixin.png';
+import { fetchOauthUrl } from '@/api/oauth';
 export default {
 	data() {
 		return {
@@ -123,7 +124,7 @@ export default {
 			return this.windowArray;
 		},
 		handleClick(source) {
-			this.$api('getOauthUrl', source)
+			fetchOauthUrl(source)
 				.then((response) => {
 					if (response && response.code == 200) {
 						let url = response.data;

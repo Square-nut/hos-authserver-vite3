@@ -147,6 +147,13 @@
 <script>
 import { getLocale, setCurrentLocale } from '@/utils/i18n/i18n-util';
 import { closeHosBizDialog } from '@/composables/useHosBiz';
+import { getOTPCode, getCaptcha as fetchCaptcha } from '@/api/login';
+import {
+	validateForgetCode,
+	editForgetPassword,
+	fetchForgetPhone,
+} from '@/api/forget-password';
+import { fetchForcingPwdPolicy } from '@/api/sys-password';
 export default {
 	name: 'forgetPassword',
 	data() {
@@ -358,10 +365,7 @@ export default {
 			this.$refs['firstFormRef'].validate(async (valid) => {
 				if (valid) {
 					const obj = JSON.parse(JSON.stringify(this.firstForm));
-					const { code, data, msg } = await this.$api(
-						'forget-password.validateForgetCode',
-						obj
-					);
+					const { code, data, msg } = await validateForgetCode(obj);
 					if (code == 200) {
 						this.active++;
 						this.showFirst = false;
@@ -383,10 +387,7 @@ export default {
 					if (obj.rePassword) {
 						obj.rePassword = this.$m.crypt(obj.rePassword);
 					}
-					const { code, msg } = await this.$api(
-						'forget-password.editPass',
-						obj
-					);
+					const { code, msg } = await editForgetPassword(obj);
 					if (code == 200) {
 						this.active++;
 						this.showSecond = false;
@@ -398,9 +399,7 @@ export default {
 			});
 		},
 		async getPwdPolicy() {
-			const { code, data } = await this.$api(
-				'sys-password.ForcinggetPwdPolicy'
-			);
+			const { code, data } = await fetchForcingPwdPolicy();
 			if (code == 200) {
 				this.pwdPolicy = data;
 				if (
@@ -447,7 +446,7 @@ export default {
 		// 获取验证码
 		async handleCode() {
 			if (this.firstForm.phoneNumber) {
-				const { code, data, msg } = await this.$api('getOTPCode', {
+				const { code, data, msg } = await getOTPCode({
 					phoneNumber: this.firstForm.phoneNumber,
 					smsType: 'forgotPasswordTemplateCode',
 				});
@@ -503,7 +502,7 @@ export default {
 			return formatResult;
 		},
 		async getCaptcha() {
-			const { code, data } = await this.$api('getCaptcha');
+			const { code, data } = await fetchCaptcha();
 			if (code == 200) {
 				this.imgCodeUrl = 'data:image/gif;base64,' + data.img;
 				this.firstForm.captchaUUID = data.uuid;
@@ -517,7 +516,7 @@ export default {
 			});
 		},
 		getPhone(val) {
-			this.$api('forget-password.getPhone', { loginName: val })
+			fetchForgetPhone(val)
 				.then((res) => {
 					if (res.code == 200) {
 						this.firstForm.phoneNumber = res.data;

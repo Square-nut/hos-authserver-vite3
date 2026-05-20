@@ -12,6 +12,7 @@ if (import.meta.env.VITE_APP_THEME_STYLE === '1') {
 import { createApp } from 'vue'
 import HosBiz from '@/components/hos-biz'
 import elementAliases from '@/plugins/element-aliases'
+import { registerHosElementAliases } from '@/plugins/hos-element-aliases'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
@@ -30,7 +31,6 @@ const pinia = createPinia()
 
 const globalProperties = app.config.globalProperties as any
 globalProperties.$api = apiRequest
-globalProperties.$t = (...args: any[]) => (i18n.global.t as any)(...args)
 globalProperties.$ls = ls
 
 pinia.use(piniaPluginPersistedstate)
@@ -40,6 +40,7 @@ app.use(i18n)
 
 app.use(ElementPlus, { size: 'small', zIndex: 3000, locale: zhCn, })
 app.use(elementAliases)
+registerHosElementAliases(app)
 app.use(HosBiz)
 
 app.mount('#app')

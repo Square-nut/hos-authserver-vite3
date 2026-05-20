@@ -73,6 +73,7 @@
 <script>
 import { useUserStore } from '@/stores/user';
 import { closeHosBizDialog, updateHosBizTable } from '@/composables/useHosBiz';
+import { fetchSelectPostPage } from '@/api/org';
 export default {
 	// TODO 处理dialogUid，handleRowClick传参
 	props: [
@@ -232,7 +233,7 @@ export default {
 			params.type = 'id';
 			params.personId = this.personId;
 			params.size = 5;
-			return this.$api('selectPostPage', params);
+			return fetchSelectPostPage(params);
 		},
 
 		searchPost(val, key) {

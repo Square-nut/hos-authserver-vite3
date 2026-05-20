@@ -152,6 +152,7 @@ import postSelect from './components/post-select.vue';
 import postSelectTable from './components/post-select-table.vue';
 import forgetPassword from './forgetPassword.vue';
 import { useUserStore } from '@/stores/user';
+import { getOTPCode as fetchOTPCode, getCaptcha as fetchCaptcha } from '@/api/login';
 import { openHosBizDialog } from '@/composables/useHosBiz';
 import { House, Message, Picture, User } from '@element-plus/icons-vue';
 export default {
@@ -473,7 +474,7 @@ export default {
 					phoneNumber: this.otpLoginForm.loginName,
 					smsType: 'templateCode',
 				};
-				this.$api('getOTPCode', phoneForm)
+				fetchOTPCode(phoneForm)
 					.then((response) => {
 						if (response && response.code == 200) {
 							this.otpLoginForm.smsId = response.data.uuid;
@@ -491,7 +492,7 @@ export default {
 		},
 		// 获取图形二维码
 		getCaptcha() {
-			this.$api('getCaptcha')
+			fetchCaptcha()
 				.then((response) => {
 					if (response && response.code == 200) {
 						this.imgUrl = 'data:image/gif;base64,' + response.data.img;

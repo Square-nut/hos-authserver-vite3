@@ -19,6 +19,7 @@
 </template>
 <script>
 import AuthConstant from '@/constant/auth-constant';
+import { fetchPhoneScan, fetchPhoneScanStatus } from '@/api/scan-code';
 import { useUserStore } from '@/stores/user';
 import postDialog from './post-dialog.vue';
 import { openHosBizDialog } from '@/composables/useHosBiz';
@@ -77,7 +78,7 @@ export default {
 		},
 		// 获取扫码登录二维码
 		getPhoneScan() {
-			this.$api('scan-code.getPhoneScan')
+			fetchPhoneScan()
 				.then((res) => {
 					if (res && res.code == '200') {
 						this.QRcodeInfo = res.data;
@@ -99,7 +100,7 @@ export default {
 			let upData = {
 				scanCodeKey: this.QRcodeInfo.scanCodeKey,
 			};
-			this.$api('scan-code.getPhoneScanStatus', upData)
+			fetchPhoneScanStatus(upData)
 				.then((res) => {
 					if (res.code && res.code == 200) {
 						// 二维码过期，重新请求二维码

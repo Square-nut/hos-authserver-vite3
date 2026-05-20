@@ -18,8 +18,15 @@ class HttpService {
   request(key: string, params?: unknown, headers?: Record<string, string>) {
     const { api, config } = loader(key)
     const apiConfig = api(params) || {}
+    return this.requestConfig({ ...config, ...apiConfig }, headers)
+  }
 
-    const options: HttpOptions = { ...this.options, ...config, ...apiConfig }
+  /** 纯 Vue3 / api/*.ts：直接传 url、method，不经过 loader */
+  requestConfig(
+    config: AxiosRequestConfig & Pick<HttpOptions, 'cache' | 'emulateJSON'>,
+    headers?: Record<string, string>,
+  ) {
+    const options: HttpOptions = { ...this.options, ...config }
     const method = (options.method || 'get').toLowerCase()
     const isGet = !['post', 'put', 'patch'].includes(method)
 
