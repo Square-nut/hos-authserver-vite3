@@ -157,7 +157,7 @@ import { ElMessage } from 'element-plus';
 import { isOpenDb } from '@/utils/is-open-db';
 import { useI18n } from 'vue-i18n';
 import postSelect from './components/post-select.vue';
-import postSelectTable from './components/post-select-table.vue';
+import postSelectTable from '@/components/post-select-table.vue';
 import forgetPassword from './forgetPassword.vue';
 import { openHosBizDialog } from '@/composables/useHosBiz';
 import { Picture, View } from '@element-plus/icons-vue';
