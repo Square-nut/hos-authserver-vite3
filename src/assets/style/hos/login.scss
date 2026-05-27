@@ -39,7 +39,8 @@
 				&:active {
 					border: none;
 				}
-				::v-deep .hos-input__inner {
+				.hos-input__inner,
+				.el-input__inner {
 					border: none;
 					&:focus {
 						border: none;
@@ -182,7 +183,7 @@
 	}
 }
 
-.hos-dialog__body + .hos-biz-table {
+.el-dialog__body + .el-biz-table {
 	padding: 0 15px;
 }
 // 忘记密码
@@ -561,32 +562,29 @@
 	.mb15 {
 		margin-bottom: 0;
 	}
-	.hos-biz-table {
-		.hos-biz-form {
-			// display: none;
+	.el-biz-table {
+		.el-biz-form {
 			padding: 0;
 			background-color: transparent;
 			box-shadow: none;
-			.hos-form-item {
+			.el-form-item {
 				margin-bottom: 10px;
 			}
-			.hos-form-item__label {
+			.el-form-item__label {
 				color: #fff;
-				// text-align: left;
 			}
-			.hos-form-item__content {
-				// float: left;
-			}
-			.hos-input__inner {
-				color: #fff;
-				border: 1px solid rgba(65, 165, 255, 0.43);
+			.el-input__wrapper {
 				background-color: transparent;
+				box-shadow: none;
+			}
+			.el-input__inner {
+				color: #fff;
 			}
 		}
-		.hos-biz-toolbar {
+		.el-biz-toolbar {
 			display: none;
 		}
-		.hos-table {
+		.el-table {
 			color: #fff;
 			border: none;
 			box-shadow: none;
@@ -596,16 +594,16 @@
 			thead {
 				color: #fff;
 			}
-			.hos-table__header-wrapper {
+			.el-table__header-wrapper {
 				background: rgba(19, 28, 69, 1);
 			}
-			th.hos-table__cell {
+			th.el-table__cell {
 				background-color: transparent;
 			}
 			tr {
 				background-color: transparent;
 			}
-			.hos-table__empty-text {
+			.el-table__empty-text {
 				svg {
 					display: none;
 				}
@@ -614,53 +612,53 @@
 					line-height: 160px;
 				}
 			}
-			&.hos-table--enable-row-hover
-				.hos-table__body
+			&.el-table--enable-row-hover
+				.el-table__body
 				tr:hover
-				> td.hos-table__cell {
+				> td.el-table__cell {
 				background: rgba(41, 95, 159, 1);
 			}
-			td.hos-table__cell,
-			th.hos-table__cell.is-leaf {
+			td.el-table__cell,
+			th.el-table__cell.is-leaf {
 				border-bottom: 1px solid rgba(65, 165, 255, 0.43);
 			}
-			.hos-loading-mask {
+			.el-loading-mask {
 				background-color: rgba(19, 28, 69, 0.53);
 			}
 		}
 
 		&.pagination-pos-bottom {
-			.hos-biz-pagination {
+			.el-biz-pagination {
 				padding: 0;
 				box-shadow: none;
 				background: transparent;
 			}
 		}
-		.hos-biz-pagination {
+		.el-biz-pagination {
 			padding-top: 5px;
-			.hos-pagination {
+			.el-pagination {
 				padding: 0 5px;
 
-				.hos-pagination__ssizes {
-					.hos-input__suffix {
-						.hos-input__validateIcon {
+				.el-pagination__sizes {
+					.el-input__suffix {
+						.el-input__validateIcon {
 							display: none;
 						}
 					}
 				}
-				.hos-button {
+				.el-button {
 					background-color: rgba(80, 179, 255, 1);
 					color: #fff;
 				}
-				.hos-pager li {
+				.el-pager li {
 					color: #fff;
-					&.active {
+					&.is-active {
 						background: rgba(41, 95, 159, 1);
 						box-shadow: none;
 					}
 				}
 
-				.hos-pagination__total {
+				.el-pagination__total {
 					color: #fff;
 					float: initial !important;
 					span {

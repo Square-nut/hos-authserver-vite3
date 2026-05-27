@@ -35,6 +35,37 @@ export function saveProgramInstallRecord(param?: Record<string, unknown>) {
 	})
 }
 
+/** --- loader（与旧版 ssoVisit.js 一致）--- */
+export const $config = { emulateJSON: false }
+
+export function getSystemList() {
+	return { url: '/sso/ssoVisits/systemList', method: 'post' }
+}
+
+export function save(param?: Record<string, unknown>) {
+	return { url: '/sso/personalConfigs/save', method: 'post', data: param }
+}
+
+export function systemExeDownload(param?: Record<string, unknown>) {
+	return {
+		url: '/sso/ssoVisits/systemExeDownload',
+		method: 'post',
+		params: param,
+	}
+}
+
+export function roleList(param?: Record<string, unknown>) {
+	return { url: '/sso/ssoVisits/roleList', method: 'post', params: param }
+}
+
+export function saveInstall(param?: Record<string, unknown>) {
+	return { url: '/sso/programRecords/save', method: 'post', params: param }
+}
+
+export function getRoleList(param?: Record<string, unknown>) {
+	return { url: '/sso/ssoVisits/roleList', method: 'post', params: param }
+}
+
 export const ssoVisitApi = {
 	fetchSsoSystemList,
 	savePersonalConfig,

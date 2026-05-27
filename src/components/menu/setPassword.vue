@@ -116,6 +116,7 @@ import { getLocale } from '@/utils/i18n/i18n-util';
 import { getPolicyErrorCode } from '@/utils/base/user-store-util';
 import cryptUtil from '@/utils/crypt/index.js';
 import { closeHosBizDialog } from '@/composables/useHosBiz';
+import { isSuccessCode } from '@/types/api-common';
 import { useUserStore } from '@/stores/user';
 import {
 	changePassword,
@@ -346,7 +347,7 @@ async function loadPwdPolicy(policyErrorCode: string | null) {
 	const isForcing = !!props.personUuid;
 	const fetcher = isForcing ? fetchForcingPwdPolicy : fetchPwdPolicy;
 	const { code, data } = await fetcher();
-	if (code == 200 && data && typeof data === 'object') {
+	if (isSuccessCode(code) && data && typeof data === 'object') {
 		applyPwdPolicy(data as PwdPolicy, policyErrorCode);
 	}
 }
@@ -393,7 +394,7 @@ async function cancel() {
 
 async function useLastPwd() {
 	const { code } = await useLastPassword({ personUuid: props.personUuid });
-	if (code == 200) {
+	if (isSuccessCode(code)) {
 		showLastBtn.value = false;
 		await cancel();
 		ElMessage.success(t('延用上次密码成功'));
@@ -416,11 +417,11 @@ async function save() {
 			type: 'form',
 		};
 		const { code, msg } = await changePassword(pwdForm);
-		if (code == 200) {
+		if (isSuccessCode(code)) {
 			ElMessage.success(t(String(msg)));
 			await cancel();
 			props.callback?.();
-			closeHosBizDialog({ _uid: 'setPassword' });
+			closeHosBizDialog({ _uid: 'forcedJumpSetPassword' });
 			window.parent.postMessage('cancel', '*');
 		} else {
 			ElMessage.error(String(msg));

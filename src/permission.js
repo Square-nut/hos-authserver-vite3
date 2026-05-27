@@ -22,7 +22,10 @@ const whiteList = [
 	'/setpassword',
 	'/oauth/logout',
 	'/oauth/sign-out',
-	'/oauth/other-browser-redirect/' + process.env.VUE_APP_LOGIN_SOURCE,
+	'/oauth/other-browser-redirect/' +
+		(import.meta.env.VITE_APP_LOGIN_SOURCE ||
+			import.meta.env.VUE_APP_LOGIN_SOURCE ||
+			''),
 ]; // no redirect whitelist
 
 router.beforeEach(async (to, from, next) => {

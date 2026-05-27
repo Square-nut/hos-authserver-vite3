@@ -1,49 +1,47 @@
 <template>
 	<div class="post-select-table">
 		<el-biz-select-table-2
+			ref="tableWrapperRef"
 			v-model="postValue"
 			v-bind="$attrs"
-			:uid="uid + '-Table'"
-			pagePos="bottom"
+			:uid="tableUid"
+			page-pos="bottom"
 			header-row-class-name="login-biz-table-header"
 			tooltip-effect="select-table-tooltip"
 			height="200px"
-			popover-width="545px"
-			:ref="uid + '-Table'"
+			:dropdown-width="545"
 			:cols="cols"
-			:valueConfig="valueConfig"
+			:value-config="valueConfig"
 			:form="form"
 			:table-data="selectPostPage"
 			:init="false"
 			:stripe="false"
 			:border="false"
 			:page="pageConfig"
-			:rowDisabledMethod="rowDisabledMethod"
+			:row-disabled-method="rowDisabledMethod"
 			@after-load="tableLoadAfter"
 			@change="changePeople"
 		>
 			<template #form>
 				<el-row :gutter="20">
-					<!-- 业务单元 -->
 					<el-col :span="11">
-						<el-form-item :label="$t('业务单元')" label-width="80px">
+						<el-form-item :label="t('业务单元')" label-width="80px">
 							<el-input
-								@input="searchPost($event, 'type')"
 								v-model="form.model.queryBuName"
-								:placeholder="$t('业务单元')"
+								:placeholder="t('业务单元')"
 								clearable
-							></el-input>
+								@input="searchPost"
+							/>
 						</el-form-item>
 					</el-col>
-					<!-- 岗位 -->
 					<el-col :span="11">
-						<el-form-item :label="$t('业务岗位')" label-width="80px">
+						<el-form-item :label="t('业务岗位')" label-width="80px">
 							<el-input
 								v-model="form.model.queryPostName"
+								:placeholder="t('业务岗位')"
 								clearable
-								:placeholder="$t('业务岗位')"
-								@input="searchPost($event, 'name')"
-							></el-input>
+								@input="searchPost"
+							/>
 						</el-form-item>
 					</el-col>
 				</el-row>
@@ -51,141 +49,129 @@
 		</el-biz-select-table-2>
 	</div>
 </template>
-<script setup lang="ts">
-import { getCurrentInstance } from 'vue'
 
-const vm = getCurrentInstance()!
+<script setup lang="ts">
+import { computed, nextTick, onMounted, reactive, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import {
+	fetchSelectPostPage,
+	type PostPageRecord,
+} from '@/api/org';
+
+const props = withDefaults(
+	defineProps<{
+		type?: string;
+		personId?: string;
+		uid?: string;
+	}>(),
+	{
+		type: '',
+		personId: '',
+		uid: 'post',
+	},
+);
+
+const emit = defineEmits<{
+	change: [value: string | number, post: PostPageRecord | undefined];
+}>();
+
+const postValue = defineModel<string | number>({ default: '' });
+
+const { t } = useI18n();
+
+const tableUid = computed(() => `${props.uid}-Table`);
+type SelectTableExpose = {
+	refresh?: () => void;
+	fitHeight?: (height: number) => void;
+};
+
+const tableWrapperRef = ref<SelectTableExpose | null>(null);
+
+const pageConfig = reactive<{
+	pageSize: number;
+	layout?: string;
+}>({
+	pageSize: 5,
+});
+
+const form = reactive({
+	labelWidth: 'auto',
+	labelPosition: 'left',
+	model: {
+		queryBuName: '',
+		queryPostName: '',
+	},
+});
+
+const postList = ref<PostPageRecord[]>([]);
+
+const cols = computed(() => [
+	{ label: t('业务单元'), prop: 'buName' },
+	{ label: t('业务岗位'), prop: 'postName' },
+]);
+
+const valueConfig = {
+	label: 'name',
+	value: 'id',
+};
+
+function selectPostPage(params: Record<string, unknown>) {
+	return fetchSelectPostPage({
+		...params,
+		type: props.type,
+		personId: props.personId,
+	});
+}
+
+function tableLoadAfter(data: PostPageRecord[]) {
+	if (Array.isArray(data) && data.length) {
+		postList.value = data;
+		if (postValue.value === '' || postValue.value == null) {
+			const first = data[0];
+			if (first) {
+				postValue.value = first.id;
+				emit('change', postValue.value, first);
+			}
+		}
+	} else {
+		clear();
+	}
+}
+
+function searchPost() {
+	tableWrapperRef.value?.refresh?.();
+}
+
+function rowDisabledMethod(row: PostPageRecord) {
+	return row.activity === false;
+}
+
+function changePeople(val: string | number) {
+	const post = postList.value.find((ele) => ele.id == val);
+	emit('change', val, post);
+}
 
 function refresh() {
-	;(vm.proxy as { refresh: () => void }).refresh()
+	tableWrapperRef.value?.refresh?.();
 }
 
 function clear() {
-	;(vm.proxy as { clear: () => void }).clear()
+	postList.value = [];
+	postValue.value = '';
 }
 
-defineExpose({ refresh, clear })
-</script>
-<script>
-import { fetchSelectPostPage } from '@/api/org'
+defineExpose({ refresh, clear });
 
-export default {
-	props: {
-		type: String,
-		personId: String,
-		uid: String,
-	},
-	components: {},
-	data() {
-		return {
-			pageConfig: {
-				pageSize: 5,
-			},
-			postValue: '',
-			form: {
-				labelWidth: 'auto',
-				labelPosition: 'left',
-				model: {
-					queryBuName: '',
-					queryPostName: '',
-				},
-			},
-			postList: [],
-			cols: [
-				// {
-				// 	prop: 'name',
-				// 	label: this.$t('名称'),
-				// 	width: '150px',
-				// },
-				// {
-				// 	prop: 'type',
-				// 	label: this.$t('类型'),
-				// 	width: '80px',
-				// 	formatter: (row, column, value) => {
-				//     return row.type == 'unit' ? this.$t('岗位单元') : row.type == 'group' ? this.$t('岗位组') : this.$t('岗位')
-				//   },
-				// },
-				{
-					label: this.$t('业务单元'),
-					prop: 'buName',
-				},
-				{
-					label: this.$t('业务岗位'),
-					prop: 'postName',
-				},
-			],
-			valueConfig: {
-				label: 'name',
-				value: 'id',
-			},
-			options: [
-				{
-					label: this.$t('岗位单元'),
-					value: 'unit',
-				},
-				{
-					label: this.$t('岗位组'),
-					value: 'group',
-				},
-				{
-					label: this.$t('岗位'),
-					value: 'post',
-				},
-			],
-		};
-	},
-	created() {
-		if (
-			import.meta.env.VITE_APP_THEME_STYLE == '1'
-		) {
-			this.pageConfig.layout = 'total, home, prev, pager, next, end';
-		}
-	},
-	mounted() {
-		this.$refs[this.uid + '-Table'].fitHeight(200); // 调用fitHeight将tableHeight传给bizTable
-	},
-	methods: {
-		refresh() {
-			this.$refs[this.uid + '-Table'].refresh();
-		},
-		selectPostPage(params) {
-			params.type = this.type;
-			params.personId = this.personId;
-			return fetchSelectPostPage(params);
-		},
-		// 列表加载完数据
-		tableLoadAfter(data) {
-			// 自动赋值
-			if (Array.isArray(data) && data.length) {
-				this.postList = data;
-				// 避免重复赋值
-				if (this.postValue == '') {
-					this.postValue = data[0].id;
-					let post = data[0];
-					this.$emit('change', this.postValue, post);
-				}
-			} else {
-				this.clear();
-			}
-		},
-		searchPost(val, key) {
-			this.$refs[this.uid + '-Table'].refresh();
-		},
-		rowDisabledMethod(row) {
-			return row.activity === false;
-		},
-		changePeople(val) {
-			let post = this.postList.filter((ele) => ele.id == val)[0];
-			this.$emit('change', val, post);
-			// this.$emit('input', val)
-		},
-		clear() {
-			this.postList = [];
-			this.postValue = '';
-		},
-	},
-};
+onMounted(() => {
+	if (import.meta.env.VITE_APP_THEME_STYLE === '1') {
+		pageConfig.layout = 'total, home, prev, pager, next, end';
+	}
+	nextTick(() => {
+		tableWrapperRef.value?.fitHeight?.(200);
+	});
+});
 </script>
+
 <style lang="scss" scoped></style>
 <style lang="scss">
 .post-select-table .el-input__prefix {

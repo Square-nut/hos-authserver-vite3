@@ -1,11 +1,18 @@
 <template>
-	<hos-popover v-model="visible" placement="bottom-start" :width="popoverWidth" popper-class="select-table-v2-popover" trigger="click" :disabled="disabled">
-		<hos-biz-table
+	<el-popover
+		v-model:visible="visible"
+		placement="bottom-start"
+		:width="popoverWidth"
+		popper-class="select-table-v2-popover"
+		trigger="click"
+		:disabled="disabled"
+	>
+		<el-biz-table
 			v-bind="$attrs"
 			:uid="tableUID"
 			:ref="tableUID"
 			:cols="cols"
-			:data="tableData"
+			:data="resolvedTableData"
 			:page="page"
 			:form="form"
 			@row-click="rowClick"
@@ -21,32 +28,44 @@
 			<template v-if="$slots.toolbar" #toolbar>
 				<slot name="toolbar"></slot>
 			</template>
-		</hos-biz-table>
-		<hos-select
-			class="select-table-v2-popover-select"
-			popper-class="select-table-v2-dropdown-select"
-			slot="reference"
-			ref="select"
-			v-bind="$attrs"
-			v-model="defaultValue"
-			:disabled="disabled"
-			:select-value="selectLabel"
-		>
-			<i v-if="selectPrefix && theme == 1" class="hos-input__icon hos-icom-post" slot="prefix" ></i>
-			<img v-if="selectPrefix && theme != 1" src="../../../../assets/images/login/z61.png" class=" " slot="prefix" />
-			<i class="hos-input__icon hos-icom-table-picker" slot="suffix"></i>
-		</hos-select>
-		<!-- <hos-button slot="reference">click 激活</hos-button> -->
-	</hos-popover>
+		</el-biz-table>
+		<template #reference>
+			<el-select
+				ref="select"
+				class="select-table-v2-popover-select"
+				v-bind="$attrs"
+				v-model="defaultValue"
+				:disabled="disabled"
+				popper-class="select-table-v2-dropdown-select"
+				@visible-change="visibleChange"
+			>
+				<template v-if="selectPrefix" #prefix>
+					<el-icon v-if="isHosTheme"><Briefcase /></el-icon>
+					<img v-else src="@/assets/images/login/z61.png" alt="" />
+				</template>
+				<el-option
+					v-for="row in currentTableData"
+					:key="row[valueKey]"
+					:label="String(row[labelKey] ?? '')"
+					:value="row[valueKey]"
+				/>
+			</el-select>
+		</template>
+	</el-popover>
 </template>
 
 <script>
+import { Briefcase } from '@element-plus/icons-vue';
 import { useHosBizTableStore } from '@/stores/hosBizTable';
 
 export default {
 	name: 'HosBizSelectTable2',
+	inheritAttrs: false,
+	components: { Briefcase },
+	emits: ['update:modelValue', 'input', 'change'],
 	props: {
-		value: { type: [String, Number, Array], default: '' },
+		modelValue: { type: [String, Number, Array], default: undefined },
+		value: { type: [String, Number, Array], default: undefined },
 		multiple: { type: Boolean, default: false },
 		
 		// 选择框的映射(label、value)配置
@@ -81,45 +100,87 @@ export default {
 	},
 	data() {
 		return {
-			theme: process.env.VUE_APP_SIMPLE_ONCE,
-			defaultValue: [],
+			isHosTheme: import.meta.env.VITE_APP_THEME_STYLE === '1',
+			defaultValue: this.multiple ? [] : '',
 			selectRows: {},
 			currentTableData: [],
 			popoverWidth: '500px',
 			visible: false,
-			selectLabel: ''
+			selectLabel: '',
 		};
 	},
 	watch: {
+		modelValue: {
+			immediate: true,
+			handler(val) {
+				this.syncFromProp(val);
+			},
+		},
 		value: {
-			handler(val, old) {
-				this.defaultValue = val;
-				const target = this.currentTableData.filter(ele => ele[this.valueConfig.value] == val)
-				if(Array.isArray(target) && target.length) {
-					this.selectLabel = this.currentTableData.filter(ele => ele[this.valueConfig.value] == val)[0][this.valueConfig.label]
-				} else {
-					this.selectLabel = ''
+			immediate: true,
+			handler(val) {
+				if (this.modelValue === undefined || this.modelValue === null) {
+					this.syncFromProp(val);
 				}
-				
 			},
 		},
 	},
 	computed: {
+		resolvedTableData() {
+			if (this.tableData !== undefined && this.tableData !== null) {
+				return this.tableData;
+			}
+			return this.$attrs.tableData ?? this.$attrs['table-data'];
+		},
 		tableUID() {
 			return this.uid + '-select-table-dropdown-table';
-		}
+		},
+		valueKey() {
+			return this.valueConfig.value;
+		},
+		labelKey() {
+			return this.valueConfig.label;
+		},
 	},
 	created() {
+		this.initTable();
 	},
+	expose: ['refresh', 'fitHeight'],
 	mounted() {
-		this.popoverWidth = this.$refs.select.$el.offsetWidth;
-		if(this.dropdownWidth) {
+		this.$nextTick(() => {
+			const el = this.$refs.select?.$el;
+			if (el) {
+				this.popoverWidth = el.offsetWidth;
+			}
+			if (this.dropdownWidth) {
 				this.popoverWidth = this.dropdownWidth;
-		}
-		// this.$refs.uid.doLayout();
-		// select-table-dropdown-table
-    },
+			}
+		});
+	},
 	methods: {
+		syncFromProp(val) {
+			this.defaultValue =
+				val !== undefined && val !== null
+					? val
+					: this.multiple
+						? []
+						: '';
+			this.syncSelectLabel(this.defaultValue);
+		},
+		syncSelectLabel(val) {
+			if (this.multiple || Array.isArray(val)) {
+				return;
+			}
+			const target = this.currentTableData.find(
+				(ele) => ele[this.valueKey] == val
+			);
+			this.selectLabel = target ? target[this.labelKey] : '';
+		},
+		emitModel(val) {
+			this.$emit('update:modelValue', val);
+			this.$emit('input', val);
+			this.$emit('change', val);
+		},
 		initTable() {
 			if (this.multiple === true) {
 				this.cols.splice(0, 0, {
@@ -143,10 +204,9 @@ export default {
 					[value]: row,
 				};
 				this.defaultValue = row[this.valueConfig.value];
-				this.$refs.select.blur();
-				this.findLabel();
-				this.$emit('input', this.defaultValue);
-				this.$emit('change', this.defaultValue);
+				this.selectLabel = row[this.valueConfig.label];
+				this.$refs.select?.blur?.();
+				this.emitModel(this.defaultValue);
 				this.visible = false;
 			}
 		},
@@ -154,11 +214,10 @@ export default {
 			// 处理是否选中
 			var isSelect = rows.length && rows.indexOf(row) !== -1; // tip：row属于rows里的数据，同一地址，所以可判断
 			if (isSelect) {
-				// 选中
-				this.$set(this.selectRows, row[this.valueConfig.value], row);
+				this.selectRows[row[this.valueConfig.value]] = row;
 				this.defaultValue.push(row[this.valueConfig.value]);
 			} else {
-				this.$delete(this.selectRows, row[this.valueConfig.value]);
+				delete this.selectRows[row[this.valueConfig.value]];
 				this.defaultValue.splice(
 					this.defaultValue.findIndex(
 						(item) => item === row[this.valueConfig.value]
@@ -167,15 +226,14 @@ export default {
 				);
 			}
 			this.findLabel();
-			this.$emit('input', this.defaultValue);
-			this.$emit('change', this.defaultValue);
+			this.emitModel(this.defaultValue);
 		},
 		selectAll(rows) {
 			var isAllSelect = rows.length > 0;
 			if (isAllSelect) {
 				// 全选
 				rows.forEach((row) => {
-					this.$set(this.selectRows, row[this.valueConfig.value], row);
+					this.selectRows[row[this.valueConfig.value]] = row;
 					var isHas = this.defaultValue.find(
 						(item) => item === row[this.valueConfig.value]
 					);
@@ -186,7 +244,7 @@ export default {
 			} else {
 				// 全不选
 				this.$refs[this.tableUID].tableData.forEach((row) => {
-					this.$delete(this.selectRows, row[this.valueConfig.value]);
+					delete this.selectRows[row[this.valueConfig.value]];
 					const index = this.defaultValue.findIndex(
 						(item) => item === row[this.valueConfig.value]
 					);
@@ -196,25 +254,13 @@ export default {
 				});
 			}
 			this.findLabel();
-			this.$emit('input', this.defaultValue);
-			this.$emit('change', this.defaultValue);
+			this.emitModel(this.defaultValue);
 		},
 		findLabel() {
-			this.$nextTick(() => {
-				if (this.multiple) {
-					this.$refs.select.selected.forEach((item) => {
-						var row = this.selectRows[item.value];
-            if(row) {
-              item.currentLabel = row[this.valueConfig.label];
-            }
-					});
-				} else {
-					var row = this.selectRows[this.defaultValue];
-          if(row) {
-            this.$refs.select.selectedLabel = row[this.valueConfig.label];
-          }
-				}
-			});
+			const row = this.selectRows[this.defaultValue];
+			if (row) {
+				this.selectLabel = row[this.valueConfig.label];
+			}
 		},
 		// 关键值查询表格数据行
 		findRowByKey(value) {
@@ -255,9 +301,12 @@ export default {
 			return this.selectRows[value];
 		},
 
-		refresh(){
-			useHosBizTableStore().UPDATE_TABLE({ _uid: this.tableUID })
-		}
+		refresh() {
+			useHosBizTableStore().UPDATE_TABLE({ _uid: this.tableUID });
+		},
+		fitHeight(height) {
+			this.$refs[this.tableUID]?.fitHeight?.(height);
+		},
 	},
 };
 </script>

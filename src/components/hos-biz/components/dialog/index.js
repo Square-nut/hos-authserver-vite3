@@ -3,8 +3,9 @@
  * @Date: 2022-03-12 10:58:36
  */
 import { h } from 'vue';
+import { ElDialog } from '../../utils/element-plus-resolve';
 import { useHosBizDialogStore, subscribeHosBizDialogMutations } from '@/stores/hosBizDialog';
-import { dialogStoreComputed } from '../../utils/pinia-bridge';
+import { dialogStoreComputed, hosBizUidMatches } from '../../utils/pinia-bridge';
 
 const props = {
 	uid: {
@@ -12,23 +13,23 @@ const props = {
 	},
 };
 
+function dialogUidMatches(storeUid, instanceUid) {
+	if (storeUid === 'all' || storeUid === 0) return true;
+	return hosBizUidMatches(storeUid, instanceUid);
+}
+
 export default {
 	name: 'HosBizDialog',
 	props,
 	computed: dialogStoreComputed(),
 	created() {
 		this.unsubscribe = subscribeHosBizDialogMutations(() => {
-			if (
-				this.sUID === 'all' ||
-				this.sUID === 0 ||
-				this.sUID === this.uid
-			) {
+			if (dialogUidMatches(this.sUID, this.uid)) {
 				this.visible = this.sEvent === 'open';
 			}
-			const wrappers = document.querySelectorAll(
-				'.hos-dialog__wrapper, .el-overlay',
-			);
-			wrappers.forEach((ele) => ele.removeAttribute('title'));
+			document.querySelectorAll('.el-overlay').forEach((ele) => {
+				ele.removeAttribute('title');
+			});
 		});
 	},
 	beforeUnmount() {
@@ -57,12 +58,15 @@ export default {
 				: [];
 
 		return h(
-			'hos-dialog',
+			ElDialog,
 			{
 				...attrs,
 				modelValue: this.visible,
 				'onUpdate:modelValue': (val) => {
 					this.visible = val;
+					if (!val) {
+						dialogStore.CLOSE_DIALOG({ _uid: this.uid });
+					}
 				},
 				destroyOnClose: true,
 				appendToBody: true,
@@ -71,7 +75,9 @@ export default {
 					this.$emit('close', val);
 				},
 			},
-			() => children,
+			{
+				default: () => children,
+			},
 		);
 	},
 };

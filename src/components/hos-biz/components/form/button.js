@@ -1,4 +1,5 @@
 import { h } from 'vue';
+import { ElButton } from '../../utils/element-plus-resolve';
 import { isPromise, isFunction } from '../../utils/get-type';
 
 function runCommand(commands) {
@@ -45,7 +46,7 @@ export default {
 		attrs.loading = this.loading;
 
 		return h(
-			'hos-button',
+			ElButton,
 			{
 				...attrs,
 				onClick: (val) => {
@@ -67,7 +68,7 @@ export default {
 					}
 				},
 			},
-			this.$slots.default,
+			this.$slots.default?.(),
 		);
 	},
 };

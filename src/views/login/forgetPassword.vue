@@ -81,12 +81,9 @@
 							:placeholder="$t('新密码')"
 						>
 							<template #suffix>
-								<i
-									class="iconPos"
-									:class="['el-icon-view']"
-									autocomplete="auto"
-									@click.stop="flag1 = !flag1"
-								/>
+								<el-icon class="iconPos" @click.stop="flag1 = !flag1">
+									<View />
+								</el-icon>
 							</template>
 						</el-input>
 						<span v-if="showPwdStr" class="lengthStrClass"
@@ -113,12 +110,9 @@
 							:placeholder="$t('确认密码')"
 						>
 							<template #suffix>
-								<i
-									class="iconPos"
-									:class="['el-icon-view']"
-									autocomplete="auto"
-									@click.stop="flag2 = !flag2"
-								/>
+								<el-icon class="iconPos" @click.stop="flag2 = !flag2">
+									<View />
+								</el-icon>
 							</template>
 						</el-input>
 					</el-form-item>
@@ -154,8 +148,10 @@ import {
 	fetchForgetPhone,
 } from '@/api/forget-password';
 import { fetchForcingPwdPolicy } from '@/api/sys-password';
+import { View } from '@element-plus/icons-vue';
 export default {
 	name: 'forgetPassword',
+	components: { View },
 	data() {
 		return {
 			loading: false,
@@ -567,7 +563,7 @@ export default {
 		padding-right: 10px;
 	}
 
-	::v-deep .el-progress {
+	:deep(.el-progress) {
 		// width: 95%;
 		// line-height: 22px;
 		.el-progress-bar__outer {

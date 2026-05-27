@@ -1,10 +1,11 @@
 /*
- * @Author: liruiqing@mediway.cn 
- * @Date: 2022-03-12 10:58:52 
- * @Last Modified by: liruiqing@mediway.cn
- * @Last Modified time: 2022-06-09 17:16:25
+ * @Author: liruiqing@mediway.cn
+ * @Date: 2022-03-12 10:58:52
  */
+import { h } from 'vue';
+import { ElPagination } from '../../utils/element-plus-resolve';
 import Params, { addRule } from '../../utils/params-util';
+
 export const COMPONENT_NAME = 'P';
 
 const props = {
@@ -29,6 +30,7 @@ addRule(COMPONENT_NAME, {
 });
 
 export default {
+	name: 'HosBizPagination',
 	data() {
 		return {
 			timer: null,
@@ -36,7 +38,7 @@ export default {
 		};
 	},
 	props,
-	render(h) {
+	render() {
 		const layout =
 			this.$attrs.layout || 'sizes, prev, pager, next, jumper, ->, total';
 		const current =
@@ -44,7 +46,7 @@ export default {
 		const pageSize = this.params.get('size') || this.$attrs.pageSize || 10;
 
 		return h(
-			'hos-pagination',
+			ElPagination,
 			{
 				...this.$attrs,
 				layout,
@@ -69,7 +71,7 @@ export default {
 					});
 				},
 			},
-			this.$slots.default,
+			this.$slots.default?.(),
 		);
 	},
 	methods: {

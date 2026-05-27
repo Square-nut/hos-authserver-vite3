@@ -28,6 +28,21 @@ export function fetchWebsysCmd() {
 	return http<unknown>(config)
 }
 
+/** loader：`websys.cmd`（与旧版 websys.js 一致） */
+export function cmd() {
+	return {
+		method: 'post',
+		url: '/cmd/cmd',
+		baseURL: getWebsysBaseUrl(),
+		emulateJSON: true,
+		data: {
+			_version: WEBSYS_VERSION,
+			_clientIPExp: '',
+			M_GetConfig: '',
+		},
+	}
+}
+
 export const websysApi = {
 	fetchWebsysCmd,
 }

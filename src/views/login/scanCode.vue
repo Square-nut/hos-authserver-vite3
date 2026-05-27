@@ -6,7 +6,7 @@
 			</template>
 			<template #error>
 				<div class="image-slot">
-					<i class="el-icon-loading"></i>
+					<el-icon class="is-loading"><Loading /></el-icon>
 				</div>
 			</template>
 		</el-image>
@@ -23,7 +23,9 @@ import { fetchPhoneScan, fetchPhoneScanStatus } from '@/api/scan-code';
 import { useUserStore } from '@/stores/user';
 import postDialog from './post-dialog.vue';
 import { openHosBizDialog } from '@/composables/useHosBiz';
+import { Loading } from '@element-plus/icons-vue';
 export default {
+	components: { Loading },
 	props: ['activeType'],
 	data() {
 		return {
@@ -227,7 +229,7 @@ export default {
 			transform: translate(-50%, -50%);
 			font-size: 28px;
 		}
-		::v-deep .el-image__inner {
+		:deep(.el-image__inner) {
 			position: absolute;
 			left: 50%;
 			top: 50%;

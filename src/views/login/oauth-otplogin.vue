@@ -248,7 +248,7 @@ export default {
 	.input-width {
 		width: 260px;
 		height: 36px;
-		&::v-deep .el-input__inner {
+		:deep(.el-input__inner) {
 			height: 36px;
 			line-height: 36px;
 		}
@@ -274,7 +274,7 @@ export default {
 			padding-right: 10px;
 		}
 	}
-	&::v-deep .el-form-item {
+	:deep(.el-form-item) {
 		margin-bottom: 24px;
 	}
 	.uk-dynamic,

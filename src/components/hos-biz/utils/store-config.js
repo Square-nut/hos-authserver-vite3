@@ -27,5 +27,8 @@ export function commonTable(state, _params) {
  
   state[timestamp] = uuidv4();
   state[uid] = _uid
-  state[params][_uid] = _params // 将传入的_params放在对应的uid下面.
+  if (!state[params] || typeof state[params] !== 'object') {
+    state[params] = {};
+  }
+  state[params][String(_uid)] = _params // 将传入的_params放在对应的uid下面.
 }

@@ -26,6 +26,12 @@ export function dialogStoreComputed() {
 	};
 }
 
+/** Pinia 广播 uid 与组件 :uid 对齐（兼容 string/number） */
+export function hosBizUidMatches(storeUid, instanceUid) {
+	if (storeUid === 'all') return true;
+	return String(storeUid) === String(instanceUid);
+}
+
 export function tableStoreComputed() {
 	return {
 		...mapHosBizTableStore,

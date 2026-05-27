@@ -4,8 +4,16 @@
  * @Last Modified by: liruiqing@mediway.cn
  * @Last Modified time: 2024-04-17 15:31:22
  */
+import {
+	ElCheckbox,
+	ElRadio,
+	ElTable,
+	ElTableColumn,
+} from '../../utils/element-plus-resolve';
 import SingleArray from '../../utils/single-array';
-import { tableStoreComputed } from '../../utils/pinia-bridge';
+import { tableStoreComputed, hosBizUidMatches } from '../../utils/pinia-bridge';
+
+export const EL_TABLE_REF = 'elTableRef';
 
 const props = {
 	uid: {
@@ -42,16 +50,25 @@ const tableColumnParser = (() => {
 		},
 		parse(cols, h) {
 			return cols.map((v) => {
-				if( v._show === true) {
-					
-				}
 				const props = { ...v };
+				const nested = props.children;
+				if (Array.isArray(nested)) {
+					delete props.children;
+				}
+				const parsed = tableColumnParser._parse.call(this, props, h);
+				const colProps = parsed?.props ?? parsed;
+				const scopedSlots = parsed?.scopedSlots;
+				const childVnodes = Array.isArray(nested)
+					? tableColumnParser.parse.call(this, nested, h)
+					: undefined;
+				const slots =
+					scopedSlots && Object.keys(scopedSlots).length
+						? scopedSlots
+						: undefined;
 				return h(
-					'hos-table-column',
-					tableColumnParser._parse.call(this, props, h),
-					Array.isArray(props.children)
-						? tableColumnParser.parse.call(this, props.children, h)
-						: undefined
+					ElTableColumn,
+					colProps,
+					slots || childVnodes,
 				);
 			});
 		},
@@ -105,10 +122,17 @@ tableColumnParser.add(function ({ props, scopedSlots }, h) {
  */
 tableColumnParser.add(function ({ props, scopedSlots }, h) {
 	if (typeof props.slotName === 'string') {
-		const func = this.asyncSlot[props.slotName]
-		scopedSlots.default = scope => {
-			let _func = typeof func === 'object'? func : func(scope, h)
-		  return parseCustomNode.call(this, _func, scope, h);
+		const func = this.asyncSlot[props.slotName];
+		scopedSlots.default = (scope) => {
+			if (!func) return null;
+			let _func;
+			if (typeof func === 'function') {
+				// Vue3 具名插槽为 () => VNode；旧产线为 (scope, h) => VNode
+				_func = func.length > 0 ? func(scope, h) : func();
+			} else {
+				_func = func;
+			}
+			return parseCustomNode.call(this, _func, scope, h);
 		};
 	}
 });
@@ -132,31 +156,34 @@ tableColumnParser.add(function ({ props, scopedSlots }, h) {
 tableColumnParser.add(function ({ props, scopedSlots }, h) {
 	if (props.type === 'checkbox') {
 		const key = props.key || 'id';
+		const currentValue = Array.isArray(this.value) ? this.value : [];
 		if (!Array.isArray(this.value)) {
 			this.$emit('input', []);
+			this.$emit('update:modelValue', []);
 		}
-		const value = new SingleArray(this.value, key);
+		const value = new SingleArray(currentValue, key);
+		const emitValue = (next) => {
+			this.$emit('input', next);
+			this.$emit('update:modelValue', next);
+		};
 
 		scopedSlots.header = () => {
 			if (this.$attrs.data.length === 0 || !Array.isArray(this.value)) return;
 			const isAll = value.has(this.$attrs.data, true);
 			const isIndeterminate = value.has(this.$attrs.data, false) && !isAll;
-			return h('hos-checkbox', {
+			return h(ElCheckbox, {
 				indeterminate: isIndeterminate,
 				modelValue: isAll,
 				'onUpdate:modelValue': (isChecked) => {
-					this.$emit(
-						'input',
-						value[isChecked ? 'add' : 'delete'](this.$attrs.data),
-					);
+					emitValue(value[isChecked ? 'add' : 'delete'](this.$attrs.data));
 				},
 			});
 		};
 		scopedSlots.default = (prop) => {
-			return h('hos-checkbox', {
-				modelValue: this.value.some((v) => v[key] === prop.row[key]),
+			return h(ElCheckbox, {
+				modelValue: currentValue.some((v) => v[key] === prop.row[key]),
 				'onUpdate:modelValue': (isChecked) => {
-					this.$emit('input', value[isChecked ? 'add' : 'delete'](prop.row));
+					emitValue(value[isChecked ? 'add' : 'delete'](prop.row));
 				},
 			});
 		};
@@ -171,15 +198,14 @@ tableColumnParser.add(function ({ props, scopedSlots }, h) {
 		const key = props.key || 'id';
 		scopedSlots.default = (prop) => {
 			return h(
-				'hos-radio',
+				ElRadio,
 				{
 					label: prop.row[key],
 					modelValue: this.value[key],
 					'onUpdate:modelValue': (val) => {
-						this.$emit(
-							'input',
-							this.$attrs.data.filter((v) => v[key] === val)[0],
-						);
+						const next = this.$attrs.data.filter((v) => v[key] === val)[0];
+						this.$emit('input', next);
+						this.$emit('update:modelValue', next);
 					},
 				},
 				() =>
@@ -197,10 +223,10 @@ export default {
 	watch: {
 		sTimestamp() {
 			if (
-				this.sUID === this.uid ||
+				hosBizUidMatches(this.sUID, this.uid) ||
 				(this.sUID === 0 && this.sEvent === 'doLayout')
 			) {
-				if (this.$refs['hos-table-lq']) this.$refs['hos-table-lq'].doLayout()
+				if (this.$refs[EL_TABLE_REF]) this.$refs[EL_TABLE_REF].doLayout()
 			}
 		},
 	},
@@ -210,19 +236,12 @@ export default {
 		// 解析表格
 		const cols = tableColumnParser.parse.call(this, this.cols, h);
 		
-		// 添加表格默认插槽
-		if (this.$slots.default) {
-			cols.push(...this.$slots.default)
+		// 添加表格默认插槽（Vue3：default 为函数）
+		const defaultSlot = this.$slots.default?.();
+		if (defaultSlot?.length) {
+			cols.push(...defaultSlot);
 		}
 		
-		return h(
-			'hos-table',
-			{
-				...attrs,
-				ref: 'hos-table-lq',
-				id: 'hos-table-lq',
-			},
-			cols
-		);
+		return h(ElTable, { ...attrs, ref: EL_TABLE_REF }, cols);
 	},
 };

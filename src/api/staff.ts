@@ -50,6 +50,50 @@ export function deleteStaffById(id: string | number) {
 	} as StaffHttpConfig)
 }
 
+/** --- loader（与旧版 staff.js 一致，返回 request config）--- */
+export const $config = { baseURL: STAFF_BASE_URL }
+
+export function selectPageStaff(param?: Record<string, unknown>) {
+	return { url: '/staff/selectPageStaff', method: 'get', params: param }
+}
+
+export function selectPage(param?: Record<string, unknown>) {
+	return { url: '/staff/selectPage', method: 'get', params: param }
+}
+
+export function insert(param?: Record<string, unknown>) {
+	return { url: '/staff/insert', method: 'post', data: param }
+}
+
+export function selectById(id: string | number) {
+	return { url: '/staff/selectById', method: 'get', params: { id } }
+}
+
+export function updateById(param?: Record<string, unknown>) {
+	return { url: '/staff/updateById', method: 'post', data: param }
+}
+
+export function deleteById(id: string | number) {
+	return {
+		url: '/staff/deleteStaffById',
+		method: 'post',
+		needSign: true,
+		needCrypt: true,
+		needDecrypt: true,
+		params: { id },
+	}
+}
+
+export function api4(param?: Record<string, unknown>) {
+	const { name, phone, email } = (param || {}) as Record<string, string>
+	return {
+		url: `/staff/selectPageStaff/${name}`,
+		method: 'post',
+		params: { phone },
+		data: { email, current: 1, size: 10 },
+	}
+}
+
 export const staffApi = {
 	fetchSelectPageStaff,
 	fetchStaffSelectPage,

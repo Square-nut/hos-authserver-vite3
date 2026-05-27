@@ -40,6 +40,7 @@ function parseKey(key: string) {
 
 function resolveModule(path: string): ApiModule | null {
   const candidates = [
+    ...(path === 'index' ? ['../api/legacy-index.ts'] : []),
     `../api/${path}.ts`,
     `../api/${path}.js`,
     `../api/${path}/index.ts`,

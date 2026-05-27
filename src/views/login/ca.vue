@@ -217,8 +217,8 @@ import { ukMixinData } from './js/uk';
 import { pinMixinData } from './js/pin';
 import AuthConstant from '@/constant/auth-constant';
 import { getLoginErrorDesc } from './js/login';
-import postSelect from './components/post-select.vue';
-import postSelectTable from './components/post-select-table.vue';
+import postSelect from '@/components/post-select.vue';
+import postSelectTable from '@/components/post-select-table.vue';
 import postDialog from './post-dialog.vue';
 import { useUserStore } from '@/stores/user';
 import { closeHosBizDialog, openHosBizDialog } from '@/composables/useHosBiz';
@@ -661,7 +661,7 @@ export default {
 .input-width {
 	width: 260px;
 	height: 36px;
-	&::v-deep .el-input__inner {
+	:deep(.el-input__inner) {
 		height: 36px;
 		line-height: 36px;
 	}
@@ -689,7 +689,7 @@ export default {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	&::v-deep .el-form-item {
+	:deep(.el-form-item) {
 		margin-bottom: 24px;
 	}
 	&.phone-in-frame {

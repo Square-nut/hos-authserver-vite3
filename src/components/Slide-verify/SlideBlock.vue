@@ -8,7 +8,7 @@
 		}"
 	>
 		<!-- 滑动条 -->
-		<hos-slider v-model="internalValue" @input="input" @change="change" :disabled="disabled" :show-tooltip="false"></hos-slider>
+		<el-slider v-model="internalValue" @input="input" @change="change" :disabled="disabled" :show-tooltip="false" />
 		<!--滑动条提示文字-->
 		<div class="slider-hint">{{ sliderHint }}</div>
 	</div>
@@ -47,11 +47,11 @@ export default {
 		},
 		successIcon: {
 			type: String,
-			default: 'hos-icom-select-grant',
+			default: '✓',
 		},
 		startIcon: {
 			type: String,
-			default: 'hos-icom-arrow-right',
+			default: '→',
 		},
 		barBackground: {
 			type: String,
@@ -132,7 +132,7 @@ export default {
 	},
 	mounted() {
 		this.addIcon()
-		document.querySelector('.hos-slider__bar').style.background = this.barBackground
+		document.querySelector('.el-slider__bar').style.background = this.barBackground
 		
 		// this.bindEvents();
 	},
@@ -144,44 +144,47 @@ export default {
 	},
 	methods: {
 		addIcon() {
-			const elementI = document.createElement('i')
-			elementI.className = this.startIcon
-			document.querySelector('.hos-slider__button-wrapper').append(elementI)
+			const el = document.createElement('span')
+			el.className = 'slide-block-btn-icon'
+			el.textContent = this.startIcon
+			document.querySelector('.el-slider__button-wrapper')?.append(el)
 		},
 		input(val) {
 			this.$emit('input', val)
 			if(val === 0) {
 				this.sliderHint = this.$t('请按住滑块，拖动到最右边')
-				if(document.querySelector('.hos-slider__button-wrapper')) {
-					document.querySelector('.hos-slider__button-wrapper').style.color = '#000'
-					document.querySelector('.hos-slider__button-wrapper').style.background = '#fff'
-					document.querySelector('.hos-slider__button-wrapper i').className = this.startIcon
+				if(document.querySelector('.el-slider__button-wrapper')) {
+					document.querySelector('.el-slider__button-wrapper').style.color = '#000'
+					document.querySelector('.el-slider__button-wrapper').style.background = '#fff'
+					const icon = document.querySelector('.el-slider__button-wrapper .slide-block-btn-icon')
+					if (icon) icon.textContent = this.startIcon
 					document.querySelector('.slider-hint').style.color = '#9296A1'
 				}
 			} else if(val > 0 && val < 95) {
 				this.sliderHint = ''
 				// 按钮样式
-				document.querySelector('.hos-slider__button-wrapper').style.background = '#5386FF'
-				document.querySelector('.hos-slider__button-wrapper').style.color = '#fff'
-				document.querySelector('.hos-slider__button-wrapper i').className = this.startIcon
-				this.addClass(document.querySelector('.hos-slider__button-wrapper'), 'is-moving')
+				document.querySelector('.el-slider__button-wrapper').style.background = '#5386FF'
+				document.querySelector('.el-slider__button-wrapper').style.color = '#fff'
+				document.querySelector('.el-slider__button-wrapper i').className = this.startIcon
+				this.addClass(document.querySelector('.el-slider__button-wrapper'), 'is-moving')
 				// 填充样式
-				document.querySelector('.hos-slider__bar').style.borderColor = '#7EA4FF'
-				document.querySelector('.hos-slider__bar').style.background = '#E9EFFF'
+				document.querySelector('.el-slider__bar').style.borderColor = '#7EA4FF'
+				document.querySelector('.el-slider__bar').style.background = '#E9EFFF'
 				document.querySelector('.slider-hint').style.color = '#9296A1'
 			} else if(val > 95) {
 				this.verifySuccess = true;
 				this.internalValue = 100
 				// 按钮样式
-				document.querySelector('.hos-slider__button-wrapper i').className = this.successIcon
-				document.querySelector('.hos-slider__button-wrapper').style.background = '#41B349'
-				document.querySelector('.hos-slider__button-wrapper').style.color = '#fff'
+				const icon = document.querySelector('.el-slider__button-wrapper .slide-block-btn-icon')
+				if (icon) icon.textContent = this.successIcon
+				document.querySelector('.el-slider__button-wrapper').style.background = '#41B349'
+				document.querySelector('.el-slider__button-wrapper').style.color = '#fff'
 				// 填充样式
-				document.querySelector('.hos-slider__bar').style.borderColor = '#41B349'
-				document.querySelector('.hos-slider__bar').style.background = '#EBF7EC'
+				document.querySelector('.el-slider__bar').style.borderColor = '#41B349'
+				document.querySelector('.el-slider__bar').style.background = '#EBF7EC'
 				document.querySelector('.slider-hint').style.color = '#19A323'
 				// 
-				this.addClass(document.querySelector('.hos-slider__button-wrapper'), 'is-moving')
+				this.addClass(document.querySelector('.el-slider__button-wrapper'), 'is-moving')
 				this.sliderHint = this.$t('验证通过！')
 				this.$emit('success')
 			}
@@ -401,7 +404,7 @@ export default {
 			visibility: visible;
 		}
 	}
-	.hos-slider {
+	.el-slider {
     width: calc(100% - 41px);
 	}
 	.slider-hint {
@@ -414,23 +417,23 @@ export default {
 		// line-height: 100%;
 		background: transparent;
 	}
-	.hos-slider__runway {
+	.el-slider__runway {
 		background: transparent;
 		&.disabled {
-			.hos-slider__bar {
+			.el-slider__bar {
 				background: linear-gradient(90deg,rgba(0, 255, 211, 0) 0%,#00ffd3 100%);
 			}
-			.hos-slider__button-wrapper:hover {
+			.el-slider__button-wrapper:hover {
 				cursor: auto;
 			}
 		}
-		.hos-slider__bar {
+		.el-slider__bar {
 			height: 43px;
 			top: -15px;
 			background: linear-gradient(90deg,rgba(0, 255, 211, 0) 0%,#00ffd3 100%);
 		}
 	}
-	.hos-slider__button-wrapper {
+	.el-slider__button-wrapper {
 		top: -16px;
 		width: 45px;
 		height: 45px;
@@ -438,12 +441,12 @@ export default {
 		border-radius: 5px;
 		box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.3);
 		transform: translate(0);
-		.hos-icom-arrow-right {
+		.slide-block-btn-icon {
 			color: #fff;
 			font-size: 16px;
 			line-height: 45px;
 		}
-		.hos-slider__button {
+		.el-slider__button {
 			display: none;
 		}
 		.is-moving {

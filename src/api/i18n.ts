@@ -31,10 +31,28 @@ export function fetchLanguages() {
 	return httpGet<unknown>('/i18n/language/select-Language')
 }
 
+/** 登录页 i18n 配置（原 getI18nConfig / `$api('getI18nConfig')`） */
+export function fetchI18nLoginPageConfig() {
+	return httpGet<{
+		languageList?: LangOption[]
+		pageElements?: Record<string, string>
+	}>('/i18n/element/get-login-page-config', { moduleCode: 'loginPage' })
+}
+
+/** loader：`i18n.getI18nConfig` */
+export function getI18nConfig() {
+	return {
+		url: '/i18n/element/get-login-page-config',
+		method: 'get',
+		params: { moduleCode: 'loginPage' },
+	}
+}
+
 export const i18nApi = {
 	fetchI18nIsOpen,
 	fetchLangList,
 	fetchLoginPageElements,
 	fetchLanguageData,
 	fetchLanguages,
+	fetchI18nLoginPageConfig,
 }

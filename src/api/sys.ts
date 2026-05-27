@@ -23,6 +23,12 @@ export function fetchDbDialogShowData() {
 	return httpGet<unknown>('/sys/config/is-open-download-browser')
 }
 
+/** loader：`sys.dbDialogShowData` */
+export const dbDialogShowData = () => ({
+	url: '/sys/config/is-open-download-browser',
+	method: 'get',
+})
+
 export const sysApi = {
 	fetchListMenu,
 	fetchListConfig,

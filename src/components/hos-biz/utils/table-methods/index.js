@@ -1,83 +1,47 @@
+import { EL_TABLE_REF } from '../../components/table/index.js';
+
+function getTableRef(vm) {
+	const wrapper = vm.$refs[`el-table-${vm.uid}`];
+	return wrapper?.$refs?.[EL_TABLE_REF] ?? null;
+}
+
 export const otherMethods = {
 	methods: {
-		// 转发table方法
 		clearSelection() {
-			if (
-				this.$refs['hos-table-' + this.uid] &&
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq']
-			)
-				this.$refs['hos-table-' + this.uid].$refs[
-					'hos-table-lq'
-				].clearSelection();
+			const table = getTableRef(this);
+			if (table?.clearSelection) table.clearSelection();
 		},
 		toggleRowSelection(row, selected) {
-			if (
-				this.$refs['hos-table-' + this.uid] &&
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq']
-			)
-				this.$refs['hos-table-' + this.uid].$refs[
-					'hos-table-lq'
-				].toggleRowSelection(row, selected);
+			const table = getTableRef(this);
+			if (table?.toggleRowSelection) table.toggleRowSelection(row, selected);
 		},
 		toggleAllSelection() {
-			if (
-				this.$refs['hos-table-' + this.uid] &&
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq']
-			)
-				this.$refs['hos-table-' + this.uid].$refs[
-					'hos-table-lq'
-				].toggleAllSelection();
+			const table = getTableRef(this);
+			if (table?.toggleAllSelection) table.toggleAllSelection();
 		},
 		toggleRowExpansion(row, expanded) {
-			if (
-				this.$refs['hos-table-' + this.uid] &&
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq']
-			)
-				this.$refs['hos-table-' + this.uid].$refs[
-					'hos-table-lq'
-				].toggleRowExpansion(row, expanded);
+			const table = getTableRef(this);
+			if (table?.toggleRowExpansion) table.toggleRowExpansion(row, expanded);
 		},
 		setCurrentRow(row) {
-			if (
-				this.$refs['hos-table-' + this.uid] &&
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq']
-			)
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq'].setCurrentRow(
-					row
-				);
+			const table = getTableRef(this);
+			if (table?.setCurrentRow) table.setCurrentRow(row);
 		},
 		clearSort() {
-			if (
-				this.$refs['hos-table-' + this.uid] &&
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq']
-			)
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq'].clearSort();
+			const table = getTableRef(this);
+			if (table?.clearSort) table.clearSort();
 		},
 		clearFilter(columnKey) {
-			if (
-				this.$refs['hos-table-' + this.uid] &&
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq']
-			)
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq'].clearFilter(
-					columnKey
-				);
+			const table = getTableRef(this);
+			if (table?.clearFilter) table.clearFilter(columnKey);
 		},
 		doLayout() {
-			if (
-				this.$refs['hos-table-' + this.uid] &&
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq']
-			)
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq'].doLayout();
+			const table = getTableRef(this);
+			if (table?.doLayout) table.doLayout();
 		},
 		sort(prop, order) {
-			if (
-				this.$refs['hos-table-' + this.uid] &&
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq']
-			)
-				this.$refs['hos-table-' + this.uid].$refs['hos-table-lq'].sort(
-					prop,
-					order
-				);
+			const table = getTableRef(this);
+			if (table?.sort) table.sort(prop, order);
 		},
 	},
 };

@@ -27,6 +27,8 @@ AI / Cursor 约定：`.cursor/rules/api-http-conventions.mdc`；迁移流程：`
 | `websys.ts` | 本地 websys 客户端探测（独立 `baseURL`） |
 | `staff.ts` | 员工 CRUD（独立 `baseURL`，遗留） |
 | `ssoVisit.ts` | SSO 单点访问 |
+| `slider.ts` | 拼图滑块验证码（jigsaw） |
+| `legacy-index.ts` | 旧版 `index.js` 全部接口（仅 loader / `$api('getCaptcha')` 等） |
 | `index.ts` | 聚合导出各 `*Api` 对象 |
 
 **`src/api` 下已无 `*.js` 文件。** 新接口只新增 `*.ts`，组件直接 `import { fetchXxx } from '@/api/...'`。
@@ -69,6 +71,9 @@ if (res.code != 200 || !res.data) return
 | `forget-password.*` | `validateForgetCode` 等 | `forget-password.ts` |
 | `scan-code.getPhoneScan` | `fetchPhoneScan` | `scan-code.ts` |
 | `sys-password.ForcinggetPwdPolicy` | `fetchForcingPwdPolicy` | `sys-password.ts` |
-| `websys.cmd` | `fetchWebsysCmd` | `websys.ts` |
+| `websys.cmd` | `fetchWebsysCmd` / `cmd` | `websys.ts` |
+| `slider.generateCaptcha` | `generateCaptcha` | `slider.ts` |
+| `getI18nConfig` | `getI18nConfig` / `fetchI18nLoginPageConfig` | `legacy-index.ts` / `i18n.ts` |
+| `ca.getCAOpenFlag` | `fetchCAOpenFlag` / `getCAOpenFlag` | `ca.ts` |
 
 更早迁移见各模块文件头注释；`/security/*` 见 `login.ts`。

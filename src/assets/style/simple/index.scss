@@ -57,19 +57,19 @@
   .hos-card__header + .hos-card__body {
     height: auto;
   }
-  .hos-biz-pagination {
+  .el-biz-pagination {
     // position: absolute;
     // bottom: 0;
     width: 100%;
   }
-  .hos-biz-table .hos-biz-form,
-  .hos-biz-table .hos-biz-toolbar,
+  .el-biz-table .el-biz-form,
+  .el-biz-table .el-biz-toolbar,
   .hos-table--border,
   .hos-table {
     border-left: 0!important;
     border-right: 0!important;
   }
-  .hos-biz-table .hos-biz-pagination {
+  .el-biz-table .el-biz-pagination {
     border: 0;
     border-top: 1px solid #e2e2e2;
   }
@@ -77,7 +77,7 @@
     box-shadow: 0 0px 0px #fff;
     border-radius: 0;
   }
-  .hos-biz-table .hos-biz-form {
+  .el-biz-table .el-biz-form {
     padding: 11px 11px 0 11px;
   }
   .hos-date-editor--daterange.hos-input__inner {

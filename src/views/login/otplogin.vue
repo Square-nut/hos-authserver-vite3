@@ -63,7 +63,7 @@
 									<el-icon><Message /></el-icon>
 								</template>
 							</el-input>
-							<span class="get-opt-code" @click="getCode()">{{
+							<span class="get-opt-code" @click="openSlider()">{{
 								!btnShow ? `${count}${$t('s后重新获取')}` : $t('获取验证码')
 							}}</span>
 						</div>
@@ -141,6 +141,15 @@
 			>
 			</el-biz-dialog>
 		</el-form>
+		<slideVerify
+			v-if="showOTPSlider"
+			type="image"
+			:pcode="pcode"
+			v-model="slideValue"
+			@success="onSuccess"
+			@close="closeDialog"
+		/>
+		<div v-if="showOTPSlider" class="slide-verify-mask"></div>
 	</el-row>
 </template>
 
@@ -148,16 +157,32 @@
 import AuthConstant from '@/constant/auth-constant';
 import { validPhone11, validEmail } from '@/utils/validateUtil';
 import { getLoginErrorDesc } from './js/login';
-import postSelect from './components/post-select.vue';
-import postSelectTable from './components/post-select-table.vue';
+import postSelect from '@/components/post-select.vue';
+import postSelectTable from '@/components/post-select-table.vue';
 import forgetPassword from './forgetPassword.vue';
 import { useUserStore } from '@/stores/user';
-import { getOTPCode as fetchOTPCode, getCaptcha as fetchCaptcha } from '@/api/login';
+import {
+	getOTPCode as fetchOTPCode,
+	getCaptcha as fetchCaptcha,
+} from '@/api/login';
 import { openHosBizDialog } from '@/composables/useHosBiz';
 import { House, Message, Picture, User } from '@element-plus/icons-vue';
+import slideVerify from '@/components/Slide-verify/index.vue';
+import cryptUtil from '@/utils/crypt/index.js';
+import generateRandomString from '@/utils/generate-random-string.js';
+import { isSuccessCode } from '@/types/api-common';
+import { ElMessage } from 'element-plus';
 export default {
 	name: 'otplogin',
-	components: { postSelect, postSelectTable, User, Message, Picture, House },
+	components: {
+		postSelect,
+		postSelectTable,
+		slideVerify,
+		User,
+		Message,
+		Picture,
+		House,
+	},
 	directives: {
 		focus: {
 			// 指令的定义
@@ -314,6 +339,11 @@ export default {
 			timer: null,
 			imgUrl: '', // 图形二维码
 			postPlaceholder: this.$t('点击登录按钮后获取岗位单元'),
+			showOTPSlider: false,
+			slideValue: 0,
+			pcode: '',
+			resetSlider: 0,
+			disabledSlider: false,
 		};
 	},
 	props: {
@@ -361,10 +391,11 @@ export default {
 						paramData.postChainId = this.postChainId;
 					}
 					this.loading = true;
-					useUserStore().Login(paramData)
+					useUserStore()
+						.Login(paramData)
 						.then((res) => {
 							// 登录成功跳转
-							if (res && res.code == 200) {
+							if (res && isSuccessCode(res.code)) {
 								// 获取岗位信息并展示下拉列表
 								if (res.data.personId && !this.Simple) {
 									this.postPlaceholder = this.$t('请选择岗位单元');
@@ -413,11 +444,11 @@ export default {
 								this.openCaptcha = true;
 								this.getCaptcha();
 							}
-							if (!err.code.includes('101-002-005-')) {
-								this.$message.error(err.msg);
+							const errCode = String(err?.code ?? '');
+							if (!errCode.includes('101-002-005-')) {
+								ElMessage.error(err?.msg ?? this.$t('登录失败'));
 							}
-							// 强制修改密码弹窗
-							if (err.code.includes(AuthConstant.forcedJumpSetPassword)) {
+							if (errCode.includes(AuthConstant.forcedJumpSetPassword)) {
 								this.$emit('forcedJumpSetPassword', err);
 							}
 						});
@@ -464,37 +495,65 @@ export default {
 				}, 1000);
 			}
 		},
-		getOTPCode() {
-			return new Promise((resolve) => {
-				// 参数名：smsType
-				// templateCode    短信登录
-				// forgotPasswordTemplateCode  忘记密码发短信
-				// UnlockTemplateCode  自主解锁发短信
-				let phoneForm = {
-					phoneNumber: this.otpLoginForm.loginName,
-					smsType: 'templateCode',
-				};
-				fetchOTPCode(phoneForm)
-					.then((response) => {
-						if (response && response.code == 200) {
-							this.otpLoginForm.smsId = response.data.uuid;
+		getCertCode() {
+			const cert = cryptUtil.crypt(this.otpLoginForm.loginName);
+			return `${generateRandomString(10)}${cert}${generateRandomString(10)}`;
+		},
+		getOTPCode(token) {
+			const phoneForm = token
+				? { code: this.getCertCode(), token }
+				: {
+						phoneNumber: this.otpLoginForm.loginName,
+						smsType: 'templateCode',
+					};
+			return fetchOTPCode(phoneForm)
+				.then((response) => {
+					if (response && isSuccessCode(response.code)) {
+						this.otpLoginForm.smsId = response.data?.uuid;
+						if (!token) {
 							this.countDown(60);
-						} else {
-							///提示错误信息
-							this.$message.error(response.msg);
 						}
-					})
-					.catch((error) => {
-						this.$message.error(error.msg);
-						console.log(error);
-					});
-			});
+					} else {
+						this.btnShow = true;
+						clearInterval(this.timer);
+						this.timer = null;
+						ElMessage.error(
+							response?.msg ?? this.$t('获取验证码失败，请重新再试！'),
+						);
+					}
+				})
+				.catch((error) => {
+					this.btnShow = true;
+					clearInterval(this.timer);
+					this.timer = null;
+					ElMessage.error(
+						error?.msg ?? this.$t('获取验证码失败，请重新再试！'),
+					);
+					console.log(error);
+				});
+		},
+		openSlider() {
+			if (!this.btnShow) return;
+			if (!this.otpLoginForm.loginName?.trim()) return;
+			this.disabledSlider = false;
+			this.pcode = cryptUtil.crypt(this.otpLoginForm.loginName);
+			this.showOTPSlider = true;
+		},
+		onSuccess(val) {
+			this.btnShow = false;
+			this.showOTPSlider = false;
+			this.disabledSlider = true;
+			this.getOTPCode(val);
+		},
+		closeDialog() {
+			this.showOTPSlider = false;
+			this.btnShow = true;
 		},
 		// 获取图形二维码
 		getCaptcha() {
 			fetchCaptcha()
 				.then((response) => {
-					if (response && response.code == 200) {
+					if (response && isSuccessCode(response.code)) {
 						this.imgUrl = 'data:image/gif;base64,' + response.data.img;
 						this.otpLoginForm.captchaUUID = response.data.uuid;
 						this.$forceUpdate();
@@ -517,6 +576,7 @@ export default {
 			});
 		},
 		changeLoginName() {
+			this.resetSlider = Date.now();
 			this.reset();
 		},
 		reset() {
@@ -531,6 +591,9 @@ export default {
 		},
 		changePost(id, post) {
 			this.otpLoginForm.post = post;
+		},
+		openLoginBtn() {
+			this.loading = false;
 		},
 	},
 };
@@ -552,5 +615,11 @@ export default {
 	a {
 		cursor: pointer;
 	}
+}
+.slide-verify-mask {
+	position: fixed;
+	inset: 0;
+	z-index: 10000;
+	background: rgba(0, 0, 0, 0.45);
 }
 </style>

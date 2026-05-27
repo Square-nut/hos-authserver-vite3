@@ -1,7 +1,7 @@
 <template>
 	<div class="slide-wrap">
 		<div @click="close" class="slide-verify-close">
-			<i class="hos-icom-close"></i>
+			<el-icon><Close /></el-icon>
 		</div>
 		<!-- 滑动条 -->
 		<SlideBlock
@@ -23,10 +23,12 @@
 	</div>
 </template>
 <script>
+import { Close } from '@element-plus/icons-vue';
 import SlideImage from './SlideImage';
 import SlideBlock from './SlideBlock';
 export default {
 	name: 'SlideVerify',
+	components: { Close },
 	props: {
 		type: {
 			// block or image

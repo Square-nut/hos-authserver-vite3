@@ -240,7 +240,7 @@ export default {
 				.then((response) => {
 					this.isLoading = false
 					const data = response.data;
-					if (response.code == 200) {
+					if (response.code == 200 || response.code == '200') {
 						this.sessionId = data.sessionId;
 						self.$refs.block.src = data.sliderImg;
 						self.$refs.block.style.top = data.yposition + 'px';
@@ -516,7 +516,10 @@ export default {
 				mobile: this.pcode,
 			})
 				.then((response) => {
-					if (response.code == 200 && response.data.success === true) 
+					if (
+						(response.code == 200 || response.code == '200') &&
+						response.data.success === true
+					) 
 					{
 						this.slideVerifyRootText = this.$t('验证通过！')
 						this.verifySuccessEvent()

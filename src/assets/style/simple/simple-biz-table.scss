@@ -1,6 +1,6 @@
 $--border-color: #e2e2e2;
 $--border: 1px solid $--border-color;
-.hos-biz-table {
+.el-biz-table {
   background: #fff;
   border-radius: 4px;
   overflow: hidden;
@@ -10,7 +10,7 @@ $--border: 1px solid $--border-color;
     border-bottom-left-radius: 4px !important;
   }
 
-  .hos-biz-form {
+  .el-biz-form {
     background: #fff;
     padding: 11px 11px 0 11px;
     border-top: $--border;
@@ -20,7 +20,7 @@ $--border: 1px solid $--border-color;
     overflow: hidden;
   }
 
-  .hos-biz-toolbar {
+  .el-biz-toolbar {
 		overflow: hidden;
 		height: 28px;
     padding: 2px;
@@ -37,7 +37,7 @@ $--border: 1px solid $--border-color;
         padding: 6px 10px;
       }
     }
-		.hos-biz-pagination {
+		.el-biz-pagination {
 			width: 100%;
 
 			&.hasSetting {
@@ -59,7 +59,7 @@ $--border: 1px solid $--border-color;
 		}
 	}
 
-  .hos-biz-pagination {
+  .el-biz-pagination {
     height: 32px;
     line-height: 32px;
     background: #ffffff;
@@ -68,7 +68,7 @@ $--border: 1px solid $--border-color;
     border-radius: 0 0 4px 4px;
     overflow: hidden;
 
-    .hos-pagination {
+    .el-pagination {
       padding-top: 0;
       padding-bottom: 0;
 
@@ -84,11 +84,11 @@ $--border: 1px solid $--border-color;
         line-height: 32px;
       }
 
-      span:hover:not(.hos-pagination__simplejump, .hos-pagination__stotal) {
+      span:hover:not(.el-pagination__simplejump, .el-pagination__stotal) {
         text-decoration: underline;
       }
 
-      .hos-pagination__stotal {
+      .el-pagination__stotal {
         float: right;
       }
 
@@ -109,62 +109,62 @@ $--border: 1px solid $--border-color;
   .hos-tabs {
     height: 100%;
     .all-table{
-      .hos-biz-form{
+      .el-biz-form{
         border-top: none;
         border-right: none;
         border-left: none;
       }
-      .hos-table{
+      .el-table{
         border-right: none!important;
         border-left: none!important;
       }
-      &.hos-biz-table{
-        .hos-biz-toolbar{
+      &.el-biz-table{
+        .el-biz-toolbar{
           border-right: none;
           border-left: none;
         }
       }
-      .hos-biz-pagination {
+      .el-biz-pagination {
         border: none;
       }
     }
     .left-table{
-      .hos-biz-form{
+      .el-biz-form{
         border-top: none;
         border-left: none;
         border-top-right-radius: 0;
       }
-      .hos-table{
+      .el-table{
         border-left: none!important;
       }
-      &.hos-biz-table{
+      &.el-biz-table{
         border-radius: 4px 0 0 4px;
-        .hos-biz-toolbar{
+        .el-biz-toolbar{
           border-left: none;
         }
       }
-      .hos-biz-pagination {
+      .el-biz-pagination {
         border-left: none;
         border-bottom: none;
         border-bottom-right-radius: 0;
       }
     }
     .right-table{
-      .hos-biz-form{
+      .el-biz-form{
         border-top: none;
         border-right: none;
         border-top-left-radius: 0;
       }
-      .hos-table{
+      .el-table{
         border-right: none!important;
       }
-      &.hos-biz-table{
+      &.el-biz-table{
         border-radius: 0 4px 4px 0;
-        .hos-biz-toolbar{
+        .el-biz-toolbar{
           border-right: none;
         }
       }
-      .hos-biz-pagination {
+      .el-biz-pagination {
         border-right: none;
         border-bottom: none;
         border-bottom-left-radius: 0;
@@ -195,18 +195,18 @@ $--border: 1px solid $--border-color;
   & .hos-card__body {
     padding: 0;
   }
-  .hos-biz-pagination {
+  .el-biz-pagination {
     position: absolute;
     bottom: 0;
     width: 100%;
   }
-  .hos-biz-table .hos-biz-form,
-  .hos-biz-table .hos-biz-toolbar,
-  .hos-table--border {
+  .el-biz-table .el-biz-form,
+  .el-biz-table .el-biz-toolbar,
+  .el-table--border {
     border-left: 0;
     border-right: 0;
   }
-  .hos-biz-table .hos-biz-pagination {
+  .el-biz-table .el-biz-pagination {
     border: 0;
     border-top: 1px solid #e2e2e2;
   }
@@ -214,7 +214,7 @@ $--border: 1px solid $--border-color;
     box-shadow: 0 0px 0px #fff;
     border-radius: 0;
   }
-  .hos-table__body-wrapper {
+  .el-table__body-wrapper {
     height: auto !important;
   }
   .hos-date-editor--daterange.hos-input__inner {

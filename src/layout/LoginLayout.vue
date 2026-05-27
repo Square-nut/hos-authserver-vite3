@@ -1,32 +1,74 @@
 <template>
 	<el-container>
-		<template v-if="isHosTheme">
+		<!-- Hos 主题 ($theme == 1) -->
+		<template v-if="uiTheme === 1">
 			<div class="hos-img-login-bg el-img-login-bg"></div>
 			<div class="hos-img-login-content el-img-login-content">
 				<el-main class="hos-login-main el-login-main">
+					<div
+						class="hos-login-company-info"
+						:style="hosCompanyInfoStyle"
+					>
+						<img
+							v-if="loginStyle.companyLogo?.login_back_file_id"
+							class="login-company-logo dib mid pr10"
+							:src="loginStyle.companyLogo.login_back_file_id"
+							alt=""
+						/>
+						<span class="dib mid">{{ loginStyle.companyName }}</span>
+					</div>
 					<div class="hos-login-card el-login-card">
 						<LoginIndex />
 					</div>
 				</el-main>
-				<el-footer class="login-footer">
-					<div>
-						<span class="foot-font">{{
-							loginPageDataDTO.hosCopyrightInformation
-						}}</span>
-					</div>
+				<el-footer
+					v-if="loginStyle.copyrightInformationSwitch == 1"
+					class="login-footer"
+				>
+					<template
+						v-for="(item, index) in copyrightList"
+						:key="'hos-footer-' + index"
+					>
+						<span
+							v-if="item.type == 'String'"
+							class="footer-item span"
+							:class="{ newline: item.newline }"
+							>{{ item.content }}</span
+						>
+						<img
+							v-if="item.type == 'Trademark' && item.actived == true"
+							class="footer-item img pl10"
+							:class="{ newline: item.newline }"
+							:src="getCopyrightImage(item)"
+							alt=""
+						/>
+					</template>
 				</el-footer>
 			</div>
 		</template>
-		<template v-else>
-			<el-main class="login-simple-el-main">
+
+		<!-- 简约主题 ($theme == 0) -->
+		<template v-else-if="uiTheme === 0">
+			<el-main
+				class="login-simple-el-main login-simple-hos-main"
+				:class="{ 'is-feature': loginStyle.showPersonalization == 1 }"
+			>
 				<div class="header-four-box">
 					<div class="left-group-box"></div>
-					<div class="center">
-						<span>{{ loginPageDataDTO.easyTitle }}</span>
+					<div class="center" :style="companyInfoStyle">
+						<img
+							v-if="loginStyle.companyLogo?.login_back_file_id"
+							class="login-company-logo dib mid"
+							:src="loginStyle.companyLogo.login_back_file_id"
+							alt=""
+						/>
+						<span class="dib mid">{{
+							loginStyle.companyName || t('东华医为数字化医院')
+						}}</span>
 					</div>
 					<div class="languangeChange">
 						<el-select
-							v-if="i18nStatus"
+							v-if="isI18n && loginStyle.showI18n == 1"
 							v-model="currLang"
 							class="languageSelect"
 							:placeholder="t('请选择语言')"
@@ -43,29 +85,139 @@
 					<div class="right-group-box"></div>
 				</div>
 				<div class="simple-login-mid">
-					<el-carousel trigger="click" height="100%">
+					<el-carousel
+						trigger="click"
+						:height="
+							loginStyle.showPersonalization == 1 ? '555px' : '672px'
+						"
+						:interval="5000"
+					>
 						<el-carousel-item
 							v-for="item in carouselImage"
 							:key="item.sort"
-						>
-							<el-image
-								:src="item.login_back_file_id"
-								style="width: 100%; height: 100%"
-							/>
-						</el-carousel-item>
+							:style="carouselItemStyle(item)"
+						/>
 					</el-carousel>
+					<div
+						v-if="loginStyle.easyUserInfo == true"
+						id="login-user-info-wrap"
+						class="login-user-info-wrap"
+						v-html="userInfoHtml"
+					></div>
 					<div class="simple-login-card">
 						<LoginIndex />
 					</div>
 				</div>
+				<FeatureList
+					v-if="loginStyle.showPersonalization == 1"
+					:data="loginStyle.personalization || []"
+				/>
 			</el-main>
-			<el-footer class="simple-footer">
-				<div class="simple-com-logo"></div>
-				<span class="simple-foot-font">
-					{{ loginPageDataDTO.easyCopyrightInformation }}
-				</span>
+			<el-footer
+				v-if="loginStyle.copyrightInformationSwitch == 1"
+				class="simple-footer"
+			>
+				<template
+					v-for="(item, index) in copyrightList"
+					:key="'simple-footer-' + index"
+				>
+					<span
+						v-if="item.type == 'String' && item.actived == true"
+						class="footer-item span"
+						:class="{ newline: item.newline }"
+						>{{ item.content }}</span
+					>
+					<img
+						v-if="item.type == 'Trademark' && item.actived == true"
+						class="footer-item img"
+						:class="{ newline: item.newline }"
+						:src="getCopyrightImage(item)"
+						alt=""
+					/>
+				</template>
 			</el-footer>
 		</template>
+
+		<!-- 纯净主题 ($theme == 2) -->
+		<template v-else-if="uiTheme === 2">
+			<el-main
+				class="login-pure-hos-main login-pure-el-main"
+				:class="{ 'is-feature': loginStyle.showPersonalization == 1 }"
+			>
+				<div class="header-four-box">
+					<div class="left-group-box"></div>
+					<div class="center" :style="companyInfoStyle">
+						<img
+							v-if="loginStyle.companyLogo?.login_back_file_id"
+							class="login-company-logo dib mid"
+							:src="loginStyle.companyLogo.login_back_file_id"
+							alt=""
+						/>
+						<span class="dib mid">{{
+							loginStyle.companyName || t('东华医为数字化医院')
+						}}</span>
+					</div>
+					<div class="languangeChange">
+						<el-select
+							v-if="loginStyle.showI18n == 1"
+							v-model="currLang"
+							class="languageSelect"
+							popper-class="login-language-select-popper"
+							:placeholder="t('请选择语言')"
+							@change="languageChange"
+						>
+							<el-option
+								v-for="item in langOpts"
+								:key="item.value"
+								:label="item.label"
+								:value="item.value"
+							/>
+						</el-select>
+					</div>
+					<div class="right-group-box"></div>
+				</div>
+				<div class="pure-login-mid">
+					<el-carousel trigger="click" height="100%" :interval="5000">
+						<el-carousel-item
+							v-for="item in carouselImage"
+							:key="item.sort"
+							:style="pureCarouselItemStyle(item)"
+						/>
+					</el-carousel>
+					<div class="pure-login-card">
+						<LoginIndex />
+					</div>
+				</div>
+				<FeatureList
+					v-if="loginStyle.showPersonalization == 1"
+					:data="loginStyle.personalization || []"
+				/>
+			</el-main>
+			<el-footer
+				v-if="loginStyle.copyrightInformationSwitch == 1"
+				class="pure-footer"
+			>
+				<template
+					v-for="(item, index) in copyrightList"
+					:key="'pure-footer-' + index"
+				>
+					<span
+						v-if="item.type == 'String' && item.actived == true"
+						class="footer-item span"
+						:class="{ newline: item.newline }"
+						>{{ item.content }}</span
+					>
+					<img
+						v-if="item.type == 'Trademark' && item.actived == true"
+						class="footer-item img"
+						:class="{ newline: item.newline }"
+						:src="getCopyrightImage(item)"
+						alt=""
+					/>
+				</template>
+			</el-footer>
+		</template>
+
 		<div v-if="showLoginDeviceInfo" class="login-layout-device-info">
 			<span>本机IP: {{ localIp || '--' }}</span>
 			<span>MAC: {{ localMac || '--' }}</span>
@@ -75,10 +227,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import {
+	computed,
+	onBeforeMount,
+	onBeforeUnmount,
+	onMounted,
+	provide,
+	ref,
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import LoginIndex from '@/views/login/index.vue'
+import FeatureList from '@/components/feature-list.vue'
 import dbDialog from '@/components/DHCWebBrowser-dialog/index.vue'
 import UserConstant from '@/constant/user-constant'
 import { returnGlobalValue } from '@/utils'
@@ -94,48 +253,96 @@ import { i18nApi } from '@/api/i18n'
 import { useDeviceStore } from '@/stores/device'
 import { useI18nStore } from '@/stores/i18n'
 import { useUserStore } from '@/stores/user'
+import { useLoginSessionStore } from '@/stores/loginSession'
 import {
 	setLoginI18nList,
 	setLoginPageStyle,
 	setLoginPortalUrl,
 	setLoginPostVersion,
 } from '@/composables/useHosBiz'
-import loginBg01 from '@/assets/images/login/01.png'
-import loginBg02 from '@/assets/images/login/02.png'
-import loginBg03 from '@/assets/images/login/03.png'
+import {
+	enrichLoginPageDto,
+	getFaviconHref,
+	getSlideImageUrl,
+	normalizeCarousel,
+	resolveUiTheme,
+} from '@/layout/login-layout-utils'
 import type {
 	ApiResult,
 	CarouselSlide,
+	CopyrightItem,
 	LangOption,
 	LoginConfigData,
 	LoginPageDataDTO,
 	LoginTypeDataDTO,
 } from '@/types/login-layout'
 
-const defaultCarouselImage: CarouselSlide[] = [
-	{ sort: 1, login_back_file_id: loginBg01 },
-	{ sort: 2, login_back_file_id: loginBg02 },
-	{ sort: 3, login_back_file_id: loginBg03 },
-]
-
 const { t } = useI18n()
-const router = useRouter()
 const deviceStore = useDeviceStore()
 const i18nStore = useI18nStore()
 const userStore = useUserStore()
+const loginSessionStore = useLoginSessionStore()
 
-const isHosTheme = computed(
-	() => import.meta.env.VITE_APP_THEME_STYLE === '1',
-)
-const carouselImage = ref<CarouselSlide[]>([...defaultCarouselImage])
+const uiTheme = ref(resolveUiTheme())
 const loginPageDataDTO = ref<LoginPageDataDTO>({})
+const loginStyle = computed(() => loginPageDataDTO.value)
+const copyrightList = ref<CopyrightItem[]>([])
+const carouselImage = ref<CarouselSlide[]>(normalizeCarousel())
 const dbDialogVisible = ref(false)
-const langOpts = ref<LangOption[]>([])
+const userInfoHtml = ref('')
+const isChangeLanguage = ref(false)
 const currLang = ref(getLocale())
-const i18nStatus = ref(false)
 const showLoginDeviceInfo = ref(false)
 const localIp = ref('')
 const localMac = ref('')
+
+const isI18n = computed(() => i18nStore.i18nStatus)
+const langOpts = computed(
+	() => (loginSessionStore.langOpts as LangOption[]) || [],
+)
+
+const hosCompanyInfoStyle = computed(() => {
+	const layout = loginStyle.value.layout || 'left'
+	if (layout === 'left') return { left: '111px' }
+	if (layout === 'center') return { left: '50%', transform: 'translateX(-50%)' }
+	return { right: '111px' }
+})
+
+const companyInfoStyle = computed(() => {
+	const layout = loginStyle.value.layout || 'center'
+	let posRight = ''
+	if (isI18n.value && loginStyle.value.showI18n == 1 && layout === 'right') {
+		posRight = 'margin-right: 128px;'
+	}
+	return `text-align:${layout};${posRight}`
+})
+
+function getCopyrightImage(item: CopyrightItem): string {
+	const content = item.content
+	if (content && typeof content === 'object' && 'login_back_file_id' in content) {
+		return content.login_back_file_id || ''
+	}
+	return ''
+}
+
+function carouselItemStyle(item: CarouselSlide) {
+	const url = getSlideImageUrl(item)
+	return {
+		display: item.actived === false ? 'none' : 'inline-block',
+		backgroundImage: url ? `url(${url})` : undefined,
+	}
+}
+
+function pureCarouselItemStyle(item: CarouselSlide) {
+	const url = getSlideImageUrl(item)
+	return {
+		display: item.actived === false ? 'none' : 'inline-block',
+		backgroundImage: url ? `url(${url})` : undefined,
+		backgroundRepeat: 'repeat-x',
+		backgroundPosition: 'center',
+		backgroundSize: 'contain',
+	}
+}
 
 function hideLoginLoadingMask() {
 	const mask = document.querySelector<HTMLElement>('.login-loading-mask')
@@ -160,12 +367,20 @@ function initLoginDeviceInfo() {
 	localMac.value = deviceStore.mac || legacyMac
 }
 
+function updateRouterQuery() {
+	const url = new URL(window.location.href)
+	const params = new URLSearchParams(url.search)
+	params.delete('language')
+	url.search = params.toString()
+	window.history.pushState({}, '', url.toString())
+}
+
 async function fetchI18nOpen() {
 	const res = await i18nApi.fetchI18nIsOpen()
-	if (res.code == '200' && res.data != null) {
-		i18nStatus.value = Boolean(res.data)
-		i18nStore.setI18nStatus(i18nStatus.value)
-		if (i18nStatus.value) {
+	if ((res.code == 200 || res.code == '200') && res.data != null) {
+		const open = Boolean(res.data)
+		i18nStore.setI18nStatus(open)
+		if (open) {
 			await fetchLangs()
 		}
 	}
@@ -174,11 +389,10 @@ async function fetchI18nOpen() {
 async function fetchLangs() {
 	try {
 		const res = await i18nApi.fetchLangList()
-		if (res.code != 200 || !Array.isArray(res.data)) return
+		if (res.code != 200 && res.code != '200') return
+		if (!Array.isArray(res.data)) return
 
-		langOpts.value = res.data
 		setLoginI18nList(res.data)
-
 		const defaultLang = res.data.find((item) => item.isDefault)
 		if (defaultLang?.value) {
 			setDefaultLocale(defaultLang.value)
@@ -187,30 +401,19 @@ async function fetchLangs() {
 		if (!getLocale() && defaultLang?.value) {
 			setCurrentLocale(defaultLang.value)
 		}
-		await fetchLoginPageElements()
+		await mergeLoginPageElements(getLocale())
 	} catch (error) {
 		console.log(error)
 	}
 }
 
-async function fetchLoginPageElements() {
+async function mergeLoginPageElements(language?: string) {
+	const lang = language || getLocale()
+	if (!lang) return
 	const res = await i18nApi.fetchLoginPageElements('loginPage')
-	if (res.code == '200' && res.data) {
-		i18n.global.mergeLocaleMessage(currLang.value, res.data)
+	if ((res.code == 200 || res.code == '200') && res.data) {
+		i18n.global.mergeLocaleMessage(lang, res.data)
 	}
-}
-
-function languageChange(val: string) {
-	const currentQuery = { ...router.currentRoute.value.query }
-	if (currentQuery.language) {
-		delete currentQuery.language
-		router.replace({
-			path: router.currentRoute.value.path,
-			query: currentQuery,
-		})
-	}
-	setCurrentLocale(val)
-	router.go(0)
 }
 
 function getDefaultLoginTypeInfo(): LoginTypeDataDTO {
@@ -232,43 +435,50 @@ function getDefaultLoginTypeInfo(): LoginTypeDataDTO {
 }
 
 function persistLoginType(loginTypeInfo: LoginTypeDataDTO) {
-	const strObj = JSON.stringify(loginTypeInfo)
-	sessionStorage.setItem('loginTypeDataDTO', strObj)
+	sessionStorage.setItem('loginTypeDataDTO', JSON.stringify(loginTypeInfo))
 	userStore.setLoginType(loginTypeInfo as Record<string, unknown>)
 }
 
-function applyLoginPageData(dto: LoginPageDataDTO) {
+function applyLoginPageData(raw: LoginPageDataDTO) {
+	const dto = enrichLoginPageDto(raw)
 	loginPageDataDTO.value = dto
-	carouselImage.value =
-		dto.easyBackGround?.length ? dto.easyBackGround : [...defaultCarouselImage]
-	sessionStorage.setItem('loginPageDataDTO', JSON.stringify(dto))
+	userStore.setLoginStyle(dto as Record<string, unknown>)
 	setLoginPageStyle(dto as Record<string, unknown>)
 
-	document.title =
-		dto.easyBrowserTabName ||
-		dto.hosBrowserTabName ||
-		t('基础开发框架')
+	copyrightList.value = Array.isArray(dto.copyrightInformationInfo)
+		? dto.copyrightInformationInfo
+		: []
+	carouselImage.value = normalizeCarousel(dto.backGround)
 
-	const logoUrl = dto.easyBrowserTabLogo || dto.hosBrowserTabLogo
-	if (logoUrl) {
+	sessionStorage.setItem('loginPageDataDTO', JSON.stringify(dto))
+
+	document.title = dto.browserTabName || t('基础开发框架')
+	const favicon = getFaviconHref(dto.browserTabLogo)
+	if (favicon) {
 		let link =
 			document.querySelector<HTMLLinkElement>("link[rel*='icon']") ||
 			document.createElement('link')
 		link.rel = 'shortcut icon'
-		link.href = logoUrl
+		link.href = favicon
 		document.head.appendChild(link)
 	}
 }
 
 function applyLoginConfig(res: ApiResult<LoginConfigData>) {
-	if (!res || res.code != 200 || !res.data) return
+	if (!res || (res.code != 200 && res.code != '200') || !res.data) return
 
 	const data = res.data
 	if (data.functionalVersion != null) {
-		setLoginPostVersion(String(data.functionalVersion))
+		const version = String(data.functionalVersion)
+		ls.set('hos_login_post_type', version)
+		setLoginPostVersion(version)
 	}
-	if (data.portalUrl != null) {
-		setLoginPortalUrl(String(data.portalUrl))
+	const portal =
+		returnGlobalValue('VUE_APP_PORTAL_URL') ||
+		data.portalUrl ||
+		''
+	if (portal) {
+		setLoginPortalUrl(String(portal))
 	}
 	hideLoginLoadingMask()
 
@@ -289,8 +499,9 @@ function applyLoginConfig(res: ApiResult<LoginConfigData>) {
 	}
 }
 
-function fetchLoginConfig() {
-	const pageType = isHosTheme.value ? 'hos' : 'easy'
+/** 与旧版 configPageType 同名，供 index inject 调用 */
+function configPageType() {
+	const pageType = uiTheme.value === 1 ? 'hos' : 'easy'
 	loginApi
 		.fetchLoginConfig(pageType)
 		.then((res) => applyLoginConfig(res))
@@ -299,14 +510,43 @@ function fetchLoginConfig() {
 		})
 }
 
+function init() {
+	currLang.value = getLocale()
+	configPageType()
+}
+
+async function languageChange(val: string) {
+	setCurrentLocale(val)
+	updateRouterQuery()
+	currLang.value = val
+	i18nStore.setLanguage(val)
+	isChangeLanguage.value = true
+	await mergeLoginPageElements(val)
+	init()
+}
+
+function onLoginUserInfoMessage(event: MessageEvent) {
+	const data = event.data as { type?: string; data?: string }
+	if (data?.type === 'login-receive-user-info') {
+		userInfoHtml.value = data.data || ''
+	}
+}
+
+provide('loginLayoutThis', {
+	configPageType,
+	languageChange,
+	isChangeLanguage,
+})
+
 onBeforeMount(async () => {
 	await fetchI18nOpen()
-	fetchLoginConfig()
+	init()
 	initLoginDeviceInfo()
 })
 
 onMounted(() => {
 	document.body.classList.add('userLayout')
+	window.addEventListener('message', onLoginUserInfoMessage)
 	setTimeout(() => {
 		initLoginDeviceInfo()
 	}, 1500)
@@ -314,6 +554,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
 	document.body.classList.remove('userLayout')
+	window.removeEventListener('message', onLoginUserInfoMessage)
 })
 </script>
 
@@ -324,11 +565,26 @@ onBeforeUnmount(() => {
 .el-system-name {
 	padding-top: 25px;
 	font-size: 32px;
-	font-family: Microsoft YaHei;
+	font-family: 'Source Han Sans', '思源黑体', 'Microsoft YaHei', sans-serif;
 	font-weight: bold;
 	color: #000000;
 }
-
+.hos-login-main {
+	display: flex;
+	height: 502px;
+	opacity: 1;
+	border-radius: 0;
+}
+.login-company-logo {
+	height: 45px;
+}
+.footer-item + .footer-item:not(.newline) {
+	margin-left: 5px;
+}
+.newline {
+	display: block;
+	margin: auto;
+}
 .login-layout-device-info {
 	position: fixed;
 	right: 16px;

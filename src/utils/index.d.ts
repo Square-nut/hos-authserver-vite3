@@ -48,7 +48,7 @@ export function removeClass(ele: HTMLElement, cls: string): void
 
 export const escapeRegexpString: (value?: string) => string
 
-/** 读取 `__hos` 或 `process.env` 中的配置项 */
+/** 读取 `__hos`（environment.js）或 `import.meta.env` 中的配置项 */
 export function returnGlobalValue(val: string): unknown
 
 export function getBaseUrl(): unknown

@@ -25,7 +25,7 @@
 					>
 					</el-option>
 				</el-select>
-				<i class="el-icon-s-home"></i>
+				<el-icon class="tenant-home-icon"><House /></el-icon>
 			</el-form-item>
 		</el-col>
 
@@ -156,17 +156,19 @@
 import { ElMessage } from 'element-plus';
 import { isOpenDb } from '@/utils/is-open-db';
 import { useI18n } from 'vue-i18n';
-import postSelect from './components/post-select.vue';
+import postSelect from '@/components/post-select.vue';
 import postSelectTable from '@/components/post-select-table.vue';
 import forgetPassword from './forgetPassword.vue';
 import { openHosBizDialog } from '@/composables/useHosBiz';
-import { Picture, View } from '@element-plus/icons-vue';
+import { House, Picture, View } from '@element-plus/icons-vue';
+import { resolveUiTheme } from '@/layout/login-layout-utils';
 import AuthConstant from '@/constant/auth-constant';
 import { useUserStore } from '@/stores/user';
 import { loginApi } from '@/api/login';
 import cryptUtil from '@/utils/crypt/index.js';
 import { ref, watch, onMounted, reactive, nextTick } from 'vue';
 import type { FormInstance, FormRules, InputInstance } from 'element-plus';
+import { isSuccessCode } from '@/types/api-common';
 
 const loginFormRef = ref<FormInstance>();
 const userLoginSelectPostRef = ref<InstanceType<typeof postSelect> | null>(
@@ -223,7 +225,7 @@ const vFocus = {
 const postChainId = ref('');
 const passwordType = ref('password');
 const loginErr = ref('');
-const theme = ref(import.meta.env.VITE_APP_THEME_STYLE);
+const theme = ref(String(resolveUiTheme()));
 const openTenant = ref(false);
 const openCaptcha = ref(false);
 const imgUrl = ref('');
@@ -400,7 +402,7 @@ function userHandleLogin(isLogin: boolean) {
 			.Login(upData)
 			.then((res) => {
 				// 登录成功跳转
-				if (res && res.code == 200) {
+				if (res && isSuccessCode(res.code)) {
 					// 首次点击登录按钮，获取岗位信息并展示下拉列表
 					if (res.data.personId && props.showPostType != 'simple') {
 						loading.value = false;
@@ -453,11 +455,12 @@ function userHandleLogin(isLogin: boolean) {
 				if (err.code == '101-002-004-004' || err.code == '101-002-004-005') {
 					getCaptcha();
 				}
-				if (!err.code.includes('101-002-005-')) {
-					ElMessage.error(err.msg);
+				const errCode = String(err?.code ?? '');
+				if (!errCode.includes('101-002-005-')) {
+					ElMessage.error(err?.msg ?? t('登录失败'));
 				}
 				// 强制修改密码弹窗
-				if (err.code.includes(AuthConstant.forcedJumpSetPassword)) {
+				if (errCode.includes(AuthConstant.forcedJumpSetPassword)) {
 					emit('forcedJumpSetPassword', err);
 				}
 			});
@@ -469,7 +472,7 @@ function getCaptcha() {
 		.getCaptcha()
 		.then((response) => {
 			const data = response?.data;
-			if (response?.code == 200 && data) {
+			if (isSuccessCode(response?.code) && data) {
 				imgUrl.value = 'data:image/gif;base64,' + data.img;
 				loginForm.value.captchaUUID = data.uuid;
 			} else {
@@ -514,6 +517,8 @@ function changePost(id: string, post: any) {
 function openLoginBtn() {
 	loading.value = false;
 }
+
+defineExpose({ openLoginBtn });
 </script>
 <style scoped>
 .Password_settings {
@@ -540,5 +545,14 @@ function openLoginBtn() {
 .VCode img {
 	width: 120px;
 	height: 45px;
+}
+
+.tenant-home-icon {
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	pointer-events: none;
+	color: var(--el-text-color-placeholder);
 }
 </style>

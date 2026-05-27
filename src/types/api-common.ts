@@ -4,3 +4,8 @@ export interface ApiResult<T = unknown> {
 	data?: T
 	msg: string
 }
+
+/** 业务成功码（兼容 number / string） */
+export function isSuccessCode(code: string | number | undefined | null): boolean {
+	return code === 200 || code === '200'
+}

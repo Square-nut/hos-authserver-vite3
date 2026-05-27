@@ -32,7 +32,8 @@
 				<h3 class="title">
 					<span class="title-welcome-row">
 						<span class="title-welcome-text">
-							{{ $t('欢迎登录') }}<span v-if="systemConfigTitle !== ''">，</span>
+							{{ $t('欢迎登录')
+							}}<span v-if="systemConfigTitle !== ''">，</span>
 						</span>
 						<el-popover
 							v-if="licenseInfo?.showLicense"
@@ -46,7 +47,7 @@
 								' ' +
 								licenseInfo.authType
 							"
-							v-model="yorn"
+							v-model:visible="yorn"
 						>
 							<div
 								style="padding: 0 15px 15px 15px"
@@ -67,15 +68,18 @@
 							</template>
 						</el-popover>
 						<el-select
-							v-if="i18nStatus && isHos"
+							v-if="i18nStatus && isHos && loginPageInfo.showI18n == 1"
 							class="login-language-select"
 							v-model="currLang"
 							:placeholder="$t('请选择语言')"
-							:data="langOpts"
 							@change="languageChange"
-							option-label="label"
-							option-value="value"
 						>
+							<el-option
+								v-for="item in langOpts"
+								:key="item.value"
+								:label="item.label"
+								:value="item.value"
+							/>
 						</el-select>
 					</span>
 					<h4 v-if="systemConfigTitle === 'isNull'" class="title-name">
@@ -122,7 +126,7 @@
 						v-if="loginTypeInfo.sms.enable"
 					>
 						<otplogin
-							ref="otp"
+							ref="otpLoginRef"
 							:showPostType="loginPostVersion"
 							@loginSucessHandler="loginSucessHandler"
 							@forcedJumpSetPassword="forcedJumpSetPassword"
@@ -165,7 +169,7 @@
 						v-if="loginTypeInfo.enableAD"
 					>
 						<userLogin
-							ref="adlogin"
+							ref="adloginRef"
 							grantType="AD"
 							:showPostType="loginPostVersion"
 							@loginSucessHandler="loginSucessHandler"
@@ -255,24 +259,31 @@ import {
 	setDefaultLocale,
 } from '@/utils/i18n/i18n-util';
 import i18n from '@/i18n';
-import { computed, getCurrentInstance, onBeforeMount, ref, watch } from 'vue';
+import { computed, inject, onBeforeMount, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
+import { ls } from '@/utils/ls';
 import { openHosBizDialog, setLoginAuthInfo } from '@/composables/useHosBiz';
 import { useLoginSessionStore } from '@/stores/loginSession';
 import { caLoginTypeIconMap } from '@/utils/login-element-icons';
 import { fetchLicenseState } from '@/api/login';
 import { fetchOauthInfo } from '@/api/oauth';
 import { fetchLangList, fetchLoginPageElements } from '@/api/i18n';
-
-const { proxy } = getCurrentInstance();
+import { useI18n } from 'vue-i18n';
+import { isSuccessCode } from '@/types/api-common';
+const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 const loginSessionStore = useLoginSessionStore();
+const loginLayoutThis = inject('loginLayoutThis', null);
 
 const isHos = ref(import.meta.env.VITE_APP_THEME_STYLE === '1');
 const currLang = ref('');
-const title = ref(proxy.$t('医院综合业务操作系统HOS2.0'));
+const title = ref(t('医院综合业务操作系统HOS2.0'));
 const loginPageInfo = ref({});
 const activeType = ref('');
 const UItype = ref(import.meta.env.VITE_APP_THEME_STYLE);
-const SCDialogTitle = ref(proxy.$t('二次认证'));
+const SCDialogTitle = ref(t('二次认证'));
 const CADialogTitle = ref('');
 const yorn = ref(false);
 const licenseInfo = ref({});
@@ -339,14 +350,19 @@ function normalizeLoginTypeInfo(raw) {
 
 const loginState = computed(() => ({ ...loginSessionStore.$state }));
 const loginTypeDataDTO = computed(
-	() => loginState.value.loginTypeDataDTO || readSessionJSON('loginTypeDataDTO', {})
+	() =>
+		loginState.value.loginTypeDataDTO || readSessionJSON('loginTypeDataDTO', {})
 );
 const loginPostVersion = computed(
-	() => loginState.value.loginPostVersion || sessionStorage.getItem('loginPostVersion') || ''
+	() =>
+		loginState.value.loginPostVersion ||
+		sessionStorage.getItem('loginPostVersion') ||
+		''
 );
 const portalUrl = computed(() => loginState.value.portalUrl || '');
 const i18nStatus = computed(() => {
-	if (typeof loginState.value.i18nStatus === 'boolean') return loginState.value.i18nStatus;
+	if (typeof loginState.value.i18nStatus === 'boolean')
+		return loginState.value.i18nStatus;
 	return false;
 });
 const langOpts = computed(() => loginState.value.langOpts || []);
@@ -381,9 +397,11 @@ async function getSysAuthInfo() {
 }
 
 const userLoginRef = ref(null);
+const adloginRef = ref(null);
+const otpLoginRef = ref(null);
 
 function getClientId() {
-	const redirect = proxy.$route.query.redirect;
+	const redirect = route.query.redirect;
 	if (redirect) {
 		if (redirect.indexOf('oauth/logout') != -1) {
 			url.value = redirect.split('service=')[1];
@@ -427,11 +445,13 @@ function loginTypeFn() {
 
 function triggerClick(event) {
 	const className = event.target.className;
+	const activedPath = licenseInfo.value?.activedPath;
+	if (!activedPath) return;
 	let iframeUrl = '';
-	if (licenseInfo.value.activedPath.includes('?')) {
-		iframeUrl = licenseInfo.value.activedPath + '&language=' + getLocale();
+	if (activedPath.includes('?')) {
+		iframeUrl = activedPath + '&language=' + getLocale();
 	} else {
-		iframeUrl = licenseInfo.value.activedPath + '?language=' + getLocale();
+		iframeUrl = activedPath + '?language=' + getLocale();
 	}
 	if (className == 'install-license') {
 		openHosBizDialog({
@@ -444,13 +464,13 @@ function triggerClick(event) {
 		});
 	}
 	if (className == 'continue') {
-		console.log(proxy.$t('继续'));
+		console.log(t('继续'));
 	}
 }
 
 function licenseState() {
 	let currentClientId = '';
-	const redirect = proxy.$route.query.redirect;
+	const redirect = route.query.redirect;
 	if (redirect && redirect != '/') {
 		currentClientId = new URLSearchParams(redirect).get('client_id');
 	} else {
@@ -459,73 +479,74 @@ function licenseState() {
 	if (!currentClientId) {
 		return;
 	}
-	fetchLicenseState({ clientId: currentClientId }).then((res) => {
-		if (res && res.code == 200 && res.data) {
-			const data = res.data;
-			data.licenseText = '';
-			licenseInfo.value = data;
-			licenseType.value = data.type;
-			licenseEdition.value = data.authType;
-			if (data.type == 1) {
-				licenseInfo.value.licenseText = `${proxy.$t('该产品有效期至')}${
-					data.expireDate
-				}，${proxy.$t('请')}<span class="install-license">${proxy.$t(
-					'安装新许可'
-				)}</span>。`;
+	fetchLicenseState({ clientId: currentClientId })
+		.then((res) => {
+			if (res && isSuccessCode(res.code) && res.data) {
+				const data = res.data;
+				data.licenseText = '';
+				licenseInfo.value = data;
+				licenseType.value = data.type;
+				licenseEdition.value = data.authType;
+				if (data.type == 1) {
+					licenseInfo.value.licenseText = `${t('该产品有效期至')}${
+						data.expireDate
+					}，${t('请')}<span class="install-license">${t(
+						'安装新许可'
+					)}</span>。`;
+				}
+				if (data.type == 2) {
+					licenseInfo.value.licenseText = `${t('该产品有效期至')}${
+						data.expireDate
+					}，${t('请')}<span class="install-license">${t(
+						'安装新许可'
+					)}</span>。`;
+					licenseEdition.value = `${data.authType}-${t('快过期')}`;
+					return;
+				}
+				if (data.type == 31) {
+					licenseEdition.value = `${data.authType}-${t('非法许可')}`;
+					licenseInfo.value.licenseText = `${t(
+						'该产品尚未安装许可'
+					)}，${t('请')}<span class="install-license">${t(
+						'安装许可'
+					)}</span>。`;
+					return;
+				}
+				if (data.type == 32) {
+					licenseEdition.value = `${data.authType}-${t('非法许可')}`;
+					licenseInfo.value.licenseText = `${t(
+						'该产品许可为非法许可'
+					)}，${t('请')}<span class="install-license">${t(
+						'更新许可'
+					)}</span>。`;
+					return;
+				}
+				if (data.type == 33) {
+					licenseEdition.value = `${data.authType}-${t('已过期')}`;
+					licenseInfo.value.licenseText = `${t(
+						'该产品有效期已过期'
+					)}，${t('请')}<span class="install-license">${t(
+						'更新许可'
+					)}</span>。`;
+					return;
+				}
+				if (data.type == 34) {
+					licenseEdition.value = `${data.authType}-${t('非法许可')}`;
+					licenseInfo.value.licenseText = `${t('服务器')} ${
+						data.macAddress
+					} ${t('的许可无效')}，${t(
+						'请'
+					)}<span class="install-license">${t('更新许可')}</span>。`;
+					return;
+				}
+				if (data.type == 3) {
+					licenseEdition.value = `${data.authType}-${t('非法许可')}`;
+					data.licenseText = `${t('该产品许可为非法许可')}，${t(
+						'请'
+					)}<span class="install-license">${t('更新许可')}</span>。`;
+				}
 			}
-			if (data.type == 2) {
-				licenseInfo.value.licenseText = `${proxy.$t('该产品有效期至')}${
-					data.expireDate
-				}，${proxy.$t('请')}<span class="install-license">${proxy.$t(
-					'安装新许可'
-				)}</span>。`;
-				licenseEdition.value = `${data.authType}-${proxy.$t('快过期')}`;
-				return;
-			}
-			if (data.type == 31) {
-				licenseEdition.value = `${data.authType}-${proxy.$t('非法许可')}`;
-				licenseInfo.value.licenseText = `${proxy.$t(
-					'该产品尚未安装许可'
-				)}，${proxy.$t('请')}<span class="install-license">${proxy.$t(
-					'安装许可'
-				)}</span>。`;
-				return;
-			}
-			if (data.type == 32) {
-				licenseEdition.value = `${data.authType}-${proxy.$t('非法许可')}`;
-				licenseInfo.value.licenseText = `${proxy.$t(
-					'该产品许可为非法许可'
-				)}，${proxy.$t('请')}<span class="install-license">${proxy.$t(
-					'更新许可'
-				)}</span>。`;
-				return;
-			}
-			if (data.type == 33) {
-				licenseEdition.value = `${data.authType}-${proxy.$t('已过期')}`;
-				licenseInfo.value.licenseText = `${proxy.$t(
-					'该产品有效期已过期'
-				)}，${proxy.$t('请')}<span class="install-license">${proxy.$t(
-					'更新许可'
-				)}</span>。`;
-				return;
-			}
-			if (data.type == 34) {
-				licenseEdition.value = `${data.authType}-${proxy.$t('非法许可')}`;
-				licenseInfo.value.licenseText = `${proxy.$t('服务器')} ${
-					data.macAddress
-				} ${proxy.$t('的许可无效')}，${proxy.$t(
-					'请'
-				)}<span class="install-license">${proxy.$t('更新许可')}</span>。`;
-				return;
-			}
-			if (data.type == 3) {
-				licenseEdition.value = `${data.authType}-${proxy.$t('非法许可')}`;
-				data.licenseText = `${proxy.$t('该产品许可为非法许可')}，${proxy.$t(
-					'请'
-				)}<span class="install-license">${proxy.$t('更新许可')}</span>。`;
-			}
-		}
-	})
+		})
 		.catch(() => {
 			// License check is optional; avoid uncaught promise when API fails or is aborted.
 		});
@@ -552,21 +573,21 @@ function openCADialog(row) {
 }
 
 function loginSucessHandler(toPath) {
-	const IP = proxy.$ls.get('IP');
-	const MAC = proxy.$ls.get('MAC');
+	const IP = ls.get('IP');
+	const MAC = ls.get('MAC');
 	if (!toPath) {
 		let toCustomPath = getQueryString('redirect');
 		if (
 			(!toCustomPath || toCustomPath.indexOf('/oauth/authorize') == -1) &&
 			authInfo.value.redirect_uri
 		) {
-			proxy.$router.push({ path: '/oauth/authorize', query: authInfo.value });
+			router.push({ path: '/oauth/authorize', query: authInfo.value });
 			return;
 		}
 		toPath = toCustomPath;
 	}
 	const query = IP && MAC ? { ip: IP, mac: MAC } : null;
-	proxy.$router.push({ path: toPath, query: query });
+	router.push({ path: toPath, query: query });
 }
 
 const getOTPLoginData = () => {};
@@ -612,7 +633,7 @@ function openTwoAuthDialog(
 			break;
 		}
 		case 'ca': {
-			CADialogTitle.value = proxy.$t('二次认证');
+			CADialogTitle.value = t('二次认证');
 			openHosBizDialog({
 				component: secondaryCertification,
 				_uid: 'CADialog',
@@ -627,7 +648,7 @@ function openTwoAuthDialog(
 			break;
 		}
 		default: {
-			proxy.$message.error(proxy.$t('不支持此种登录方式'));
+			ElMessage.error(t('不支持此种登录方式'));
 		}
 	}
 }
@@ -635,13 +656,15 @@ function openTwoAuthDialog(
 async function getlangs() {
 	try {
 		const { data, code } = await fetchLangList();
-		if (code == 200) {
+		if (isSuccessCode(code)) {
 			const defaultLang = data.find((item) => {
 				return item.isDefault;
 			});
-			setDefaultLocale(defaultLang.value);
-			const cl = getLocale();
-			cl ? false : setCurrentLocale(defaultLang.value);
+			if (defaultLang?.value) {
+				setDefaultLocale(defaultLang.value);
+				const cl = getLocale();
+				if (!cl) setCurrentLocale(defaultLang.value);
+			}
 		}
 	} catch (error) {
 		console.log(error);
@@ -649,24 +672,24 @@ async function getlangs() {
 }
 
 function languageChange(val) {
-	const currentRoute = proxy.$route;
-	const currentQuery = { ...currentRoute.query };
+	const currentQuery = { ...route.query };
 	if (currentQuery.language) {
 		delete currentQuery.language;
-		const newRoute = {
-			path: currentRoute.path,
+		router.replace({
+			path: route.path,
 			query: currentQuery,
-		};
-		proxy.$router.replace(newRoute);
+		});
 	}
 
 	setCurrentLocale(val);
-	proxy.$router.go();
+	currLang.value = getLocale();
+	loginPageElements();
+	loginLayoutThis?.configPageType();
 }
 
 async function loginPageElements() {
 	const { code, data } = await fetchLoginPageElements('loginPage');
-	if (code == '200') {
+	if (isSuccessCode(code)) {
 		i18n.mergeLocaleMessage(currLang.value, data);
 	}
 }
@@ -687,6 +710,9 @@ function forcedJumpSetPassword(res) {
 
 function closeBtnLoading() {
 	toggleLoading.value += 1;
+	userLoginRef.value?.openLoginBtn?.();
+	adloginRef.value?.openLoginBtn?.();
+	otpLoginRef.value?.openLoginBtn?.();
 }
 
 watch(loginTypeDataDTO, () => {

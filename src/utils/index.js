@@ -351,14 +351,38 @@ export function removeClass(ele, cls) {
 export const escapeRegexpString = (value = '') => String(value).replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
 
 /**
- * @function 判断变量是否在全局变量中定义
- * 已定义,返回全局变量值.未定义,返回环境变量值或undefined
- * @param {string} val 传入的变量名
- * @returns {string} 返回变量值
+ * Vite 浏览器环境无 process.env，从 import.meta.env 读取（VUE_APP_* → VITE_APP_*）
+ * @param {string} key
+ * @returns {unknown}
  */
+function readImportMetaEnv(key) {
+  const env = import.meta.env
+  if (key === 'NODE_ENV') {
+    return env.PROD ? 'production' : 'development'
+  }
+  const viteKey =
+    key === 'VUE_APP_SIMPLE_ONCE'
+      ? 'VITE_APP_THEME_STYLE'
+      : key.startsWith('VUE_APP_')
+        ? key.replace(/^VUE_APP_/, 'VITE_APP_')
+        : key
+  if (viteKey in env && env[viteKey] !== undefined && env[viteKey] !== '') {
+    return env[viteKey]
+  }
+  return undefined
+}
 
+/**
+ * @function 判断变量是否在全局变量中定义
+ * 已定义,返回全局变量值.未定义,返回 import.meta.env 或 undefined
+ * @param {string} val 传入的变量名
+ * @returns {unknown} 返回变量值
+ */
 export const returnGlobalValue = (val) => {
-  return __hos.hasOwnProperty(val) ? __hos[val] : process.env[val]
+  if (typeof __hos !== 'undefined' && Object.prototype.hasOwnProperty.call(__hos, val)) {
+    return __hos[val]
+  }
+  return readImportMetaEnv(val)
 }
 
 /**

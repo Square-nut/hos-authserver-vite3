@@ -5,32 +5,32 @@
   * @Last Modified time: 2024-08-29 16:13:36
 */ -->
 <template>
-  <div class="hos-biz-table" :class="{ flex: isFit, 'pagination-pos-bottom': pagePos === 'bottom', chrome49 }">
-    <div :class="{ mb15: !showToolbar && uiStyle == 1, 'hos-biz-form': $slots.form }" v-if="form">
-      <Form ref="form" v-bind="form" :query-cache="queryCache" @reset="reset" @search="search">
+  <div class="el-biz-table" :class="{ flex: isFit, 'pagination-pos-bottom': pagePos === 'bottom', chrome49 }">
+    <div :class="{ mb15: !showToolbar && uiStyle == 1, 'el-biz-form': $slots.form }" v-if="form">
+      <Form ref="form" v-bind="form" :uid="uid" :query-cache="queryCache" @reset="reset" @search="search">
         <slot name="form"></slot>
       </Form>
     </div>
     <slot name="top"></slot>
-    <div class="hos-biz-toolbar" v-if="showToolbar">
-      <div class="hos-biz-toolbar-left" v-if="$slots.toolbar">
+    <div class="el-biz-toolbar" v-if="showToolbar">
+      <div class="el-biz-toolbar-left" v-if="$slots.toolbar">
         <slot name="toolbar"></slot>
       </div>
-      <div v-if="pagePos === 'top' && page !== false" class="hos-biz-toolbar-right hos-biz-pagination">
+      <div v-if="pagePos === 'top' && page !== false" class="el-biz-toolbar-right el-biz-pagination">
         <Page
           v-bind="pageConfig"
           :query-cache="queryCache"
           class="fr"
-          @current-change="currentChange"
-          @size-change="sizeChange"
-          size="mini"
           :uid="uid"
           :total="total"
-          ref="page"
+          size="mini"
+          ref="pageTop"
+          @current-change="currentChange"
+          @size-change="sizeChange"
         ></Page>
       </div>
       <div class="top-toolbar-table-setting" v-if="columnSelected">
-        <hos-popover placement="bottom" width="100" trigger="click">
+        <el-popover placement="bottom" :width="100" trigger="click">
           <div class="top-toolbar-table-setting-content">
             <div
               v-for="(item, index) in cols"
@@ -38,16 +38,18 @@
               class="top-toolbar-table-setting-item"
               :class="{ none: item.none }"
             >
-              <hos-checkbox
+              <el-checkbox
                 v-model="selectedInFilteredColumn"
                 :label="item.columnSelectedKey"
                 @change="changeFilteredColumn"
-                >{{ item.columnSelectedLabel }}</hos-checkbox
+                >{{ item.columnSelectedLabel }}</el-checkbox
               >
             </div>
           </div>
-          <i slot="reference" class="hos-icom-config"></i>
-        </hos-popover>
+          <template #reference>
+            <el-icon class="top-toolbar-table-setting-icon"><Setting /></el-icon>
+          </template>
+        </el-popover>
       </div>
     </div>
     <!-- style="min-height: 200px;" 解决resize事件表格导致页面卡死问题 -->
@@ -59,7 +61,7 @@
       :asyncSlot="asyncSlot"
       :cols="selectedCols"
       :height="height"
-      :ref="'hos-table-' + uid"
+      :ref="'el-table-' + uid"
       @sort-change="sortChange"
       @current-change="convertCurrentChange"
       :border="border"
@@ -74,26 +76,27 @@
       <slot></slot>
     </Table>
     <slot name="bottom"></slot>
-    <div v-if="page !== false && pagePos === 'bottom'" class="hos-biz-pagination clearfix">
+    <div v-if="page !== false && pagePos === 'bottom'" class="el-biz-pagination clearfix">
       <!-- <slot name="page"></slot> -->
       <Page
+        ref="page"
         class="simple-pagination"
         v-bind="pageConfig"
-        @current-change="currentChange"
-        @size-change="sizeChange"
         :query-cache="queryCache"
         :uid="uid"
         :total="total"
-        ref="page"
+        @current-change="currentChange"
+        @size-change="sizeChange"
         :prev-text="uiStyle == 0 ? $t('el.pagination.prev') : null"
         :next-text="uiStyle == 0 ? $t('el.pagination.next') : null"
       >
-        <i class="hos-icon-refresh btn-refresh" @click="refresh"></i>
+        <el-icon class="btn-refresh" @click="refresh"><Refresh /></el-icon>
       </Page>
     </div>
   </div>
 </template>
 <script>
+import { Refresh, Setting } from '@element-plus/icons-vue'
 import { otherMethods } from '../utils/table-methods'
 import Table from './table'
 import Page from './pagination'
@@ -101,7 +104,8 @@ import Form from './form'
 import tryGetOnlyArray from '../utils/data-patch-v1/try-get-only-array'
 import tryGetPaginationParams from '../utils/data-patch-v1/try-get-pagination-params'
 import { useHosBizTableStore, subscribeHosBizTableMutations } from '@/stores/hosBizTable'
-import { tableStoreComputed } from '../utils/pinia-bridge'
+import { tableStoreComputed, hosBizUidMatches } from '../utils/pinia-bridge'
+import { isSuccessCode } from '@/types/api-common'
 import filterEmpty from '../utils/filter-empty'
 import Sortable from 'sortablejs'
 import RenderLabel from '../utils/render-label'
@@ -114,7 +118,7 @@ export default {
   watch: {
     page: {
       handler: function (val, oldVal) {
-        if (val.currentPage != oldVal.currentPage) {
+        if (oldVal && val?.currentPage != null && val.currentPage != oldVal.currentPage) {
           this.params.pagination.current = val.currentPage
         }
       },
@@ -129,7 +133,7 @@ export default {
       TABLE_PROVIDE: this
     }
   },
-  components: { Table, Page, Form },
+  components: { Table, Page, Form, Refresh, Setting },
   computed: {
     ...tableStoreComputed(),
     formItems() {
@@ -277,6 +281,12 @@ export default {
     }
   },
   methods: {
+    isOkResponse(code) {
+      return isSuccessCode(code)
+    },
+    tableUidMatches(storeUid) {
+      return hosBizUidMatches(storeUid, this.uid)
+    },
     isChrome49() {
       if (navigator.userAgent.includes('Chrome/49')) {
         this.chrome49 = true
@@ -305,7 +315,7 @@ export default {
         /* eslint handle-callback-err: "warn" */
         return this.$api(this.data, _params)
           .then((response) => {
-            if (response && response.code == '200') {
+            if (response && this.isOkResponse(response.code)) {
               this.setTableData(response)
             } else {
               this.total = 0
@@ -327,7 +337,7 @@ export default {
         this.tableIsLoading = true
         return this.data(_params)
           .then((response) => {
-            if (response?.code == '200') {
+            if (this.isOkResponse(response?.code)) {
               this.setTableData(response)
             } else {
               response?.msg && this.$message.error(response?.msg)
@@ -420,8 +430,9 @@ export default {
     },
     async getData(isReset = true) {
       try {
-        if (this.page !== false && this.$refs.page) {
-          this.params.pagination = await this.$refs.page.getParams()
+        const pageRef = this.$refs.page || this.$refs.pageTop
+        if (this.page !== false && pageRef) {
+          this.params.pagination = await pageRef.getParams()
         }
         if (this.form && this.$refs.form) {
           this.params.form = await this.$refs.form.getParams()
@@ -435,7 +446,8 @@ export default {
       }
     },
     rowDrop() {
-      this.dragTableBody = document.getElementById('hos-table-lq').querySelector('.hos-table__body-wrapper tbody')
+      const tableRoot = this.$refs[`el-table-${this.uid}`]?.$el
+      this.dragTableBody = tableRoot?.querySelector('.el-table__body-wrapper tbody')
       const _this = this
       Sortable.create(this.dragTableBody, {
         onEnd(evt) {
@@ -449,7 +461,7 @@ export default {
     setFilteredColumn() {
       const renderLabel = new RenderLabel()
       this.cols.forEach((element) => {
-        if (!element.hidden) this.$set(element, 'hidden', false)
+        if (!element.hidden) element.hidden = false
         typeof element.label === 'undefined' ? (element.none = true) : (element.none = false)
         let _label = renderLabel.getLabel(element.label)
         if (!element.columnSelectedKey) {
@@ -517,7 +529,7 @@ export default {
         this.height = tableHeight
       } else {
         // 未传入值时, 将剩余高度作为table的高度
-        const element = this.$refs['hos-table-' + this.uid]?.$el
+        const element = this.$refs[`el-table-${this.uid}`]?.$el
         if (!element) return
         this.height = element.offsetHeight
       }
@@ -527,7 +539,7 @@ export default {
     },
     // 处理表格行数自适应
     getRowNum() {
-      if (this.isFit && this.$refs['hos-table-' + this.uid]) {
+      if (this.isFit && this.$refs[`el-table-${this.uid}`]) {
         let rowHeight, headRowHeight, sumRowHeight
         if (this.uiStyle == 0) {
           rowHeight = 32 // 行高
@@ -539,7 +551,7 @@ export default {
           sumRowHeight = this.$attrs['show-summary'] !== undefined ? 44 : 0 // 合计行高
         }
 
-        let tableHeight = this.$refs['hos-table-' + this.uid].$el.offsetHeight // 表格高度
+        let tableHeight = this.$refs[`el-table-${this.uid}`].$el.offsetHeight // 表格高度
         let rowNum = Math.floor((tableHeight - headRowHeight - sumRowHeight) / rowHeight)
         return rowNum
       }
@@ -552,14 +564,14 @@ export default {
   created() {
     this.unsubscribe = subscribeHosBizTableMutations((type) => {
       if (type === 'UPDATE_TABLE') {
-        if (this.sUID === this.uid || (this.sUID === 0 && this.sEvent === 'update')) {
+        if (this.tableUidMatches(this.sUID) || (this.sUID === 0 && this.sEvent === 'update')) {
           this.sParams?.type === 'reset' && (this.tableIsLoading = true)
           this.$nextTick(() => {
             this.getData()
           })
         }
       } else if (type === 'REFRESH_TABLE') {
-        if (this.sUID === this.uid || (this.sUID === 0 && this.sEvent === 'refresh')) {
+        if (this.tableUidMatches(this.sUID) || (this.sUID === 0 && this.sEvent === 'refresh')) {
           this.sParams?.type === 'reset' && (this.tableIsLoading = true)
           this.$nextTick(() => {
             this.getData(false)
@@ -602,57 +614,44 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.hos-biz-table {
+.el-biz-table {
   flex-direction: column;
   height: 100%;
   background: transparent;
   &.flex {
     display: flex;
   }
-  .hos-table {
-    ::v-deep .hos-table__body-wrapper {
-      outline: none; // 聚焦时会有outline,主动取消outline样式
-    }
-    ::v-deep .hos-table__fixed {
-      // 处于表格固定列内的横向滚动条无法拖动. 如果列数过多,固定列宽度大于横向滚动条长度时,会导致整个滚动条无法拖动.
-      // 以下样式用于修复此问题.使得在固定列内的横向滚动条也可以拖动.
-      pointer-events: none;
-      // 将直接子元素显式声明为默认值"auto"
-      & > * {
-        pointer-events: auto;
-      }
+  :deep(.el-table__body-wrapper) {
+    outline: none;
+  }
+  :deep(.el-table__fixed) {
+    pointer-events: none;
+    & > * {
+      pointer-events: auto;
     }
   }
-  // .hos-biz-toolbar {
-  // 	overflow: hidden;
-  // }
 }
 .none {
   display: none;
 }
+.top-toolbar-table-setting-icon {
+  font-size: 18px;
+  color: #606266;
+  cursor: pointer;
+}
 </style>
 
 <style lang="scss">
-//分页未对齐的兼容问题
-.chrome49.hos-biz-table {
-  .hos-pagination button,
-  .hos-pagination span:not([class*='suffix']) {
+.chrome49.el-biz-table {
+  .el-pagination button,
+  .el-pagination span:not([class*='suffix']) {
     line-height: 31px;
   }
-  .hos-pagination span.hos-pagination__ssizes:not([class*='suffix']) {
+  .el-pagination span.el-pagination__sizes:not([class*='suffix']) {
     line-height: 26px;
   }
 }
-// 隐藏biz-table的input__validateIcon校验图标
-.hos-biz-table {
-  & .hos-biz-pagination {
-    & .hos-pagination__ssizes {
-      .hos-input__suffix {
-        .hos-input__validateIcon {
-          display: none;
-        }
-      }
-    }
-  }
+.el-biz-table .el-biz-pagination .el-pagination__sizes .el-input__suffix .el-input__validateIcon {
+  display: none;
 }
 </style>

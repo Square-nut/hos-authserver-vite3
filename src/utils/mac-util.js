@@ -1,12 +1,20 @@
-import Vue from 'vue'
 import UserConstant from '@/constant/user-constant'
 import { returnGlobalValue, getOs } from '@/utils'
-import store from '@/store'
+import { ls } from '@/utils/ls'
+import { useSysStore } from '@/stores/sys'
 import api from '@/axios'
 import Qs from 'qs'
 
+function setShowDbDialog() {
+  try {
+    useSysStore().SET_SHOW_DBDIALOG(Boolean(ls.get('isOpenDb')))
+  } catch {
+    /* Pinia 未就绪时忽略 */
+  }
+}
+
 export const hasMac = () => {
-  if (Vue.ls.get('MAC')) {
+  if (ls.get('MAC')) {
     return true
   } else {
     return false
@@ -16,8 +24,8 @@ export const hasMac = () => {
 // Windows系统下获取IpMac方法.
 async function getIpMac() {
   // 判断sessionStorage里是否有Ip和Mac字段.如果没有则调用接口去获取
-  const IP = Vue.ls.get(UserConstant.IP)
-  const Mac = Vue.ls.get(UserConstant.Mac)
+  const IP = ls.get(UserConstant.IP)
+  const Mac = ls.get(UserConstant.Mac)
   if (IP && Mac) return { [UserConstant.IP]: IP, [UserConstant.Mac]: Mac }
   let resolve
   const promise = new Promise((res) => (resolve = res))
@@ -25,15 +33,14 @@ async function getIpMac() {
     const { status, rtn } = await api.request('websys.cmd')
     if (status == '200') {
       const config = JSON.parse(rtn)
-      Vue.ls.set(UserConstant.IP, config.IP)
-      Vue.ls.set(UserConstant.HostName, config.HostName)
-      Vue.ls.set(UserConstant.Mac, config.Mac)
+      ls.set(UserConstant.IP, config.IP)
+      ls.set(UserConstant.HostName, config.HostName)
+      ls.set(UserConstant.Mac, config.Mac)
       resolve(config)
     }
   } catch (error) {
-    store.commit('SET_CMD_ERROR', true)
     // error表示获取cmd的接口报错,可能是未安装或未运行.在此处进行弹窗提醒
-    store.commit('SET_SHOW_DBDIALOG', Vue.ls.get('isOpenDb'))
+    setShowDbDialog()
   }
   return promise
 }
@@ -41,8 +48,8 @@ async function getIpMac() {
 // Linux系统下,则使用ws连接,获取IpMac.
 async function initializeApplication() {
   // 判断sessionStorage里是否有Ip和Mac字段.如果没有则调用接口去获取
-  const IP = Vue.ls.get(UserConstant.IP)
-  const Mac = Vue.ls.get(UserConstant.Mac)
+  const IP = ls.get(UserConstant.IP)
+  const Mac = ls.get(UserConstant.Mac)
   if (IP && Mac) return { [UserConstant.IP]: IP, [UserConstant.Mac]: Mac }
   // 仅在第一次ws连接失败时,弹出提示框.
   let first = true
@@ -73,15 +80,15 @@ async function initializeApplication() {
       }
       if (data.status == '200') {
         const { rtn } = data
-        Vue.ls.set(UserConstant.IP, rtn.IP)
-        Vue.ls.set(UserConstant.Mac, rtn.Mac)
-        Vue.ls.set(UserConstant.HostName, rtn.HostName)
+        ls.set(UserConstant.IP, rtn.IP)
+        ls.set(UserConstant.Mac, rtn.Mac)
+        ls.set(UserConstant.HostName, rtn.HostName)
         resolve(rtn)
       }
     }
     addinsWs.onerror = (e) => {
       // error表示获取ws的接口报错,可能是未安装或未运行.在此处进行弹窗提醒
-      first && store.commit('SET_SHOW_DBDIALOG', Vue.ls.get('isOpenDb'))
+      first && setShowDbDialog()
       first = false
       init()
     }
@@ -123,9 +130,9 @@ function setIpMac() {
   const { ip = '', mac = '', hostname = '' } = searchObj
   // 如果ip和mac都存在, 则保存到缓存中
   if (ip && mac) {
-    Vue.ls.set(UserConstant.IP, ip)
-    Vue.ls.set(UserConstant.Mac, mac)
-    Vue.ls.set(UserConstant.HostName, hostname)
+    ls.set(UserConstant.IP, ip)
+    ls.set(UserConstant.Mac, mac)
+    ls.set(UserConstant.HostName, hostname)
     return { [UserConstant.IP]: ip, [UserConstant.Mac]: mac }
   }
 }
@@ -135,12 +142,12 @@ export async function initWebsys() {
   const os = getOs()
   // 新版websys客户端使用ws进行连接.若使用新版客户端,需开启此配置,并通过ws获取Ip和Mac.
   const websysWs = returnGlobalValue('VUE_APP_WEBSYS_WS')
-  let isOpenDb = Vue.ls.get('isOpenDb')
+  let isOpenDb = ls.get('isOpenDb')
   // 未被接口赋值时,默认值为null.若不是boolean,表示还未请求接口获取数据.因此先请求接口.
   if (typeof isOpenDb !== 'boolean') {
     const { code, data } = await api.request('dbDialogShowData')
     if (code == '200') {
-      Vue.ls.set('isOpenDb', data)
+      ls.set('isOpenDb', data)
       isOpenDb = data
     }
   }
@@ -162,8 +169,8 @@ let first = true
 export async function isForceMac(wait = returnGlobalValue('isForceMAC')) {
   // 仅在首次调用时执行,确保只会执行一次
   if (!first) {
-    const IP = Vue.ls.get(UserConstant.IP)
-    const Mac = Vue.ls.get(UserConstant.Mac)
+    const IP = ls.get(UserConstant.IP)
+    const Mac = ls.get(UserConstant.Mac)
     return { [UserConstant.IP]: IP, [UserConstant.Mac]: Mac }
   }
   first = false
