@@ -4,74 +4,44 @@
 	</div>
 </template>
 
-<script>
-import { setCurrentLocale } from '@/utils/i18n/i18n-util';
-import Qs from 'qs';
-import { useUserStore } from '@/stores/user';
-export default {
-	name: 'oauth_callback',
-	data() {
-		return {};
-	},
-	mounted() {
-		document.title = this.$t('打开其他应用');
-		this.init();
-	},
-	methods: {
-		init() {
-			if (document.querySelector('.login-loading-mask'))
-				document.querySelector('.login-loading-mask').style.display = 'none';
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import Qs from 'qs'
+import { setCurrentLocale } from '@/utils/i18n/i18n-util'
+import { useUserStore } from '@/stores/user'
 
-			const {
-				key,
-				redirectUrl,
-				language: defaultLanguage,
-			} = Qs.parse(window.location.search, { ignoreQueryPrefix: true });
+defineOptions({ name: 'oauth_callback' })
 
-			if (defaultLanguage) setCurrentLocale(defaultLanguage);
+const { t } = useI18n()
+const userStore = useUserStore()
 
-			let upData = {
-				grantType: 'disposableKey',
-				disposableKey: key,
-			};
-			useUserStore()
-				.Login(upData)
-				.then((res) => {
-					window.location.href = redirectUrl;
-				})
-				.catch((error) => {});
-		},
-	},
-};
+function init() {
+	const mask = document.querySelector('.login-loading-mask') as HTMLElement | null
+	if (mask) mask.style.display = 'none'
+
+	const { key, redirectUrl, language: defaultLanguage } = Qs.parse(
+		window.location.search,
+		{ ignoreQueryPrefix: true },
+	) as Record<string, string>
+
+	if (defaultLanguage) setCurrentLocale(String(defaultLanguage))
+
+	const upData = {
+		grantType: 'disposableKey',
+		disposableKey: key as string,
+	}
+	userStore.Login(upData).then(() => {
+		window.location.href = redirectUrl as string
+	})
+}
+
+onMounted(() => {
+	document.title = t('打开其他应用')
+	init()
+})
 </script>
 <style lang="scss" scoped>
-.authorize {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-}
-.text-align-center {
-	text-align: center;
-}
-.loadding-img {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-}
-</style>
-<style lang="scss">
-.authorize {
-	.install-license {
-		color: #5db42f;
-		cursor: pointer;
-	}
-	.continue {
-		color: #5db42f;
-		cursor: pointer;
-	}
-}
 .loadding-img {
 	position: absolute;
 	top: 50%;

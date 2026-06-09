@@ -10,7 +10,7 @@
         </hos-col>
         <hos-col :span="17">
           <hos-menu
-            v-if="simpleLeftMenu == 1"
+            v-if="simpleLeftMenu === '1'"
             class="mid-nav"
             text-color="#ffffff"
             @select="topLeftMenuSelect"
@@ -28,18 +28,18 @@
             </template>
           </hos-menu>
           <hos-menu
-            v-if="simpleLeftMenu == 0"
+            v-if="simpleLeftMenu === '0'"
             class="mid-nav"
             style="color: #fff"
             @select="menuSelect"
-            :default-active="$route.path"
+            :default-active="route.path"
             :collapse-transition="false"
             :unique-opened="true"
             mode="horizontal"
             expand-icon="hos-icon-caret-bottom"
             pack-up-icon="hos-icon-caret-right"
           >
-            <side-menu :showIcon="false" :menuList="menuList"></side-menu>
+			<side-menu :showIcon="false" :menuList="menuList as any"></side-menu>
           </hos-menu>
         </hos-col>
         <hos-col :span="3" class="top-right-simple">
@@ -50,7 +50,7 @@
     <hos-main style="padding: 0" v-if="simple == 0">
       <hos-container class="main">
         <hos-aside
-          v-if="twoMenuList.length != 0 && simpleLeftMenu == 1"
+          v-if="twoMenuList.length != 0 && simpleLeftMenu === '1'"
           :width="isCollapse ? '40px' : '220px'"
         >
           <div class="toggle_box">
@@ -63,11 +63,11 @@
             class="hos-menu-vertical-demo menuLeftMain"
             @select="menuSelect"
             :collapse="isCollapse"
-            :default-active="$route.path"
+            :default-active="route.path"
             :collapse-transition="false"
             :unique-opened="true"
           >
-            <side-menu :showIcon="true" :menuList="twoMenuList"></side-menu>
+            <side-menu :showIcon="true" :menuList="twoMenuList as any"></side-menu>
           </hos-menu>
         </hos-aside>
         <hos-main
@@ -100,11 +100,11 @@
         text-color="#ffffff"
         active-text-color="#eaeaea"
         :collapse="isCollapse"
-        :default-active="$route.path"
+        :default-active="route.path"
         :collapse-transition="false"
         :unique-opened="true"
       >
-        <side-menu :showIcon="true" :menuList="menuList"></side-menu>
+        <side-menu :showIcon="true" :menuList="menuList as any"></side-menu>
       </hos-menu>
     </hos-aside>
     <hos-container v-if="simple == 1">
@@ -131,161 +131,168 @@
   </hos-container>
 </template>
 
-<script>
-import SideMenu from "@/components/menu/SideMenu";
-import DropDownMenu from "@/components/menu/DropDownMenu";
-import { mapActions, mapState } from "vuex";
+<script setup lang="ts">
+import { onBeforeMount, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
+import SideMenu from '@/components/menu/SideMenu.vue'
+import DropDownMenu from '@/components/menu/DropDownMenu.vue'
+import { useUserStore } from '@/stores/user'
+import { useHosBizDialogStore } from '@/stores/hosBizDialog'
+import { UI_THEME } from '@/constants/ui-theme'
+import { resolveViewComponent } from '@/utils/resolve-view-component'
 
-let that = null;
-export default {
-  name: "Main",
-  data() {
-    return {
-      isCollapse: false,
-      rightMenu: false,
-      searchMenu: "",
-      searchInput: false,
-      activeMenu: {},
-      menuList: [],
-      twoMenuList: [],
-      bran: [],
-      simple: process.env.VUE_APP_SIMPLE_ONCE,
-      simpleLeftMenu: localStorage.getItem("leftMenu") || "0",
-    };
-  },
+defineOptions({ name: 'Main' })
 
-  components: {
-    SideMenu,
-    DropDownMenu,
-  },
-  computed: {
-    ...mapState({
-      permissionMenuList: (state) => state.user.menuList,
-    }),
-  },
-  watch: {
-    $route: {
-      immediate: true,
-      handler() {
-        this.getRouterBran();
-      },
-    },
-  },
-  created() {
-    this.menuList = this.permissionMenuList;
-    this.getTwoMenuList();
-    if (this.bran[0]?.name != "welcome") {
-      this.topLeftMenuSelect(this.bran[0]?.name);
-    }
-  },
-  mounted() {},
-  destroyed() {},
-  methods: {
-    getTwoMenuList() {
-      let flagName = this.$route.name;
-      if (flagName == "welcome") {
-        if (this.menuList[0]?.children) {
-          this.twoMenuList = this.menuList[0]?.children;
-        }
-      } else {
-        this.permissionMenuList.filter((item) => {
-          if (item.children.length != 0) {
-            item.children.filter((key, index, originarr) => {
-              if (key.name === flagName) {
-                this.twoMenuList = originarr;
-                return;
-              }
-            });
-          }
-          return;
-        });
-      }
-    },
-    getRouterBran() {
-      let matchedFil = this.$route.matched.filter((v) => v.name);
-      let arr = [];
-      matchedFil.forEach((v, k) => {
-        if (v.name == "dashboard") return;
-        arr.push({
-          name: v.name,
-          path: v.path,
-          title: v.meta.title,
-        });
-      });
-      this.bran = arr;
-    },
-    searchInpuToggle: function () {
-      that.searchInput = !that.searchInput;
-    },
-    searchMenuEven: function () {},
-    toggleCollapse() {
-      this.isCollapse = !this.isCollapse;
-    },
-    menuSelect(index, indexPath) {
-      //此处触发动态路由被点击事件
-      this.findMenuBykey(this.menuList, index);
-      if (this.activeMenu.meta.isDialog) {
-        let componentPath = this.activeMenu.meta.componentPath;
-        let component = "";
-        if (this.activeMenu.meta.isFrame) {
-          component = require("@/components/layouts/IframePageView").default;
-        } else {
-          component = require(`@/views${componentPath}`).default;
-        }
-        //  打开一个弹窗
-        this.dialogTitle = this.activeMenu.meta.title;
-        //  打开一个弹窗
-        this.$store.commit("OPEN_DIALOG", {
-          _uid: "menuDialog",
-          component: component,
-          props: this.activeMenu.props,
-        });
-      } else {
-        this.$router.push({ path: this.activeMenu.path });
-      }
-      this.$emit("dynamicRouterShow", index, this.activeMenu.meta.title);
-    },
-    topLeftMenuSelect(index, indexPath) {
-      sessionStorage.setItem("menuIndex", index);
-      const list = this.menuList.filter((item) => {
-        return item.name == index;
-      });
-      if (!list || list.length == 0) {
-        return;
-      }
-      if (list[0].children) {
-        this.twoMenuList = list[0].children;
-      } else {
-        this.twoMenuList = [];
-        this.$router.push(list[0].path);
-      }
-    },
-    changeMenuType() {
-      this.simpleLeftMenu = localStorage.getItem("leftMenu");
-      const ind = sessionStorage.getItem("menuIndex");
-      if (ind && ind != "welcome") {
-        const list = this.menuList.filter((item) => {
-          return item.name == ind;
-        });
-        if (!list || list.length == 0) {
-          return;
-        }
-        if (list[0].children) {
-          this.twoMenuList = list[0].children;
-        }
-      }
-    },
-    findMenuBykey(menus, key) {
-      for (let i of menus) {
-        if (i.name == key) {
-          this.activeMenu = { ...i };
-        } else if (i.children && i.children.length > 0) {
-          this.findMenuBykey(i.children, key);
-        }
-      }
-    },
-  },
-};
+const emit = defineEmits<{
+	dynamicRouterShow: [index: string, title: string]
+}>()
+
+const route = useRoute()
+const router = useRouter()
+const userStore = useUserStore()
+const dialogStore = useHosBizDialogStore()
+const { menuList: permissionMenuList } = storeToRefs(userStore)
+
+const isCollapse = ref(false)
+const rightMenu = ref(false)
+const searchMenu = ref('')
+const searchInput = ref(false)
+const activeMenu = ref<Record<string, any>>({})
+const menuList = ref<Record<string, any>[]>([])
+const twoMenuList = ref<Record<string, any>[]>([])
+const bran = ref<{ name: string; path: string; title: string }[]>([])
+const simple = UI_THEME
+const simpleLeftMenu = ref(localStorage.getItem('leftMenu') || '0')
+
+watch(
+	() => route.fullPath,
+	() => {
+		getRouterBran()
+	},
+	{ immediate: true },
+)
+
+onBeforeMount(() => {
+	menuList.value = permissionMenuList.value
+	getTwoMenuList()
+	if (bran.value[0]?.name != 'welcome') {
+		topLeftMenuSelect(bran.value[0]?.name)
+	}
+})
+
+function getTwoMenuList() {
+	const flagName = route.name
+	if (flagName == 'welcome') {
+		if (menuList.value[0]?.children) {
+			twoMenuList.value = menuList.value[0]?.children
+		}
+	} else {
+		permissionMenuList.value.filter((item) => {
+			if (item.children.length != 0) {
+				item.children.filter(
+					(
+						key: Record<string, any>,
+						_index: number,
+						originarr: Record<string, any>[],
+					) => {
+						if (key.name === flagName) {
+							twoMenuList.value = originarr
+							return
+						}
+					},
+				)
+			}
+			return
+		})
+	}
+}
+
+function getRouterBran() {
+	const matchedFil = route.matched.filter((v) => v.name)
+	const arr: { name: string; path: string; title: string }[] = []
+	matchedFil.forEach((v) => {
+		if (v.name == 'dashboard') return
+		arr.push({
+			name: String(v.name),
+			path: v.path,
+			title: String(v.meta.title ?? ''),
+		})
+	})
+	bran.value = arr
+}
+
+function searchInpuToggle() {
+	searchInput.value = !searchInput.value
+}
+
+function searchMenuEven() {}
+
+function toggleCollapse() {
+	isCollapse.value = !isCollapse.value
+}
+
+function menuSelect(index: string, _indexPath?: string[]) {
+	findMenuBykey(menuList.value, index)
+	if (activeMenu.value.meta?.isDialog) {
+		const componentPath = activeMenu.value.meta.componentPath
+		const component = resolveViewComponent(
+			componentPath,
+			activeMenu.value.meta.isFrame,
+		)
+		dialogStore.OPEN_DIALOG({
+			_uid: 'menuDialog',
+			component: component,
+			props: activeMenu.value.props,
+		})
+	} else {
+		router.push({ path: activeMenu.value.path })
+	}
+	emit('dynamicRouterShow', index, activeMenu.value.meta?.title ?? '')
+}
+
+function topLeftMenuSelect(index?: string, _indexPath?: string[]) {
+	if (!index) return
+	sessionStorage.setItem('menuIndex', index)
+	const list = menuList.value.filter((item) => {
+		return item.name == index
+	})
+	if (!list || list.length == 0) {
+		return
+	}
+	if (list[0]?.children) {
+		twoMenuList.value = list[0].children
+	} else {
+		twoMenuList.value = []
+		if (list[0]?.path) router.push(list[0].path)
+	}
+}
+
+function changeMenuType() {
+	simpleLeftMenu.value = localStorage.getItem('leftMenu') ?? '0'
+	const ind = sessionStorage.getItem('menuIndex')
+	if (ind && ind != 'welcome') {
+		const list = menuList.value.filter((item) => {
+			return item.name == ind
+		})
+		if (!list || list.length == 0) {
+			return
+		}
+		if (list[0]?.children) {
+			twoMenuList.value = list[0].children
+		}
+	}
+}
+
+function findMenuBykey(menus: Record<string, any>[], key: string) {
+	for (const i of menus) {
+		if (i.name == key) {
+			activeMenu.value = { ...i }
+		} else if (i.children && i.children.length > 0) {
+			findMenuBykey(i.children, key)
+		}
+	}
+}
 </script>
 <style lang="scss" scoped>
 @import "@/assets/style/variables.scss";

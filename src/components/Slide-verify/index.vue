@@ -3,60 +3,52 @@
 		<div @click="close" class="slide-verify-close">
 			<el-icon><Close /></el-icon>
 		</div>
-		<!-- 滑动条 -->
 		<SlideBlock
 			v-if="type === 'block'"
 			v-bind="$attrs"
-			@change="change"
-			@success="onSuccess"
-			@input="input"
-		></SlideBlock>
-		<!-- 图片 -->
+			@change="(val: number) => emit('change', val)"
+			@success="(val: unknown) => emit('success', val)"
+			@input="(val: number) => emit('input', val)"
+		/>
 		<SlideImage
 			v-if="type === 'image'"
 			v-bind="$attrs"
-			@change="change"
-			@success="onSuccess"
-			@input="input"
+			@change="(val: number) => emit('change', val)"
+			@success="(val: unknown) => emit('success', val)"
+			@input="(val: number) => emit('input', val)"
 			:canvasWidth="268"
-		></SlideImage>
+		/>
 	</div>
 </template>
-<script>
-import { Close } from '@element-plus/icons-vue';
-import SlideImage from './SlideImage';
-import SlideBlock from './SlideBlock';
-export default {
-	name: 'SlideVerify',
-	components: { Close },
-	props: {
-		type: {
-			// block or image
-			default: 'block',
-			type: String,
-		},
+
+<script setup lang="ts">
+import { Close } from '@element-plus/icons-vue'
+import SlideImage from './SlideImage.vue'
+import SlideBlock from './SlideBlock.vue'
+
+defineOptions({ name: 'SlideVerify', inheritAttrs: false })
+
+withDefaults(
+	defineProps<{
+		type?: string
+	}>(),
+	{
+		type: 'block',
 	},
-	components: { SlideImage, SlideBlock },
-	data() {
-		return {};
-	},
-	created() {},
-	methods: {
-		close() {
-			this.$emit('close');
-		},
-		change(val) {
-			this.$emit('change', val);
-		},
-		onSuccess(val) {
-			this.$emit('success', val);
-		},
-		input(val) {
-			this.$emit('input', val);
-		},
-	},
-};
+)
+
+const emit = defineEmits<{
+	close: []
+	change: [val: unknown]
+	success: [val: unknown]
+	input: [val: unknown]
+}>()
+
+function close() {
+	emit('close')
+}
 </script>
+
 <style lang="scss" scoped>
 .slide-wrap {
 	position: absolute;
@@ -84,4 +76,3 @@ export default {
 	}
 }
 </style>
-<style lang="scss"></style>

@@ -2,6 +2,7 @@
  * OAuth / 社交登录相关接口
  */
 import { http, httpGet, httpPost } from '@/axios'
+import type { HttpOptions } from '@/axios/http'
 
 /** 业务系统授权信息（原 oauth.info） */
 export function fetchOauthInfo() {
@@ -30,7 +31,7 @@ export function fetchAuthorizeCode(param?: Record<string, unknown>) {
 		url: '/oauth/auth/getAuthorizationCode',
 		data: param,
 		emulateJSON: true,
-	})
+	} satisfies HttpOptions)
 }
 
 /** --- loader（与旧版 oauth.js 导出名一致）--- */

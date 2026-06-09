@@ -1,7 +1,5 @@
 /**
- * 全局 localStorage 封装（替代 vue-ls），供：
- * - `app.config.globalProperties.$ls`
- * - 非组件模块（token-util、user-store-util、Pinia store 等）
+ * 全局 localStorage 封装（替代 vue-ls），供非组件模块与 composable 直接 import。
  *
  * `get`：能 JSON 则解析为对象/数组等，否则返回原始字符串（与旧 storage-util 一致）。
  * `set`：第三个参数为 TTL（毫秒），写入 `{ value, expires }`。

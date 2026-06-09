@@ -1,4 +1,4 @@
-import JSEncrypt from 'encryptlong/bin/jsencrypt'
+import { JSEncrypt } from 'encryptlong'
 // 公钥
 const publicKey = 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCuheubArsSg/yVQXs7CV1ItqWRb4Q3JjLgszoLSqTC4Rp1lbqzKv9NZIjOh0pQwQp2wdq8SFjMvjsVt3phDSY8rNFp5pMPnD/K0BrEoQV5UUfgOgGnyxRMBFYQIbQMcV7tZa/UWLPoMbioz1PcU4btDb8Y14e5jU5amiLkOMAtCwIDAQAB'
 // 私钥

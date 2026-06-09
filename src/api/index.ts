@@ -31,8 +31,35 @@ export * from './sys-password'
 export * from './tenant'
 export * from './tree'
 export * from './websys'
-export * from './staff'
-export * from './ssoVisit'
+export {
+	STAFF_BASE_URL,
+	fetchSelectPageStaff,
+	fetchStaffSelectPage,
+	insertStaff,
+	fetchStaffById,
+	updateStaffById,
+	deleteStaffById,
+	selectPageStaff,
+	selectPage,
+	insert,
+	selectById,
+	updateById,
+	deleteById,
+	api4,
+} from './staff'
+export {
+	fetchSsoSystemList,
+	savePersonalConfig,
+	fetchSystemExeDownload,
+	fetchSsoRoleList,
+	saveProgramInstallRecord,
+	getSystemList,
+	save,
+	systemExeDownload,
+	roleList,
+	saveInstall,
+	getRoleList,
+} from './ssoVisit'
 export * from './slider'
 
 export { loginApi } from './login'

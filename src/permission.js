@@ -1,6 +1,6 @@
 import router from '@/router';
-// import store from '@/store';
 import { useDeviceStore } from '@/stores/device';
+import { useLoginSessionStore } from '@/stores/loginSession';
 import api from '@/axios';
 import { INDEX_MAIN_PAGE_PATH } from '@/store/mutation-types';
 
@@ -90,7 +90,7 @@ function noLoginFunction(freeToken, next, to) {
 	delete currentQuery.freeToken;
 	delete currentQuery.freeLoginType;
 	useUserStore()
-		.dispatch('Login', freeLoginParam)
+		.Login(freeLoginParam)
 		.then((res) => {
 			next({ path: to.path, query: currentQuery });
 		})
@@ -111,18 +111,19 @@ function noLoginFunction(freeToken, next, to) {
 
 // 获取登录页的国际化信息
 async function loginPageElements() {
+	const loginSessionStore = useLoginSessionStore();
 	try {
 		const language = getCurrentLocale() || getDefaultLocale() || '';
 		const { data, code } = await api.request('getI18nConfig', {}, { language });
 		if (code == 200) {
-			store.commit('SET_I18N_STATUS', !!data?.languageList?.length);
-			store.commit('SET_I18N_LIST', data?.languageList || []);
+			loginSessionStore.SET_I18N_STATUS(!!data?.languageList?.length);
+			loginSessionStore.SET_I18N_LIST(data?.languageList || []);
 			const defaultLang = data?.languageList?.find((item) => item.isDefault);
 			setDefaultLocale(defaultLang.value || 'zh');
-			i18n.mergeLocaleMessage(getLocale(), data.pageElements);
+			i18n.global.mergeLocaleMessage(getLocale(), data.pageElements);
 			setCurrentLocale(getLocale());
 		}
 	} catch (error) {
-		store.commit('SET_I18N_STATUS', false);
+		loginSessionStore.SET_I18N_STATUS(false);
 	}
 }

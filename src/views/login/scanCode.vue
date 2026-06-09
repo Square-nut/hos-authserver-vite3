@@ -17,191 +17,200 @@
 		<!-- <el-button @click="test">测试</el-button> -->
 	</div>
 </template>
-<script>
+<script setup lang="ts">
+import { ref, watch, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage } from 'element-plus';
 import AuthConstant from '@/constant/auth-constant';
 import { fetchPhoneScan, fetchPhoneScanStatus } from '@/api/scan-code';
 import { useUserStore } from '@/stores/user';
 import postDialog from './post-dialog.vue';
 import { openHosBizDialog } from '@/composables/useHosBiz';
 import { Loading } from '@element-plus/icons-vue';
-export default {
-	components: { Loading },
-	props: ['activeType'],
-	data() {
-		return {
-			QRcodeInfo: {
-				scanCode: '',
-				scanCodeKey: '',
-			}, // 获取二维码
-			timer: '', // 扫码结果轮询
-			QRcodeTimer: '', // 每60秒刷新一下二维码
-		};
+
+const { t } = useI18n();
+
+const props = defineProps<{
+	activeType?: string;
+}>();
+
+const emit = defineEmits<{
+	(
+		e: 'openTwoAuthDialog',
+		grantChainId: string,
+		authType: string,
+		account: string,
+		caData: unknown,
+		phone: string
+	): void;
+	(e: 'loginSucessHandler'): void;
+	(e: 'forcedJumpSetPassword', err: unknown): void;
+}>();
+
+interface QRcodeInfoType {
+	scanCode: string;
+	scanCodeKey: string;
+}
+
+const QRcodeInfo = ref<QRcodeInfoType>({
+	scanCode: '',
+	scanCodeKey: '',
+});
+const timer = ref<ReturnType<typeof setInterval> | ''>('');
+const QRcodeTimer = ref<ReturnType<typeof setInterval> | ''>('');
+const loading = ref(false);
+
+watch(
+	() => props.activeType,
+	(newVal) => {
+		if (newVal == 'scanCode') {
+			getPhoneScan();
+		} else {
+			stopInterval();
+		}
 	},
-	watch: {
-		activeType: {
-			immediate: true, //首次加载的时候执行函数
-			handler: function (newVal) {
-				if (newVal == 'scanCode') {
-					this.getPhoneScan();
-				} else {
-					this.stopInterval();
+	{ immediate: true }
+);
+
+onBeforeUnmount(() => {
+	stopInterval();
+});
+
+function test() {
+	openHosBizDialog({
+		component: postDialog,
+		_uid: 'postDialog',
+		props: {},
+	});
+}
+
+function start() {
+	stopInterval();
+	timer.value = setInterval(() => {
+		getPhoneScanStatus();
+	}, 1000);
+	QRcodeTimer.value = setInterval(() => {
+		getPhoneScan();
+	}, 60000);
+}
+
+function stopInterval() {
+	if (timer.value) {
+		clearInterval(timer.value);
+	}
+	if (QRcodeTimer.value) {
+		clearInterval(QRcodeTimer.value);
+	}
+}
+
+function getPhoneScan() {
+	fetchPhoneScan()
+		.then((res) => {
+			if (res && res.code == '200') {
+				QRcodeInfo.value = res.data as QRcodeInfoType;
+				start();
+			} else {
+				ElMessage.error(res.msg);
+				stopInterval();
+			}
+		})
+		.catch((err: { msg?: string }) => {
+			ElMessage.error(err.msg);
+			stopInterval();
+		});
+}
+
+function getPhoneScanStatus() {
+	const upData = {
+		scanCodeKey: QRcodeInfo.value.scanCodeKey,
+	};
+	fetchPhoneScanStatus(upData)
+		.then((res) => {
+			if (res.code && res.code == 200) {
+				const payload = (res.data ?? {}) as Record<string, unknown>
+				if (payload.status === 'invalid') {
+					stopInterval()
+					start()
+				} else if (payload.status === 'confirm') {
+					stopInterval()
+					const loginData = {
+						grantType: 'scanCode',
+						phoneAccessToken: payload.accessToken,
+					}
+					loginFn(loginData)
+				} else if (payload.status === 'no-access') {
+					ElMessage.error(t('无访问权限'));
+					stopInterval();
 				}
-			},
-		},
-	},
-	beforeUnmount() {
-		this.stopInterval();
-	},
-	methods: {
-		test() {
-			openHosBizDialog({
-				component: postDialog,
-				_uid: 'postDialog',
-				props: {},
-			});
-		},
-		// 循环请求二维码扫描结果
-		start() {
-			this.stopInterval();
-			this.timer = setInterval(() => {
-				// 获取扫描结果
-				this.getPhoneScanStatus();
-			}, 1000);
-			// 每60秒刷新一下二维码
-			this.QRcodeTimer = setInterval(() => {
-				// 获取扫描结果
-				this.getPhoneScan();
-			}, 60000);
-		},
-		// 清楚轮询
-		stopInterval() {
-			clearInterval(this.timer);
-			clearTimeout(this.QRcodeTimer);
-		},
-		// 获取扫码登录二维码
-		getPhoneScan() {
-			fetchPhoneScan()
-				.then((res) => {
-					if (res && res.code == '200') {
-						this.QRcodeInfo = res.data;
-						this.start();
-					} else {
-						// 二维码接口错误不轮询
-						this.$message.error(res.msg);
-						this.stopInterval();
-					}
-				})
-				.catch((err) => {
-					// 二维码接口错误不轮询
-					this.$message.error(err.msg);
-					this.stopInterval();
-				});
-		},
-		// 获取扫码结果
-		getPhoneScanStatus() {
-			let upData = {
-				scanCodeKey: this.QRcodeInfo.scanCodeKey,
-			};
-			fetchPhoneScanStatus(upData)
-				.then((res) => {
-					if (res.code && res.code == 200) {
-						// 二维码过期，重新请求二维码
-						if (res.data.status === 'invalid') {
-							this.stopInterval();
-							this.start();
-						} else if (res.data.status === 'confirm') {
-							this.stopInterval();
-							// this.$t(登录)
-							let upData = {
-								grantType: 'scanCode',
-								phoneAccessToken: res.data.accessToken,
-							};
-							this.loginFn(upData);
-						} else if (res.data.status === 'no-access') {
-							// this.$t(无权限访问)
-							this.$message.error(this.$t('无访问权限'));
-							this.stopInterval();
-						}
-					} else {
-						this.stopInterval();
-					}
-				})
-				.catch((err) => {
-					this.stopInterval();
-				});
-		},
-		// 登录
-		loginFn(upData) {
-			useUserStore().Login(upData)
-				.then((res) => {
-					this.loading = false;
-					this.stopInterval();
-					// 登录成功跳转
-					if (res && res.code == 200) {
-						// postDialog
-						// 获取岗位信息并展示下拉列表
-						if (res.data.personId) {
-							openHosBizDialog({
-								component: postDialog,
-								_uid: 'postDialog',
-								props: {
-									personId: res.data.personId,
-									postChainId: res.data.postChainId,
-									postData: upData,
-									name: res.data.name,
-									openTwoAuthDialog: this.openTwoAuthDialog,
-									loginSucessHandler: this.loginSucessHandler,
-								},
-							});
-						} else if (res.data.againAuthType) {
-							// 需要二次认证
-							let grantChainId = res.data.grantChainId;
-							let authType = res.data.againAuthType;
-							let account = res.data.accountCode;
-							let caData = res.data.caData;
-							let phone = res.data.phone;
-							this.$emit(
-								'openTwoAuthDialog',
-								grantChainId,
-								authType,
-								account,
-								caData,
-								phone
-							);
-						} else {
-							// 不需要二次认证
-							this.$emit('loginSucessHandler');
-						}
-					}
-				})
-				.catch((err) => {
-					this.loading = false;
-					this.stopInterval();
-					if (!err.code.includes('101-002-005-')) {
-						this.$message.error(err.msg);
-					}
-					// 强制修改密码弹窗
-					if (err.code.includes(AuthConstant.forcedJumpSetPassword)) {
-						this.$emit('forcedJumpSetPassword', err);
-					}
-				});
-		},
-		openTwoAuthDialog(grantChainId, authType, account, caData, phone) {
-			this.$emit(
-				'openTwoAuthDialog',
-				grantChainId,
-				authType,
-				account,
-				caData,
-				phone
-			);
-		},
-		loginSucessHandler() {
-			// 不需要二次认证
-			this.$emit('loginSucessHandler');
-		},
-	},
-};
+			} else {
+				stopInterval();
+			}
+		})
+		.catch(() => {
+			stopInterval();
+		});
+}
+
+function loginFn(upData: Record<string, unknown>) {
+	useUserStore()
+		.Login(upData)
+		.then((res) => {
+			loading.value = false
+			stopInterval()
+			if (res && res.code == 200) {
+				const data = (res.data ?? {}) as Record<string, unknown>
+				if (data.personId) {
+					openHosBizDialog({
+						component: postDialog,
+						_uid: 'postDialog',
+						props: {
+							personId: data.personId,
+							postChainId: data.postChainId,
+							postData: upData,
+							name: data.name,
+							openTwoAuthDialog,
+							loginSucessHandler,
+						},
+					});
+				} else if (data.againAuthType) {
+					emit(
+						'openTwoAuthDialog',
+						String(data.grantChainId ?? ''),
+						String(data.authType ?? data.againAuthType ?? ''),
+						String(data.accountCode ?? ''),
+						data.caData,
+						String(data.phone ?? '')
+					)
+				} else {
+					emit('loginSucessHandler');
+				}
+			}
+		})
+		.catch((err: { code?: string; msg?: string }) => {
+			loading.value = false;
+			stopInterval();
+			if (!err.code?.includes('101-002-005-')) {
+				ElMessage.error(err.msg);
+			}
+			if (err.code?.includes(AuthConstant.forcedJumpSetPassword)) {
+				emit('forcedJumpSetPassword', err);
+			}
+		});
+}
+
+function openTwoAuthDialog(
+	grantChainId: string,
+	authType: string,
+	account: string,
+	caData: unknown,
+	phone: string
+) {
+	emit('openTwoAuthDialog', grantChainId, authType, account, caData, phone);
+}
+
+function loginSucessHandler() {
+	emit('loginSucessHandler');
+}
 </script>
 <style lang="scss" scoped>
 .scan-code {

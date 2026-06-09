@@ -18,51 +18,33 @@
     </hos-tabs>
   </div>
 </template>
-<script>
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import CA from '@/views/login/ca.vue'
-export default {
-  name:'',
-  components: {CA},
-  props:{
-    // 当前用户名，用户查询支持的二次认证方式
-    account: {
-      type:String,
-      default:'',
-    },
-    // 登录成功的回调
-    loginSucessHandler:{
-      type:Function,
-      default: () => {}
-    },
-    // 所有支持ca登录的类型
-    caList:{
-      type: Array,
-      default:() => []
-    },
-    phoneDisplay:{
-      type:String,
-      default: ''
-    },
-    grantChainId:{
-      type:String,
-      default:''
-    }
-  },
-  data(){
-    return{
-      activeType:'',
-    }
-  },
-  created(){
-    if(!this.phoneDisplay){
-      this.activeType = this.caList[0].type + '0'
-    }
-    
-  },
-  methods:{
-    tabClick(tab, event){},
-  }
+
+interface CaListItem {
+	type: string
+	loginName: string
+	[key: string]: unknown
 }
+
+const props = defineProps<{
+	account?: string
+	loginSucessHandler?: () => void
+	caList?: CaListItem[]
+	phoneDisplay?: string
+	grantChainId?: string
+}>()
+
+const activeType = ref('')
+
+function tabClick() {}
+
+onMounted(() => {
+	if (!props.phoneDisplay && props.caList?.[0]) {
+		activeType.value = props.caList[0].type + '0'
+	}
+})
 </script>
 <style lang="scss" scoped>
 .sc-dialog{

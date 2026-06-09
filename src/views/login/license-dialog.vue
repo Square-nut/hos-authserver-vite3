@@ -3,15 +3,10 @@
     <iframe class="license-iframe" frameborder="0" :src="iframeUrl"></iframe>
   </div>
 </template>
-<script>
-export default {
-  props:['iframeUrl'],
-  data(){
-    return{
-
-    }
-  }
-}
+<script setup lang="ts">
+defineProps<{
+	iframeUrl?: string
+}>()
 </script>
 <style lang="scss" scoped>
 .license-iframe{

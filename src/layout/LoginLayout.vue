@@ -468,18 +468,6 @@ function applyLoginConfig(res: ApiResult<LoginConfigData>) {
 	if (!res || (res.code != 200 && res.code != '200') || !res.data) return
 
 	const data = res.data
-	if (data.functionalVersion != null) {
-		const version = String(data.functionalVersion)
-		ls.set('hos_login_post_type', version)
-		setLoginPostVersion(version)
-	}
-	const portal =
-		returnGlobalValue('VUE_APP_PORTAL_URL') ||
-		data.portalUrl ||
-		''
-	if (portal) {
-		setLoginPortalUrl(String(portal))
-	}
 	hideLoginLoadingMask()
 
 	if (data.loginPageDataDTO) {
@@ -496,6 +484,19 @@ function applyLoginConfig(res: ApiResult<LoginConfigData>) {
 		persistLoginType(data.loginTypeDataDTO)
 	} else {
 		persistLoginType(getDefaultLoginTypeInfo())
+	}
+
+	if (data.functionalVersion != null) {
+		const version = String(data.functionalVersion)
+		ls.set('hos_login_post_type', version)
+		setLoginPostVersion(version)
+	}
+	const portal =
+		returnGlobalValue('VUE_APP_PORTAL_URL') ||
+		data.portalUrl ||
+		''
+	if (portal) {
+		setLoginPortalUrl(String(portal))
 	}
 }
 

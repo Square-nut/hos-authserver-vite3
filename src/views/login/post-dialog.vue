@@ -1,7 +1,7 @@
 <template>
 	<div class="pl15 pr15 pt15 login-post-dialog">
 		<el-biz-table
-			ref="post-dialog-select-table"
+			ref="postDialogSelectTableRef"
 			:cols="cols"
 			:form="form"
 			:data="selectPostPage"
@@ -70,201 +70,192 @@
 		</div>
 	</div>
 </template>
-<script>
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage } from 'element-plus';
 import { useUserStore } from '@/stores/user';
 import { closeHosBizDialog, updateHosBizTable } from '@/composables/useHosBiz';
 import { fetchSelectPostPage } from '@/api/org';
-export default {
-	// TODO 处理dialogUid，handleRowClick传参
-	props: [
-		'postData',
-		'personId',
-		'postChainId',
-		'name',
-		'openTwoAuthDialog',
-		'loginSucessHandler',
-		'dialogUid',
-		'handleRowClick',
-	],
-	components: {},
-	data() {
-		return {
-			disabled: true,
-			pageConfig: {
-				pageSize: 5,
-			},
-			post: '',
-			form: {
-				labelWidth: 'auto',
-				labelPosition: 'left',
-				model: {
-					query: '',
-					dataType: '',
-				},
-			},
-			cols: [
-				// {
-				// 	prop: 'name',
-				// 	label: this.$t('名称'),
-				// },
-				// {
-				// 	prop: 'type',
-				// 	label: this.$t('类型'),
-				// 	formatter: (row, column, value) => {
-				// 		return row.type == 'unit'
-				// 			? this.$t('岗位单元')
-				// 			: row.type == 'group'
-				// 			? this.$t('岗位组')
-				// 			: this.$t('岗位');
-				// 	},
-				// },
-				{
-					label: this.$t('业务单元'),
-					prop: 'buName',
-				},
-				{
-					label: this.$t('业务岗位'),
-					prop: 'postName',
-				},
-			],
-			valueConfig: {
-				label: 'name',
-				value: 'id',
-			},
-			options: [
-				{
-					label: this.$t('岗位单元'),
-					value: 'unit',
-				},
-				{
-					label: this.$t('岗位组'),
-					value: 'group',
-				},
-				{
-					label: this.$t('岗位'),
-					value: 'post',
-				},
-			],
-			loading: false,
-			loginForm: {},
-		};
-	},
-	created() {
-		if (
-			import.meta.env.VITE_APP_THEME_STYLE == '1'
-		) {
-			this.pageConfig.layout = 'total, home, prev, pager, next, end';
-		}
-		if (this.dialogUid) {
-			// this.$refs['post-dialog-select-table'].setCurrentRow(row);
-			// this.handleRowClick(this.post)
-		}
-		// this.$refs.singleTable.setCurrentRow(row);
-	},
-	methods: {
-		onRowDblclick(row, column, event) {
-			this.post = row;
-			this.loading = true;
-			this.disabled = true;
-			// 选择岗位支持双击切换
-			this.loginFn();
-		},
-		save() {
-			// 有dialogUid代表是登录后dropdownMenu调用
-			if (this.dialogUid) {
-				this.handleRowClick(this.post);
-			} else {
-				this.loginFn();
-			}
-		},
-		cancel() {
-			if (this.dialogUid) {
-				closeHosBizDialog({
-					_uid: 'dropmenu-post-change-dialog',
-				});
-			} else {
-				closeHosBizDialog({ _uid: 'postDialog' });
-			}
-		},
-		// 登录
-		loginFn() {
-			let postData = JSON.parse(JSON.stringify(this.postData));
-			postData.postChainId = this.postChainId;
-			postData.post = this.post;
-			if (!this.post) {
-				this.$message.error(this.$t('请选择岗位单元！'));
-				return;
-			}
-			this.loading = true;
-			this.disabled = true;
-			useUserStore().Login(postData)
-				.then((res) => {
-					this.loading = false;
-					// 登录成功跳转
-					if (res && res.code == 200) {
-						if (res.data.againAuthType) {
-							// 需要二次认证
-							let grantChainId = res.data.grantChainId;
-							let authType = res.data.againAuthType;
-							let account = res.data.accountCode;
-							let caData = res.data.caData;
-							let phone = res.data.phone;
-							this.openTwoAuthDialog(
-								grantChainId,
-								authType,
-								account,
-								caData,
-								phone
-							);
-						} else {
-							// 不需要二次认证
-							this.loginSucessHandler();
-						}
-					}
-				})
-				.catch((err) => {
-					this.loading = false;
-					if (!err.code.includes('101-002-005-')) {
-						this.$message.error(err.msg);
-					}
-				});
-		},
-		selectPostPage(params) {
-			params.type = 'id';
-			params.personId = this.personId;
-			params.size = 5;
-			return fetchSelectPostPage(params);
-		},
 
-		searchPost(val, key) {
-			this.$refs.people.refresh();
-		},
-		rowDisabledMethod(row) {
-			return row.activity === false;
-		},
-		changePeople(row) {
-			this.post = row;
-			this.disabled = false;
-		},
-		reset() {
-			this.form.model = {
-				query: '',
-				dataType: '',
-			};
-			this.post = '';
-			this.disabled = true;
-			updateHosBizTable({ _uid: 'post-dialog-select-table' });
-		},
+const { t } = useI18n();
 
-		// 列表加载完数据
-		tableLoadAfter(data) {
-			// 自动赋值
-			if (Array.isArray(data) && data.length) {
-				this.$refs['post-dialog-select-table'].setCurrentRow(data[0]);
-			}
-		},
+const props = defineProps<{
+	postData?: Record<string, unknown>;
+	personId?: string;
+	postChainId?: string;
+	name?: string;
+	openTwoAuthDialog?: (
+		grantChainId: string,
+		authType: string,
+		account: string,
+		caData: unknown,
+		phone: string
+	) => void;
+	loginSucessHandler?: () => void;
+	dialogUid?: string;
+	handleRowClick?: (post: unknown) => void;
+}>();
+
+const postDialogSelectTableRef = ref<{
+	setCurrentRow: (row: unknown) => void;
+} | null>(null);
+
+const disabled = ref(true);
+const pageConfig = reactive<Record<string, unknown>>({
+	pageSize: 5,
+});
+const post = ref<Record<string, unknown> | ''>('');
+const form = reactive({
+	labelWidth: 'auto',
+	labelPosition: 'left',
+	model: {
+		query: '',
+		dataType: '',
+		queryBuName: '',
+		queryPostName: '',
 	},
+});
+const cols = [
+	{
+		label: t('业务单元'),
+		prop: 'buName',
+	},
+	{
+		label: t('业务岗位'),
+		prop: 'postName',
+	},
+];
+const valueConfig = {
+	label: 'name',
+	value: 'id',
 };
+const options = [
+	{
+		label: t('岗位单元'),
+		value: 'unit',
+	},
+	{
+		label: t('岗位组'),
+		value: 'group',
+	},
+	{
+		label: t('岗位'),
+		value: 'post',
+	},
+];
+const loading = ref(false);
+const loginForm = reactive<Record<string, unknown>>({});
+
+onMounted(() => {
+	if (import.meta.env.VITE_APP_THEME_STYLE == '1') {
+		pageConfig.layout = 'total, home, prev, pager, next, end';
+	}
+	if (props.dialogUid) {
+		// this.$refs['post-dialog-select-table'].setCurrentRow(row);
+		// this.handleRowClick(this.post)
+	}
+});
+
+function onRowDblclick(row: Record<string, unknown>) {
+	post.value = row;
+	loading.value = true;
+	disabled.value = true;
+	loginFn();
+}
+
+function save() {
+	if (props.dialogUid) {
+		props.handleRowClick?.(post.value);
+	} else {
+		loginFn();
+	}
+}
+
+function cancel() {
+	if (props.dialogUid) {
+		closeHosBizDialog({
+			_uid: 'dropmenu-post-change-dialog',
+		});
+	} else {
+		closeHosBizDialog({ _uid: 'postDialog' });
+	}
+}
+
+function loginFn() {
+	const postData = JSON.parse(JSON.stringify(props.postData ?? {}));
+	postData.postChainId = props.postChainId;
+	postData.post = post.value;
+	if (!post.value) {
+		ElMessage.error(t('请选择岗位单元！'));
+		return;
+	}
+	loading.value = true;
+	disabled.value = true;
+	useUserStore()
+		.Login(postData)
+		.then((res) => {
+			loading.value = false;
+			if (res && res.code == 200) {
+				if (res.data.againAuthType) {
+					const grantChainId = res.data.grantChainId;
+					const authType = res.data.againAuthType;
+					const account = res.data.accountCode;
+					const caData = res.data.caData;
+					const phone = res.data.phone;
+					props.openTwoAuthDialog?.(
+						grantChainId,
+						authType,
+						account,
+						caData,
+						phone
+					);
+				} else {
+					props.loginSucessHandler?.();
+				}
+			}
+		})
+		.catch((err: { code?: string; msg?: string }) => {
+			loading.value = false;
+			if (!err.code?.includes('101-002-005-')) {
+				ElMessage.error(err.msg);
+			}
+		});
+}
+
+function selectPostPage(params: Record<string, unknown>) {
+	params.type = 'id';
+	params.personId = props.personId;
+	params.size = 5;
+	return fetchSelectPostPage(params);
+}
+
+function rowDisabledMethod(row: { activity?: boolean }) {
+	return row.activity === false;
+}
+
+function changePeople(row: Record<string, unknown>) {
+	post.value = row;
+	disabled.value = false;
+}
+
+function reset() {
+	form.model = {
+		query: '',
+		dataType: '',
+		queryBuName: '',
+		queryPostName: '',
+	};
+	post.value = '';
+	disabled.value = true;
+	updateHosBizTable({ _uid: 'post-dialog-select-table' });
+}
+
+function tableLoadAfter(data: unknown[]) {
+	if (Array.isArray(data) && data.length) {
+		postDialogSelectTableRef.value?.setCurrentRow(data[0]);
+	}
+}
 </script>
 <style lang="scss" scoped>
 .pl15 {

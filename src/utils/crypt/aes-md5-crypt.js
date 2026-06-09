@@ -1,6 +1,6 @@
 import CryptoJS from 'crypto-js'
 // md5密钥
-const md5Key = '11111'
+const md5Key = '1234567890123456'
 
 // AES密钥 需要用到的16位字符串的key
 const AESKey = '1234567890123456qwertyuiopasdfgh'
@@ -54,15 +54,15 @@ const sortObj = (obj) => {
   let newkey = Object.keys(obj).sort()
   let newObj = {}
   newkey.forEach((item) => {
-    // if (obj[item]) {
-    newObj[item] = obj[item]
-    // }
+    if (obj[item]) {
+      newObj[item] = obj[item]
+    }
   })
   let str = []
   for (let k in newObj) {
-    // if (newObj[k]) {
-    str.push(k + "=" + newObj[k]);
-    // }
+    if (newObj[k]) {
+      str.push(k + "=" + newObj[k]);
+    }
   }
   return str.length > 0 ? str.join("#") : str.join("")
 }

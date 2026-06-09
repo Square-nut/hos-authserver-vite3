@@ -13,7 +13,7 @@
 				<div class="flex-box">
 					<div class="login-type-title">{{ $t('短信验证登录') }}</div>
 					<el-form
-						ref="otpLoginForm"
+						ref="otpLoginFormRef"
 						label-width=""
 						hide-required-asterisk
 						class="uk-dynamic"
@@ -60,177 +60,185 @@
 		</div>
 	</div>
 </template>
-<script>
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage } from 'element-plus';
+import type { FormInstance, FormRules } from 'element-plus';
 import AuthConstant from '@/constant/auth-constant';
 import { getLoginErrorDesc } from './js/login';
 import { validPhone11, validEmail } from '@/utils/validateUtil';
 import { useUserStore } from '@/stores/user';
 import { closeHosBizDialog } from '@/composables/useHosBiz';
 import { getOTPCode as fetchOTPCode } from '@/api/login';
-export default {
-	props: {
-		// 登录成功的回调
-		loginSucessHandler: {
-			type: Function,
-			default: () => {},
-		},
-		// 是否是二次登录
-		againLogin: {
-			type: Boolean,
-			default: false,
-		},
-		// 二次认证需要传参的UUID
-		grantChainId: {
-			type: String,
-			default: '',
-		},
-		// 手机号
-		phoneDisplay: {
-			type: String,
-			default: '',
-		},
-		// 手机号id
-		grantChainId: {
-			type: String,
-			default: '',
-		},
-	},
-	data() {
-		const validatePhoneAndMail = (rule, value, callback) => {
-			let type = '';
-			if (validPhone11(value)) {
-				type = 'phone';
-			}
-			if (validEmail(value)) {
-				type = 'mail';
-			}
-			if (type == '') {
-				callback(new Error(this.$t('请输入有效的手机号')));
-			} else {
-				callback();
-			}
-		};
-		return {
-			otpForm: {
-				loginName: '',
-				grantChainId: '',
-				smsCode: '',
-				smsId: '',
-			},
-			otpLoginRules: {
-				loginName: [{ validator: validatePhoneAndMail, trigger: 'blur' }],
-				///口令不能为空
-				smsCode: [
-					{
-						required: true,
-						trigger: 'blur',
-						message: this.$t('验证码不能为空'),
-					},
-				],
-			},
-			btnShow: true,
-			count: '',
-		};
-	},
-	created() {
-		this.otpForm.loginName = this.phoneDisplay;
-		this.otpForm.grantChainId = this.grantChainId;
-	},
-	methods: {
-		// 关闭弹框
-		close() {
-			// this.$store.commit('CLOSE_DIALOG',{_uid:'SCDialog'});
-			closeHosBizDialog({ _uid: 'CADialog' });
-		},
-		// 登录流程  所有登录形式最后都走到登录流程来
-		otpLogin() {
-			let upData = {
-				againLogin: this.againLogin, // 是否为二次认证
-				grantChainId: this.grantChainId, // 当前手机号的id
-				smsId: this.otpForm.smsId, // 请求验证码时返回的id
-				smsCode: this.otpForm.smsCode, // 输入的验证码
-				loginName: this.phoneDisplay, // 手机号
-				grantType: 'sms', // 登录方式
-				loginType: 'phone',
-			};
-			useUserStore().Login(upData)
-				.then((res) => {
-					if (res && res.code == 200) {
-						this.loginSucessHandler();
-					} else {
-						this.$message.error(res.msg);
-						closeHosBizDialog({});
-					}
-				})
-				.catch((err) => {
-					let code = err.code;
-					///需要双因子认证的错误， 为什么又一次弹出了二次认证弹框
-					if (code === AuthConstant.twoAuthErrorCode) {
-						///这个需要从respnmse中获取数据,已经从过滤器中处理了
-						let grantChainId = err.data.grantChainId;
-						let authType = err.data.againAuthType;
-						let account = err.data.accountCode;
-						///弹出层
-						this.$emit('openTwoAuthDialog', grantChainId, authType, account);
-					} else {
-						///根据返回的编码，从国家化中获取相应的描述
-						////公共的错误码的校验
-						let errorDesc = getLoginErrorDesc(code, err.msg);
-						if (!errorDesc || errorDesc == '') {
-							errorDesc = this.$t('短信登录失败，请重新再试！');
-						}
-						this.$message.error(err.msg);
-						// this.$store.commit('CLOSE_DIALOG')
-					}
-				});
-		},
-		getCode() {
-			if (!this.btnShow) {
-				return;
-			}
-			this.$refs.otpLoginForm.validateField('loginName', (valid) => {
-				if (valid == '') {
-					this.getOTPCode();
-				}
-			});
-		},
-		countDown(timeLength) {
-			let TIME_COUNT = timeLength;
-			if (!this.timer) {
-				this.count = TIME_COUNT;
-				this.btnShow = false;
-				this.timer = setInterval(() => {
-					if (this.count > 0 && this.count <= TIME_COUNT) {
-						this.count--;
-					} else {
-						this.btnShow = true;
-						clearInterval(this.timer);
-						this.timer = null;
-					}
-				}, 1000);
-			}
-		},
-		getOTPCode() {
-			fetchOTPCode({
-				phoneNumber: this.otpForm.loginName,
-				smsType: 'templateCode',
-			})
-				.then((response) => {
-					if (response && response.code == 200) {
-						this.otpForm.smsId = response.data.uuid;
-						this.countDown(60);
-					} else {
-						///提示错误信息
-						this.$message.error(response.msg);
-					}
-				})
-				.catch((error) => {
-					this.$message.error(error.msg);
-					console.log(error);
-				});
-		},
-	},
+
+const { t } = useI18n();
+
+const props = withDefaults(
+	defineProps<{
+		loginSucessHandler?: () => void;
+		againLogin?: boolean;
+		grantChainId?: string;
+		phoneDisplay?: string;
+	}>(),
+	{
+		loginSucessHandler: () => {},
+		againLogin: false,
+		grantChainId: '',
+		phoneDisplay: '',
+	}
+);
+
+const emit = defineEmits<{
+	(
+		e: 'openTwoAuthDialog',
+		grantChainId: string,
+		authType: string,
+		account: string
+	): void;
+}>();
+
+const otpLoginFormRef = ref<FormInstance>();
+
+const validatePhoneAndMail = (
+	rule: unknown,
+	value: string,
+	callback: (error?: Error) => void
+) => {
+	let type = '';
+	if (validPhone11(value)) {
+		type = 'phone';
+	}
+	if (validEmail(value)) {
+		type = 'mail';
+	}
+	if (type == '') {
+		callback(new Error(t('请输入有效的手机号')));
+	} else {
+		callback();
+	}
 };
+
+const otpForm = reactive({
+	loginName: '',
+	grantChainId: '',
+	smsCode: '',
+	smsId: '',
+});
+
+const otpLoginRules = reactive<FormRules>({
+	loginName: [{ validator: validatePhoneAndMail, trigger: 'blur' }],
+	smsCode: [
+		{
+			required: true,
+			trigger: 'blur',
+			message: t('验证码不能为空'),
+		},
+	],
+});
+
+const btnShow = ref(true);
+const count = ref<number | string>('');
+const timer = ref<ReturnType<typeof setInterval> | null>(null);
+
+onMounted(() => {
+	otpForm.loginName = props.phoneDisplay;
+	otpForm.grantChainId = props.grantChainId;
+});
+
+function close() {
+	closeHosBizDialog({ _uid: 'CADialog' });
+}
+
+function otpLogin() {
+	const upData = {
+		againLogin: props.againLogin,
+		grantChainId: props.grantChainId,
+		smsId: otpForm.smsId,
+		smsCode: otpForm.smsCode,
+		loginName: props.phoneDisplay,
+		grantType: 'sms',
+		loginType: 'phone',
+	};
+	useUserStore()
+		.Login(upData)
+		.then((res) => {
+			if (res && res.code == 200) {
+				props.loginSucessHandler?.();
+			} else {
+				ElMessage.error(res.msg);
+				closeHosBizDialog({});
+			}
+		})
+		.catch((err: { code?: string; msg?: string; data?: Record<string, unknown> }) => {
+			const code = err.code;
+			if (code === AuthConstant.twoAuthErrorCode) {
+				const grantChainId = err.data?.grantChainId as string;
+				const authType = err.data?.againAuthType as string;
+				const account = err.data?.accountCode as string;
+				emit('openTwoAuthDialog', grantChainId, authType, account);
+			} else {
+				let errorDesc = getLoginErrorDesc(String(code ?? ''), err.msg);
+				if (!errorDesc || errorDesc == '') {
+					errorDesc = t('短信登录失败，请重新再试！');
+				}
+				ElMessage.error(err.msg);
+			}
+		});
+}
+
+function keyEnterLogin() {
+	otpLogin()
+}
+
+function getCode() {
+	if (!btnShow.value) {
+		return
+	}
+	otpLoginFormRef.value?.validateField('loginName', (valid) => {
+		if (valid) {
+			getOTPCode()
+		}
+	})
+}
+
+function countDown(timeLength: number) {
+	const TIME_COUNT = timeLength;
+	if (!timer.value) {
+		count.value = TIME_COUNT;
+		btnShow.value = false;
+		timer.value = setInterval(() => {
+			if (Number(count.value) > 0 && Number(count.value) <= TIME_COUNT) {
+				count.value = Number(count.value) - 1;
+			} else {
+				btnShow.value = true;
+				if (timer.value) {
+					clearInterval(timer.value);
+				}
+				timer.value = null;
+			}
+		}, 1000);
+	}
+}
+
+function getOTPCode() {
+	fetchOTPCode({
+		phoneNumber: otpForm.loginName,
+		smsType: 'templateCode',
+	})
+		.then((response) => {
+			if (response && response.code == 200) {
+				otpForm.smsId = (response.data as { uuid?: string })?.uuid ?? ''
+				countDown(60);
+			} else {
+				ElMessage.error(response.msg);
+			}
+		})
+		.catch((error: { msg?: string }) => {
+			ElMessage.error(error.msg);
+			console.log(error);
+		});
+}
 </script>
 <style lang="scss" scoped>
 .oauth-otplogin {

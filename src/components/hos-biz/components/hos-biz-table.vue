@@ -7,7 +7,7 @@
 <template>
   <div class="el-biz-table" :class="{ flex: isFit, 'pagination-pos-bottom': pagePos === 'bottom', chrome49 }">
     <div :class="{ mb15: !showToolbar && uiStyle == 1, 'el-biz-form': $slots.form }" v-if="form">
-      <Form ref="form" v-bind="form" :uid="uid" :query-cache="queryCache" @reset="reset" @search="search">
+      <Form ref="formRef" v-bind="formProps" :uid="uid" :query-cache="queryCache" @reset="reset" @search="search">
         <slot name="form"></slot>
       </Form>
     </div>
@@ -22,9 +22,9 @@
           :query-cache="queryCache"
           class="fr"
           :uid="uid"
-          :total="total"
+          :total="total ?? 0"
           size="mini"
-          ref="pageTop"
+          ref="pageTopRef"
           @current-change="currentChange"
           @size-change="sizeChange"
         ></Page>
@@ -61,7 +61,7 @@
       :asyncSlot="asyncSlot"
       :cols="selectedCols"
       :height="height"
-      :ref="'el-table-' + uid"
+      ref="tableComponentRef"
       @sort-change="sortChange"
       @current-change="convertCurrentChange"
       :border="border"
@@ -79,12 +79,12 @@
     <div v-if="page !== false && pagePos === 'bottom'" class="el-biz-pagination clearfix">
       <!-- <slot name="page"></slot> -->
       <Page
-        ref="page"
+        ref="pageRef"
         class="simple-pagination"
         v-bind="pageConfig"
         :query-cache="queryCache"
         :uid="uid"
-        :total="total"
+        :total="total ?? 0"
         @current-change="currentChange"
         @size-change="sizeChange"
         :prev-text="uiStyle == 0 ? $t('el.pagination.prev') : null"
@@ -95,523 +95,555 @@
     </div>
   </div>
 </template>
-<script>
+<script setup lang="ts">
+import {
+	computed,
+	getCurrentInstance,
+	nextTick,
+	onBeforeUnmount,
+	onMounted,
+	provide,
+	reactive,
+	ref,
+	useAttrs,
+	useSlots,
+	watch,
+} from 'vue'
+import { storeToRefs } from 'pinia'
+import { ElMessage } from 'element-plus'
 import { Refresh, Setting } from '@element-plus/icons-vue'
-import { otherMethods } from '../utils/table-methods'
 import Table from './table'
 import Page from './pagination'
 import Form from './form'
 import tryGetOnlyArray from '../utils/data-patch-v1/try-get-only-array'
 import tryGetPaginationParams from '../utils/data-patch-v1/try-get-pagination-params'
 import { useHosBizTableStore, subscribeHosBizTableMutations } from '@/stores/hosBizTable'
-import { tableStoreComputed, hosBizUidMatches } from '../utils/pinia-bridge'
+import { hosBizUidMatches } from '../utils/pinia-bridge'
+import { timestamp, uid, event, params } from '../utils/store-config'
 import { isSuccessCode } from '@/types/api-common'
 import filterEmpty from '../utils/filter-empty'
 import Sortable from 'sortablejs'
 import RenderLabel from '../utils/render-label'
 import { v4 as uuidv4 } from 'uuid'
 import { deepClone, returnGlobalValue } from '@/utils/index'
+import { UI_THEME } from '@/constants/ui-theme'
+import { useApi } from '@/composables/useApi'
+import { useHosBizTableExpose } from '../utils/useHosBizTableExpose'
 
-export default {
-  name: 'HosBizTable',
-  mixins: [otherMethods],
-  watch: {
-    page: {
-      handler: function (val, oldVal) {
-        if (oldVal && val?.currentPage != null && val.currentPage != oldVal.currentPage) {
-          this.params.pagination.current = val.currentPage
-        }
-      },
-      deep: true
-    },
-    cols: function () {
-      this.setFilteredColumn()
-    }
-  },
-  provide() {
-    return {
-      TABLE_PROVIDE: this
-    }
-  },
-  components: { Table, Page, Form, Refresh, Setting },
-  computed: {
-    ...tableStoreComputed(),
-    formItems() {
-      try {
-        return Object.keys(this.form.model)
-      } catch (e) {
-        return []
-      }
-    },
-    asyncSlot() {
-      const slotArr = ['form', 'page', 'top', 'bottom']
-      const _slot = {}
-      const slots = this.$slots || {}
-      Object.keys(slots)
-        .filter((ele) => !slotArr.includes(ele))
-        .forEach((ele) => {
-          _slot[ele] = slots[ele]
-        })
-      return _slot
-    },
-    paginationShowPage() {
-      return this.params.pagination.current
-    },
-    pageConfig() {
-      const simple = 'ssizes, home, prev, spager, next, end, slot, stotal'
-      const hos = 'jumper, home, prev, pager, next, end, ssizes, total'
-      const pure = 'stotal, ssizes, prev, pager, next, jumper'
-      let config = {
-        layout: this.uiStyle == 0 ? simple : this.uiStyle == 1 ? hos : pure,
-        total: this.total,
-        currentPage: this.params.pagination.current,
-        pageSize: this.params.pagination.size,
-        pagerCount: 5
-      }
-      if (Object.prototype.toString.call(this.page) === '[object Object]') {
-        config = { ...config, ...this.page }
-      }
-      if (this.autoPageSize) {
-        let rowNum = this.getRowNum()
-        if (rowNum) {
-          config.pageSize = rowNum
-          if (config.pageSize && Array.isArray(config.pageSize)) {
-            config.pageSize.unshift(rowNum)
-          }
-        }
-      }
-      return config
-    },
-    selectedCols() {
-      // 根据产线需求,取消columnSelected判断
-      // if (this.columnSelected) {
-      // const _arr = []
-      // for (let j = 0, lenj = this.cols.length; j < lenj;j++){
-      // 	for (let i = 0, len = this.selectedInFilteredColumn.length; i<len;i++){
-      // 		if ( this.selectedInFilteredColumn[i] === this.cols[j].columnSelectedLabel) {
-      // 			_arr.push(this.cols[j])
-      // 			break;
-      // 		}
-      // 	}
-      // }
-      // return _arr
-      return this.cols.filter((ele) => {
-        return ele.hidden !== true
-      })
-      // }
-      return this.cols
-    },
-    showToolbar() {
-      return (this.page !== false && this.pagePos === 'top') || this.$slots.toolbar || this.columnSelected
-    }
-  },
-  props: {
-    border: {
-      default: true
-    },
-    stripe: {
-      default: function () {
-        return this.$theme != 2
-      }
-    },
-    uid: {
-      // 须保证全局唯一.
-      default: 0
-    },
-    data: {
-      required: true
-    },
-    init: {
-      default: true
-    },
-    form: Object | Boolean,
-    page: Object | Boolean,
-    pageTotal: Number,
-    pagePos: {
-      default: 'bottom'
-    },
-    props: {
-      default() {
-        return {
-          // 将biz-table默认取值从之前的"data"字段改为"records"字段
-          data: 'records',
-          total: 'total'
-        }
-      }
-    },
-    dragable: Boolean,
-    columnSelected: Boolean,
-    cols: {
-      required: true,
-      type: Array
-    },
-    isFit: {
-      type: Boolean,
-      default: true
-    },
-    queryCache: {
-      type: Boolean,
-      default: false
-    },
-    autoPageSize: {
-      type: Boolean,
-      default: false
-    },
-    tableHeight: {
-      type: Number | String
-    }
-  },
-  data() {
-    const UI_STYLE = this.$theme
-    return {
-      unsubscribe: null,
-      chrome49: false, // 是否是低版本浏览器
-      uiStyle: UI_STYLE, // 0:极简  1:hos
-      selectedInFilteredColumn: [],
-      renderLabel: new RenderLabel(),
-      dragTableBody: null,
-      params: {
-        form: {},
-        pagination: {}
-      },
-      tableData: [],
-      tableIsLoading: false,
-      total: undefined,
-      height: undefined
-    }
-  },
-  methods: {
-    isOkResponse(code) {
-      return isSuccessCode(code)
-    },
-    tableUidMatches(storeUid) {
-      return hosBizUidMatches(storeUid, this.uid)
-    },
-    isChrome49() {
-      if (navigator.userAgent.includes('Chrome/49')) {
-        this.chrome49 = true
-      }
-    },
-    setTableData(response) {
-      const data = response.data || response
-      this.tableIsLoading = false
-      let tableData = data[this.props.data]
-      let total = data[this.props.total]
-      let parseTotal = parseInt(total)
-      if (typeof parseTotal === 'number' && !Number.isNaN(parseTotal)) total = parseTotal // 处理当total为string时的情况
-      if (!Array.isArray(tableData)) {
-        tableData = tryGetOnlyArray(data).data
-      }
-      if (typeof total !== 'number') {
-        total = tryGetPaginationParams(data).total
-      }
-      this.tableData = tableData
-      this.total = total
-    },
-    parseData(params) {
-      let _params = filterEmpty(params)
-      if (typeof this.data === 'string') {
-        this.tableIsLoading = true
-        /* eslint handle-callback-err: "warn" */
-        return this.$api(this.data, _params)
-          .then((response) => {
-            if (response && this.isOkResponse(response.code)) {
-              this.setTableData(response)
-            } else {
-              this.total = 0
-              this.tableIsLoading = false
-              // this.$message.error(this.$t(response.code, response.msg));
-            }
-          })
-          .catch((err) => {
-            this.total = 0
-            this.tableIsLoading = false
-          })
-          .finally(() => {
-            this.$emit('after-load', this.tableData || [])
-            this.$nextTick(() => {
-              this.doLayout()
-            })
-          })
-      } else if (typeof this.data === 'function') {
-        this.tableIsLoading = true
-        return this.data(_params)
-          .then((response) => {
-            if (this.isOkResponse(response?.code)) {
-              this.setTableData(response)
-            } else {
-              response?.msg && this.$message.error(response?.msg)
-              this.total = 0
-              this.tableIsLoading = false
-              this.tableData = []
-            }
-          })
-          .catch((error) => {
-            // this.$message.error(this.$t('系统接口') + this.$t('异常'))
-            this.total = 0
-            this.tableIsLoading = false
-            this.tableData = []
-          })
-          .finally(() => {
-            this.$emit('after-load', this.tableData || [])
-            this.$nextTick(() => {
-              this.doLayout()
-            })
-          })
-      }
-    },
-    change() {
-      if (this.autoPageSize) {
-        let rowNum = this.getRowNum()
-        if (rowNum) {
-          this.params.pagination.size = rowNum
-        }
-      }
-      // 如果:data是String或Function,不会走到这个逻辑
-      if (Array.isArray(this.data)) {
-        this.tableData = this.data
-        this.sParams?.type !== 'reset' && (this.tableIsLoading = false)
-        this.total = this.pageTotal || this.tableData.length
-        this.$emit('after-load', this.tableData || [])
-        this.$nextTick(() => {
-          this.doLayout()
-        })
-      } else {
-        // 如果params中的分页数size为undefined,则置为默认值10
-        this.params.pagination.size = this.params.pagination.size || 10
-        // 如果params中的当前页码current为undefined,则置为默认值1
-        this.params.pagination.current = this.params.pagination.current || 1
+defineOptions({ name: 'HosBizTable' })
 
-        // 让页面中的分页数size和当前页码current与params中的参数保持一致
-        this.pageConfig.currentPage = this.params.pagination.current
-        this.pageConfig.pageSize = this.params.pagination.size
-        const sParams = this.sParamsFilter(this.sParams)
-        return this.parseData({
-          ...this.params.form,
-          ...this.params.pagination,
-          ...sParams
-        })
-      }
-    },
-    // 将传入的sParams与biz-table的uid对应.须保证uid全局唯一.
-    sParamsFilter(sParams) {
-      const sParamsCopy = deepClone(sParams)
-      return sParamsCopy[this.uid] || {}
-    },
-    search(params) {
-      this.params.form = {
-        ...this.params.form,
-        ...params
-      }
-      // 点击搜索重置分页
-      this.resetPage()
-      // this.params.pagination.current = 1;
-      if (this.$attrs.onSearch) {
-        return this.$emit('search', params)
-      } else {
-        return this.change()
-      }
-    },
-    reset(params) {
-      this.params.form = params
-      this.$emit('reset', params)
-    },
-    sizeChange(size) {
-      this.params.pagination.size = size
-      this.params.pagination.current = 1
-      this.change()
-      this.$emit('size-change', size)
-    },
-    currentChange(current) {
-      this.params.pagination.current = current
-      this.change()
-      this.$emit('current-change', current)
-      this.$emit('page-current-change', current)
-    },
-    async getData(isReset = true) {
-      try {
-        const pageRef = this.$refs.page || this.$refs.pageTop
-        if (this.page !== false && pageRef) {
-          this.params.pagination = await pageRef.getParams()
-        }
-        if (this.form && this.$refs.form) {
-          this.params.form = await this.$refs.form.getParams()
-        }
-        // 触发查询重置
-        // this.params.pagination.current = 1;
-        isReset && this.resetPage()
-        return this.change()
-      } catch (error) {
-        if (returnGlobalValue('NODE_ENV') === 'development') console.error('table debugger:', error)
-      }
-    },
-    rowDrop() {
-      const tableRoot = this.$refs[`el-table-${this.uid}`]?.$el
-      this.dragTableBody = tableRoot?.querySelector('.el-table__body-wrapper tbody')
-      const _this = this
-      Sortable.create(this.dragTableBody, {
-        onEnd(evt) {
-          const { newIndex, oldIndex } = evt
-          const currRow = _this.tableData.splice(oldIndex, 1)[0]
-          _this.$emit('drag', newIndex, oldIndex, currRow)
-          _this.tableData.splice(newIndex, 0, currRow)
-        }
-      })
-    },
-    setFilteredColumn() {
-      const renderLabel = new RenderLabel()
-      this.cols.forEach((element) => {
-        if (!element.hidden) element.hidden = false
-        typeof element.label === 'undefined' ? (element.none = true) : (element.none = false)
-        let _label = renderLabel.getLabel(element.label)
-        if (!element.columnSelectedKey) {
-          element.columnSelectedKey = uuidv4()
-          element.columnSelectedLabel = _label
-        }
-      })
-      this.selectedInFilteredColumn = this.cols
-        .filter((ele) => {
-          return !ele.hidden
-        })
-        .map((ele) => ele.columnSelectedKey)
-    },
-    refresh() {
-      useHosBizTableStore().UPDATE_TABLE({ _uid: this.uid })
-    },
-    resetPage() {
-      if (this.queryCache) {
-      } else if (Object.prototype.toString.call(this.page) === '[object Object]') {
-        this.params.pagination.current = this.page.currentPage || 1
-        this.params.pagination.size = this.page.pageSize || 10
-      } else {
-        this.params.pagination.current = 1
-        // this.params.pagination.size = 10;
-      }
-    },
-    changeFilteredColumn(val) {
-      this.cols.forEach((element) => {
-        this.selectedInFilteredColumn.includes(element.columnSelectedKey)
-          ? (element.hidden = false)
-          : (element.hidden = true)
-      })
-    },
-    async sortChange({ column, prop, order }) {
-      // if (this.$listeners['sort-change']) {
-      //   // this.$emit('sort-change', {
-      //   //   column,
-      //   //   prop,
-      //   //   order
-      //   // })
-      //   //注释掉上面的抛出事件,因为组件已经通过$listeners对事件进行了一个透传,这里不需要再抛出事件,否则外面的sortChange监听会收到两次
-      // } else
-      if (this.form) {
-        this.params.form = await this.$refs.form.getParams()
-      }
-      if (column.sortable === 'custom') {
-        this.params.form.sort = prop
-        this.params.form.order = order
-        if (order === 'ascending') {
-          this.params.form.order = 'asc'
-        } else if (order === 'descending') {
-          this.params.form.order = 'desc'
-        } else {
-          delete this.params.form.sort
-          delete this.params.form.order
-        }
-        this.change()
-      }
-    },
-    fitHeight(tableHeight) {
-      // 此处传入的高度可以是number(如:200),可以是string(如:200px)
-      // isFit必须是false,否则table样式flex:1 导致传入值不生效.
-      if (tableHeight) {
-        // 传入值时, 将此值作为table的高度
-        this.height = tableHeight
-      } else {
-        // 未传入值时, 将剩余高度作为table的高度
-        const element = this.$refs[`el-table-${this.uid}`]?.$el
-        if (!element) return
-        this.height = element.offsetHeight
-      }
-      this.$nextTick(() => {
-        this.doLayout()
-      })
-    },
-    // 处理表格行数自适应
-    getRowNum() {
-      if (this.isFit && this.$refs[`el-table-${this.uid}`]) {
-        let rowHeight, headRowHeight, sumRowHeight
-        if (this.uiStyle == 0) {
-          rowHeight = 32 // 行高
-          headRowHeight = 32 //表头行高
-          sumRowHeight = this.$attrs['show-summary'] !== undefined ? 32 : 0 // 合计行高
-        } else {
-          rowHeight = 42 // 行高
-          headRowHeight = 53 //表头行高
-          sumRowHeight = this.$attrs['show-summary'] !== undefined ? 44 : 0 // 合计行高
-        }
+const props = withDefaults(
+	defineProps<{
+		border?: boolean
+		stripe?: boolean
+		uid?: string | number
+		data: unknown
+		init?: boolean
+		form?: Record<string, unknown> | boolean
+		page?: Record<string, unknown> | boolean
+		pageTotal?: number
+		pagePos?: string
+		props?: { data?: string; total?: string }
+		dragable?: boolean
+		columnSelected?: boolean
+		cols: Array<{
+			hidden?: boolean
+			none?: boolean
+			columnSelectedKey?: string
+			columnSelectedLabel?: string
+			[key: string]: unknown
+		}>
+		isFit?: boolean
+		queryCache?: boolean
+		autoPageSize?: boolean
+		tableHeight?: number | string
+	}>(),
+	{
+		border: true,
+		stripe: () => UI_THEME != 2,
+		uid: 0,
+		init: true,
+		pagePos: 'bottom',
+		props: () => ({
+			data: 'records',
+			total: 'total',
+		}),
+		isFit: true,
+		queryCache: false,
+		autoPageSize: false,
+	},
+)
 
-        let tableHeight = this.$refs[`el-table-${this.uid}`].$el.offsetHeight // 表格高度
-        let rowNum = Math.floor((tableHeight - headRowHeight - sumRowHeight) / rowHeight)
-        return rowNum
-      }
-      return null
-    },
-    convertCurrentChange(currentRow, oldCurrentRow) {
-      this.$emit('current-row-change', currentRow, oldCurrentRow)
-    }
-  },
-  created() {
-    this.unsubscribe = subscribeHosBizTableMutations((type) => {
-      if (type === 'UPDATE_TABLE') {
-        if (this.tableUidMatches(this.sUID) || (this.sUID === 0 && this.sEvent === 'update')) {
-          this.sParams?.type === 'reset' && (this.tableIsLoading = true)
-          this.$nextTick(() => {
-            this.getData()
-          })
-        }
-      } else if (type === 'REFRESH_TABLE') {
-        if (this.tableUidMatches(this.sUID) || (this.sUID === 0 && this.sEvent === 'refresh')) {
-          this.sParams?.type === 'reset' && (this.tableIsLoading = true)
-          this.$nextTick(() => {
-            this.getData(false)
-          })
-        }
-      }
-    })
-    this.isChrome49()
-  },
-  mounted() {
-    if (this.init) {
-      this.getData()
-    } else {
-      this.tableData = Array.isArray(this.data) ? this.data : this.tableData
-      this.total = this.tableData?.length || 0
-      this.$emit('after-load', this.tableData)
-      this.$nextTick(() => {
-        this.doLayout()
-      })
-    }
-    // 拖拽行
-    if (this.dragable) {
-      this.rowDrop()
-    }
-    // 显示/隐藏列
-    if (this.columnSelected) {
-      this.setFilteredColumn()
-    }
-    // mounted阶段主动调用, 避免IE浏览器下高度错误.
-    if (this.isFit) {
-      this.fitHeight()
-    }
-  },
-  beforeUnmount() {
-    // 组件销毁前,取消订阅
-    if (this.unsubscribe) {
-      this.unsubscribe()
-    }
-  }
+const emit = defineEmits<{
+	search: [params: Record<string, unknown>]
+	reset: [params: Record<string, unknown>]
+	'size-change': [size: number]
+	'current-change': [current: number]
+	'page-current-change': [current: number]
+	'after-load': [data: unknown[]]
+	drag: [newIndex: number, oldIndex: number, row: unknown]
+	'current-row-change': [currentRow: unknown, oldCurrentRow: unknown]
+}>()
+
+const attrs = useAttrs()
+const slots = useSlots()
+const api = useApi()
+
+const hosBizTableStore = useHosBizTableStore()
+storeToRefs(hosBizTableStore)
+
+const sTimestamp = computed(() => hosBizTableStore[timestamp])
+const sUID = computed(() => hosBizTableStore[uid])
+const sEvent = computed(() => hosBizTableStore[event])
+const sParams = computed(() => hosBizTableStore[params] as Record<string, unknown>)
+
+const formRef = ref<{ getParams: () => Promise<Record<string, unknown>> } | null>(null)
+const pageRef = ref<{ getParams: () => Promise<Record<string, unknown>> } | null>(null)
+const pageTopRef = ref<{ getParams: () => Promise<Record<string, unknown>> } | null>(null)
+const tableComponentRef = ref<{ $refs?: Record<string, unknown>; $el?: HTMLElement } | null>(null)
+
+const tableExposeMethods = useHosBizTableExpose(tableComponentRef)
+
+const unsubscribe = ref<(() => void) | null>(null)
+const chrome49 = ref(false)
+const uiStyle = UI_THEME
+const selectedInFilteredColumn = ref<string[]>([])
+const dragTableBody = ref<HTMLElement | null>(null)
+const paramsState = reactive<{ form: Record<string, unknown>; pagination: Record<string, unknown> }>({
+	form: {},
+	pagination: {},
+})
+const tableData = ref<unknown[]>([])
+const tableIsLoading = ref(false)
+const total = ref<number | undefined>(undefined)
+const height = ref<number | string | undefined>(undefined)
+
+const instance = getCurrentInstance()
+provide('TABLE_PROVIDE', instance?.proxy ?? instance)
+
+const formItems = computed(() => {
+	try {
+		const form = props.form as { model?: Record<string, unknown> }
+		return Object.keys(form.model || {})
+	} catch {
+		return []
+	}
+})
+
+const asyncSlot = computed(() => {
+	const slotArr = ['form', 'page', 'top', 'bottom']
+	const _slot: Record<string, unknown> = {}
+	Object.keys(slots)
+		.filter((ele) => !slotArr.includes(ele))
+		.forEach((ele) => {
+			_slot[ele] = slots[ele]
+		})
+	return _slot
+})
+
+const pageConfig = computed(() => {
+	const simple = 'ssizes, home, prev, spager, next, end, slot, stotal'
+	const hos = 'jumper, home, prev, pager, next, end, ssizes, total'
+	const pure = 'stotal, ssizes, prev, pager, next, jumper'
+	let config: Record<string, unknown> = {
+		layout: uiStyle == 0 ? simple : uiStyle == 1 ? hos : pure,
+		total: total.value ?? 0,
+		currentPage: paramsState.pagination.current,
+		pageSize: paramsState.pagination.size,
+		pagerCount: 5,
+	}
+	if (Object.prototype.toString.call(props.page) === '[object Object]') {
+		config = { ...config, ...(props.page as Record<string, unknown>) }
+	}
+	if (props.autoPageSize) {
+		const rowNum = getRowNum()
+		if (rowNum) {
+			config.pageSize = rowNum
+			if (config.pageSize && Array.isArray(config.pageSize)) {
+				;(config.pageSize as number[]).unshift(rowNum)
+			}
+		}
+	}
+	return config
+})
+
+const selectedCols = computed(() => {
+	return (props.cols as Array<{ hidden?: boolean }>).filter((ele) => ele.hidden !== true)
+})
+
+const showToolbar = computed(
+	() =>
+		(props.page !== false && props.pagePos === 'top') ||
+		!!slots.toolbar ||
+		props.columnSelected,
+)
+
+const formProps = computed(() =>
+	props.form && typeof props.form === 'object'
+		? (props.form as Record<string, unknown>)
+		: {},
+)
+
+function isOkResponse(code: unknown) {
+	return isSuccessCode(code as string | number | undefined | null)
 }
+
+function tableUidMatches(storeUid: unknown) {
+	return hosBizUidMatches(storeUid as string | number, props.uid)
+}
+
+function isChrome49() {
+	if (navigator.userAgent.includes('Chrome/49')) {
+		chrome49.value = true
+	}
+}
+
+function setTableData(response: { data?: Record<string, unknown>; [key: string]: unknown }) {
+	const data = (response.data || response) as Record<string, unknown>
+	tableIsLoading.value = false
+	let rows = data[props.props!.data!]
+	let totalVal = data[props.props!.total!]
+	const parseTotal = parseInt(String(totalVal))
+	if (typeof parseTotal === 'number' && !Number.isNaN(parseTotal)) totalVal = parseTotal
+	if (!Array.isArray(rows)) {
+		rows = tryGetOnlyArray(data).data
+	}
+	if (typeof totalVal !== 'number') {
+		totalVal = tryGetPaginationParams(data).total
+	}
+	tableData.value = rows as unknown[]
+	total.value = totalVal as number
+}
+
+function parseData(params: Record<string, unknown>) {
+	const _params = filterEmpty(params)
+	if (typeof props.data === 'string') {
+		tableIsLoading.value = true
+		return api(props.data, _params)
+			.then((response) => {
+				if (response && isOkResponse(response.code)) {
+					setTableData(response as unknown as { data?: Record<string, unknown>; [key: string]: unknown })
+				} else {
+					total.value = 0
+					tableIsLoading.value = false
+				}
+			})
+			.catch(() => {
+				total.value = 0
+				tableIsLoading.value = false
+			})
+			.finally(() => {
+				emit('after-load', tableData.value || [])
+				nextTick(() => {
+					tableExposeMethods.doLayout()
+				})
+			})
+	} else if (typeof props.data === 'function') {
+		tableIsLoading.value = true
+		return (props.data as (p: Record<string, unknown>) => Promise<{ code?: unknown; msg?: string; data?: Record<string, unknown> }>)(_params)
+			.then((response) => {
+				if (isOkResponse(response?.code)) {
+					setTableData(response as { data?: Record<string, unknown> })
+				} else {
+					response?.msg && ElMessage.error(response.msg)
+					total.value = 0
+					tableIsLoading.value = false
+					tableData.value = []
+				}
+			})
+			.catch(() => {
+				total.value = 0
+				tableIsLoading.value = false
+				tableData.value = []
+			})
+			.finally(() => {
+				emit('after-load', tableData.value || [])
+				nextTick(() => {
+					tableExposeMethods.doLayout()
+				})
+			})
+	}
+}
+
+function change() {
+	if (props.autoPageSize) {
+		const rowNum = getRowNum()
+		if (rowNum) {
+			paramsState.pagination.size = rowNum
+		}
+	}
+	if (Array.isArray(props.data)) {
+		tableData.value = props.data
+		if ((sParams.value as { type?: string })?.type !== 'reset') {
+			tableIsLoading.value = false
+		}
+		total.value = props.pageTotal || tableData.value.length
+		emit('after-load', tableData.value || [])
+		nextTick(() => {
+			tableExposeMethods.doLayout()
+		})
+	} else {
+		paramsState.pagination.size = paramsState.pagination.size || 10
+		paramsState.pagination.current = paramsState.pagination.current || 1
+		const sParamsVal = sParamsFilter(sParams.value as Record<string, unknown>)
+		return parseData({
+			...paramsState.form,
+			...paramsState.pagination,
+			...sParamsVal,
+		})
+	}
+}
+
+function sParamsFilter(sParamsRaw: Record<string, unknown>) {
+	const sParamsCopy = deepClone(sParamsRaw)
+	return (sParamsCopy[props.uid] as Record<string, unknown>) || {}
+}
+
+function search(params: Record<string, unknown>) {
+	paramsState.form = {
+		...paramsState.form,
+		...params,
+	}
+	resetPage()
+	if (attrs.onSearch) {
+		return emit('search', params)
+	}
+	return change()
+}
+
+function reset(params: Record<string, unknown>) {
+	paramsState.form = params
+	emit('reset', params)
+}
+
+function sizeChange(size: number) {
+	paramsState.pagination.size = size
+	paramsState.pagination.current = 1
+	change()
+	emit('size-change', size)
+}
+
+function currentChange(current: number) {
+	paramsState.pagination.current = current
+	change()
+	emit('current-change', current)
+	emit('page-current-change', current)
+}
+
+async function getData(isReset = true) {
+	try {
+		const pageComponent = pageRef.value || pageTopRef.value
+		if (props.page !== false && pageComponent) {
+			paramsState.pagination = await pageComponent.getParams()
+		}
+		if (props.form && formRef.value) {
+			paramsState.form = await formRef.value.getParams()
+		}
+		if (isReset) resetPage()
+		return change()
+	} catch (error) {
+		if (returnGlobalValue('NODE_ENV') === 'development') console.error('table debugger:', error)
+	}
+}
+
+function rowDrop() {
+	const tableRoot = tableComponentRef.value?.$el
+	dragTableBody.value = tableRoot?.querySelector('.el-table__body-wrapper tbody') ?? null
+	if (!dragTableBody.value) return
+	Sortable.create(dragTableBody.value, {
+		onEnd(evt) {
+			const { newIndex, oldIndex } = evt
+			if (newIndex == null || oldIndex == null) return
+			const currRow = tableData.value.splice(oldIndex, 1)[0]
+			emit('drag', newIndex, oldIndex, currRow)
+			tableData.value.splice(newIndex, 0, currRow)
+		},
+	})
+}
+
+function setFilteredColumn() {
+	const renderLabel = new RenderLabel()
+	;(props.cols as Array<Record<string, unknown>>).forEach((element) => {
+		if (!element.hidden) element.hidden = false
+		element.none = typeof element.label === 'undefined'
+		const _label = renderLabel.getLabel(element.label)
+		if (!element.columnSelectedKey) {
+			element.columnSelectedKey = uuidv4()
+			element.columnSelectedLabel = _label
+		}
+	})
+	selectedInFilteredColumn.value = (props.cols as Array<{ hidden?: boolean; columnSelectedKey?: string }>)
+		.filter((ele) => !ele.hidden)
+		.map((ele) => ele.columnSelectedKey as string)
+}
+
+function refresh() {
+	useHosBizTableStore().UPDATE_TABLE({ _uid: props.uid })
+}
+
+function resetPage() {
+	if (props.queryCache) {
+		// noop
+	} else if (Object.prototype.toString.call(props.page) === '[object Object]') {
+		const pageObj = props.page as { currentPage?: number; pageSize?: number }
+		paramsState.pagination.current = pageObj.currentPage || 1
+		paramsState.pagination.size = pageObj.pageSize || 10
+	} else {
+		paramsState.pagination.current = 1
+	}
+}
+
+function changeFilteredColumn() {
+	;(props.cols as Array<{ hidden?: boolean; columnSelectedKey?: string }>).forEach((element) => {
+		element.hidden = !selectedInFilteredColumn.value.includes(element.columnSelectedKey as string)
+	})
+}
+
+async function sortChange({
+	column,
+	prop,
+	order,
+}: {
+	column: { sortable?: string | boolean }
+	prop: string
+	order: string | null
+}) {
+	if (props.form && formRef.value) {
+		paramsState.form = await formRef.value.getParams()
+	}
+	if (column.sortable === 'custom') {
+		paramsState.form.sort = prop
+		paramsState.form.order = order
+		if (order === 'ascending') {
+			paramsState.form.order = 'asc'
+		} else if (order === 'descending') {
+			paramsState.form.order = 'desc'
+		} else {
+			delete paramsState.form.sort
+			delete paramsState.form.order
+		}
+		change()
+	}
+}
+
+function fitHeight(tableHeight?: number | string) {
+	if (tableHeight) {
+		height.value = tableHeight
+	} else {
+		const element = tableComponentRef.value?.$el
+		if (!element) return
+		height.value = element.offsetHeight
+	}
+	nextTick(() => {
+		tableExposeMethods.doLayout()
+	})
+}
+
+function getRowNum() {
+	if (props.isFit && tableComponentRef.value) {
+		let rowHeight: number
+		let headRowHeight: number
+		let sumRowHeight: number
+		if (uiStyle == 0) {
+			rowHeight = 32
+			headRowHeight = 32
+			sumRowHeight = attrs['show-summary'] !== undefined ? 32 : 0
+		} else {
+			rowHeight = 42
+			headRowHeight = 53
+			sumRowHeight = attrs['show-summary'] !== undefined ? 44 : 0
+		}
+		const tableHeightVal = tableComponentRef.value.$el?.offsetHeight ?? 0
+		return Math.floor((tableHeightVal - headRowHeight - sumRowHeight) / rowHeight)
+	}
+	return null
+}
+
+function convertCurrentChange(currentRow: unknown, oldCurrentRow: unknown) {
+	emit('current-row-change', currentRow, oldCurrentRow)
+}
+
+watch(
+	() => props.page,
+	(val, oldVal) => {
+		if (oldVal && val && typeof val === 'object' && (val as { currentPage?: number }).currentPage != null) {
+			const pageVal = val as { currentPage?: number }
+			const oldPageVal = oldVal as { currentPage?: number }
+			if (pageVal.currentPage != oldPageVal.currentPage) {
+				paramsState.pagination.current = pageVal.currentPage
+			}
+		}
+	},
+	{ deep: true },
+)
+
+watch(
+	() => props.cols,
+	() => {
+		setFilteredColumn()
+	},
+)
+
+onMounted(() => {
+	unsubscribe.value = subscribeHosBizTableMutations((type) => {
+		if (type === 'UPDATE_TABLE') {
+			if (tableUidMatches(sUID.value) || (sUID.value === 0 && sEvent.value === 'update')) {
+				if ((sParams.value as { type?: string })?.type === 'reset') {
+					tableIsLoading.value = true
+				}
+				nextTick(() => {
+					getData()
+				})
+			}
+		} else if (type === 'REFRESH_TABLE') {
+			if (tableUidMatches(sUID.value) || (sUID.value === 0 && sEvent.value === 'refresh')) {
+				if ((sParams.value as { type?: string })?.type === 'reset') {
+					tableIsLoading.value = true
+				}
+				nextTick(() => {
+					getData(false)
+				})
+			}
+		}
+	})
+	isChrome49()
+
+	if (props.init) {
+		getData()
+	} else {
+		tableData.value = Array.isArray(props.data) ? props.data : tableData.value
+		total.value = tableData.value?.length || 0
+		emit('after-load', tableData.value)
+		nextTick(() => {
+			tableExposeMethods.doLayout()
+		})
+	}
+	if (props.dragable) {
+		rowDrop()
+	}
+	if (props.columnSelected) {
+		setFilteredColumn()
+	}
+	if (props.isFit) {
+		fitHeight()
+	}
+})
+
+onBeforeUnmount(() => {
+	unsubscribe.value?.()
+})
+
+defineExpose({
+	tableData,
+	getData,
+	search,
+	reset,
+	refresh,
+	fitHeight,
+	change,
+	parseData,
+	...tableExposeMethods,
+})
 </script>
 <style lang="scss" scoped>
 .el-biz-table {

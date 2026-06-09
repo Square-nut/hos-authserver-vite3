@@ -511,8 +511,8 @@ function reset() {
 	userLoginSelectPostRef.value?.clear();
 	userLoginSelectTablePostRef.value?.clear();
 }
-function changePost(id: string, post: any) {
-	loginForm.value.post = post;
+function changePost(id: string | number, post: unknown) {
+	loginForm.value.post = post as string;
 }
 function openLoginBtn() {
 	loading.value = false;

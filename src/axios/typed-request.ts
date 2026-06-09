@@ -10,5 +10,5 @@ export function request<T = unknown>(
 	params?: unknown,
 	headers?: Record<string, string>,
 ): Promise<ApiResult<T>> {
-	return apiRequest(key, params, headers) as Promise<ApiResult<T>>
+	return apiRequest(key, params, headers) as unknown as Promise<ApiResult<T>>
 }

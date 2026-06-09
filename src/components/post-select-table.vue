@@ -4,6 +4,7 @@
 			ref="tableWrapperRef"
 			v-model="postValue"
 			v-bind="$attrs"
+			:disabled="props.disabled"
 			:uid="tableUid"
 			page-pos="bottom"
 			header-row-class-name="login-biz-table-header"
@@ -58,16 +59,20 @@ import {
 	type PostPageRecord,
 } from '@/api/org';
 
+defineOptions({ inheritAttrs: false });
+
 const props = withDefaults(
 	defineProps<{
 		type?: string;
 		personId?: string;
 		uid?: string;
+		disabled?: boolean;
 	}>(),
 	{
 		type: '',
 		personId: '',
 		uid: 'post',
+		disabled: false,
 	},
 );
 
@@ -174,7 +179,8 @@ onMounted(() => {
 
 <style lang="scss" scoped></style>
 <style lang="scss">
-.post-select-table .el-input__prefix {
+.post-select-table .el-select__prefix {
 	left: 0;
+	right: auto;
 }
 </style>

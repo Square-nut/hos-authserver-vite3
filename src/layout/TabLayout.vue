@@ -24,12 +24,14 @@
       <div class="tab_icon">
         <hos-dropdown trigger="click" @command="closeCommand">
           <i class="fa fa-bars"></i>
-          <hos-dropdown-menu slot="dropdown">
-            <hos-dropdown-item command="closeAll">关闭全部</hos-dropdown-item>
-            <hos-dropdown-item command="closeOthers"
-            >关闭其它</hos-dropdown-item
-            >
-          </hos-dropdown-menu>
+          <template #dropdown>
+            <hos-dropdown-menu>
+              <hos-dropdown-item command="closeAll">关闭全部</hos-dropdown-item>
+              <hos-dropdown-item command="closeOthers"
+              >关闭其它</hos-dropdown-item
+              >
+            </hos-dropdown-menu>
+          </template>
         </hos-dropdown>
       </div>
     </div>
@@ -49,183 +51,155 @@
     <router-view v-else />
   </div>
 </template>
-<script>
-import GlobalLayout from "@/components/page/GlobleLayout";
-import RouteView from "@/components/layouts/RouteView";
+<script setup lang="ts">
+import { computed, onBeforeMount, provide, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import GlobalLayout from '@/layout/GlobleLayout.vue'
 
-const welcomeKey = "welcome";
-export default {
-  name: "TabLayout",
-  components: {
-    GlobalLayout,
-    RouteView,
-  },
-  data() {
-    return {
-      pageList: [],
-      linkList: [],
-      activePage: "",
-      multipage: true,
-      showMenu: true,
-    };
-  },
-  watch: {
-    $route: function (newRoute) {
-     //页面跳转标题的拼接
-      const newPage = Object.assign({}, newRoute)
-      newPage.meta = Object.assign({}, newRoute.meta)
-      this.activePage = newPage.name;
-      if (!this.multipage) {
-        this.linkList = [newPage.name];
-        this.pageList = [Object.assign({}, newPage)];
-      } else if (this.linkList.indexOf(newPage.name) < 0) {
-        if(newPage.query.title){
-          newPage.meta.title= newPage.query.title + "-" +newPage.meta.title;
-        }
-        this.linkList.push(newPage.name);
-        this.pageList.push(newPage);
-      } else if (this.linkList.indexOf(newPage.name) >= 0) {
-        let oldIndex = this.linkList.indexOf(newPage.name);
-        // let oldPositionRoute = this.pageList[oldIndex];
-        if(newPage.query.title){
-          newPage.meta.title= newPage.query.title + "-" +newPage.meta.title;
-        }
-        // newPage.meta = oldPositionRoute.meta;
-        this.pageList.splice(
-          oldIndex,
-          1,
-          newPage
-        );
-      }
-    },
-    activePage: function (key) {
-      for (let page of this.pageList) {
-        if (page.name === key) {
-          this.$router.push(Object.assign({}, page));
-        }
-      }
-    },
-  },
-  provide() {
-    return {
-      closeCurrent: this.closeCurrent,
-    };
-  },
-  computed: {
-    keepAlive() {
-      return this.$route.meta.keepAlive;
-    },
-  },
-  created() {
-    if (this.$route.name != welcomeKey) {
-      this.addIndexToFirst();
-    }
-    // 复制一个route对象出来，不能影响原route
-    let currentRoute = Object.assign({}, this.$route);
-    currentRoute.meta = Object.assign({}, currentRoute.meta);
-    this.pageList.push(currentRoute);
-    this.linkList.push(currentRoute.name);
-    this.activePage = currentRoute.name;
-    if(this.$route.query.showMenu){
-      this.showMenu = this.$route.query.showMenu == 'true' ? true : false;
-    }
-  },
-  methods: {
-    // 将首页添加到第一位
-    addIndexToFirst() {
-      this.pageList.splice(0, 0, {
-        name: welcomeKey,
-        path: "/main/welcome",
-        fullPath: "/main/welcome",
-        meta: {
-          icon: "dashboard",
-          title: "首页",
-        },
-      });
-      this.linkList.splice(0, 0, welcomeKey);
-    },
+defineOptions({ name: 'TabLayout' })
 
-    dynamicRouterShow(key, title) {
-      console.log("--------dynamicRouterShow--------")
-      // let keyIndex = this.linkList.indexOf(key);
-      // if (keyIndex >= 0) {
-      //   let currRouter = this.pageList[keyIndex];
-      //   let meta = Object.assign({}, currRouter.meta, { title: title });
-      //   this.pageList.splice(
-      //     keyIndex,
-      //     1,
-      //     Object.assign({}, currRouter, { meta: meta })
-      //   );
-        // if (key === this.activePage) {
-        //   this.changeTitle(title)
-        // }
-      // }
-    },
-    changePage(key) {
-      this.activePage = key.name;
-    },
-    removePage(key) {
-      if (key == welcomeKey) {
-        this.$message.warning("首页不能关闭!");
-        return;
-      }
-      if (this.pageList.length === 1) {
-        this.$message.warning("这是最后一页，不能再关闭了啦");
-        return;
-      }
-      // let removeRoute = this.pageList.filter(item => item.name == key)
-      this.pageList = this.pageList.filter((item) => item.name !== key);
-      let index = this.linkList.indexOf(key);
-      this.linkList = this.linkList.filter((item) => item !== key);
-      index = index >= this.linkList.length ? this.linkList.length - 1 : index;
-      this.activePage = this.linkList[index];
-    },
-    closeCommand(command) {
-      switch (command) {
-        case "closeAll":
-          this.closeAll();
-          break;
-        case "closeOthers":
-          this.closeOthers();
-          break;
-        default:
-          break;
-      }
-    },
-    closeAll() {
-      this.pageList.splice(1, this.pageList.length - 1);
-      this.linkList.splice(1, this.linkList.length - 1);
-      this.activePage = this.linkList[0];
-    },
-    closeOthers() {
-      let index = this.linkList.indexOf(this.activePage);
-      if (this.activePage == welcomeKey) {
-        this.linkList = this.linkList.slice(index, index + 1);
-        this.pageList = this.pageList.slice(index, index + 1);
-        this.activePage = this.linkList[0];
-      } else {
-        let indexContent = this.pageList.slice(0, 1)[0];
-        this.linkList = this.linkList.slice(index, index + 1);
-        this.pageList = this.pageList.slice(index, index + 1);
-        this.linkList.unshift(indexContent.name);
-        this.pageList.unshift(indexContent);
-        this.activePage = this.linkList[1];
-      }
-    },
-    closeCurrent() {
-      this.removePage(this.activePage);
-    },
-    // changeTitle(title) {
-    //   let projectTitle = "HOS Mediway"
-    //   // 首页特殊处理
-    //   if (this.$route.path === welcomeKey) {
-    //     document.title = projectTitle
-    //   } else {
-    //     document.title = title + ' · ' + projectTitle
-    //   }
-    // },
-  },
-};
+const welcomeKey = 'welcome'
+
+const route = useRoute()
+const router = useRouter()
+
+const pageList = ref<Record<string, any>[]>([])
+const linkList = ref<string[]>([])
+const activePage = ref('')
+const multipage = ref(true)
+const showMenu = ref(true)
+
+const keepAlive = computed(() => route.meta.keepAlive)
+
+watch(
+	() => route.fullPath,
+	() => {
+		const newRoute = route
+		const newPage = Object.assign({}, newRoute)
+		newPage.meta = Object.assign({}, newRoute.meta)
+		activePage.value = String(newPage.name ?? '')
+		if (!multipage.value) {
+			linkList.value = [String(newPage.name ?? '')]
+			pageList.value = [Object.assign({}, newPage)]
+		} else if (linkList.value.indexOf(String(newPage.name ?? '')) < 0) {
+			if (newPage.query.title) {
+				newPage.meta.title =
+					newPage.query.title + '-' + newPage.meta.title
+			}
+			linkList.value.push(String(newPage.name ?? ''))
+			pageList.value.push(newPage)
+		} else if (linkList.value.indexOf(String(newPage.name ?? '')) >= 0) {
+			const oldIndex = linkList.value.indexOf(String(newPage.name ?? ''))
+			if (newPage.query.title) {
+				newPage.meta.title =
+					newPage.query.title + '-' + newPage.meta.title
+			}
+			pageList.value.splice(oldIndex, 1, newPage)
+		}
+	},
+)
+
+watch(activePage, (key) => {
+	for (const page of pageList.value) {
+		if (page.name === key) {
+			router.push(Object.assign({}, page))
+		}
+	}
+})
+
+function addIndexToFirst() {
+	pageList.value.splice(0, 0, {
+		name: welcomeKey,
+		path: '/main/welcome',
+		fullPath: '/main/welcome',
+		meta: {
+			icon: 'dashboard',
+			title: '首页',
+		},
+	})
+	linkList.value.splice(0, 0, welcomeKey)
+}
+
+function dynamicRouterShow(_key: string, _title: string) {
+	console.log('--------dynamicRouterShow--------')
+}
+
+function changePage(key: { name: string }) {
+	activePage.value = key.name
+}
+
+function removePage(key: string) {
+	if (key == welcomeKey) {
+		ElMessage.warning('首页不能关闭!')
+		return
+	}
+	if (pageList.value.length === 1) {
+		ElMessage.warning('这是最后一页，不能再关闭了啦')
+		return
+	}
+	pageList.value = pageList.value.filter((item) => item.name !== key)
+	let index = linkList.value.indexOf(key)
+	linkList.value = linkList.value.filter((item) => item !== key)
+	index = index >= linkList.value.length ? linkList.value.length - 1 : index
+	activePage.value = linkList.value[index] ?? ''
+}
+
+function closeCommand(command: string) {
+	switch (command) {
+		case 'closeAll':
+			closeAll()
+			break
+		case 'closeOthers':
+			closeOthers()
+			break
+		default:
+			break
+	}
+}
+
+function closeAll() {
+	pageList.value.splice(1, pageList.value.length - 1)
+	linkList.value.splice(1, linkList.value.length - 1)
+	activePage.value = linkList.value[0] ?? ''
+}
+
+function closeOthers() {
+	const index = linkList.value.indexOf(activePage.value)
+	if (activePage.value == welcomeKey) {
+		linkList.value = linkList.value.slice(index, index + 1)
+		pageList.value = pageList.value.slice(index, index + 1)
+		activePage.value = linkList.value[0] ?? ''
+	} else {
+		const indexContent = pageList.value[0]
+		if (!indexContent) return
+		linkList.value = linkList.value.slice(index, index + 1)
+		pageList.value = pageList.value.slice(index, index + 1)
+		linkList.value.unshift(indexContent.name as string)
+		pageList.value.unshift(indexContent)
+		activePage.value = linkList.value[1] ?? ''
+	}
+}
+
+function closeCurrent() {
+	removePage(activePage.value)
+}
+
+provide('closeCurrent', closeCurrent)
+
+onBeforeMount(() => {
+	if (route.name != welcomeKey) {
+		addIndexToFirst()
+	}
+	const currentRoute = Object.assign({}, route)
+	currentRoute.meta = Object.assign({}, route.meta)
+	pageList.value.push(currentRoute)
+	linkList.value.push(String(currentRoute.name ?? ''))
+	activePage.value = String(currentRoute.name ?? '')
+	if (route.query.showMenu) {
+		showMenu.value = route.query.showMenu == 'true'
+	}
+})
 </script>
 <style scoped lang="scss">
 .calc-sign{

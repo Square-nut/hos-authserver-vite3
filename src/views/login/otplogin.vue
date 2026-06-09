@@ -1,7 +1,7 @@
 <template>
 	<el-row>
 		<el-form
-			ref="otpLoginForm"
+			ref="otpLoginFormRef"
 			:model="otpLoginForm"
 			:rules="otpLoginRules"
 			class="login-form"
@@ -32,7 +32,7 @@
 			<el-col :span="24">
 				<el-form-item prop="loginName">
 					<el-input
-						ref="loginName"
+						ref="loginNameRef"
 						v-model="otpLoginForm.loginName"
 						:placeholder="$t('请输入手机号')"
 						name="loginName"
@@ -54,7 +54,7 @@
 						<div class="otp-box">
 							<el-input
 								v-model="otpLoginForm.smsCode"
-								ref="smsCode"
+								ref="smsCodeRef"
 								:placeholder="$t('请输入验证码')"
 								type="text"
 								@keyup.enter="keyEnterLogin"
@@ -76,7 +76,7 @@
 					<el-col :span="16">
 						<el-input
 							v-model="otpLoginForm.captchaCode"
-							ref="captchaCode"
+							ref="captchaCodeRef"
 							:placeholder="$t('请输入图形验证码')"
 							type="text"
 							@keyup.enter="keyEnterLogin"
@@ -96,7 +96,7 @@
 				<el-form-item prop="post">
 					<postSelect
 						v-if="showPostType"
-						ref="otpLoginSelect_post"
+						ref="otpLoginSelectPostRef"
 						type="id"
 						:personId="personId"
 						:disabled="!personId"
@@ -106,7 +106,7 @@
 					<post-select-table
 						v-else
 						type="id"
-						ref="otpLoginSelectTable_post"
+						ref="otpLoginSelectTablePostRef"
 						uid="otpLoginSelectTable_post"
 						v-model="otpLoginForm.post"
 						:disabled="!personId"
@@ -153,10 +153,13 @@
 	</el-row>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, reactive, computed, watch, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage } from 'element-plus';
+import type { FormInstance, FormRules, InputInstance } from 'element-plus';
 import AuthConstant from '@/constant/auth-constant';
 import { validPhone11, validEmail } from '@/utils/validateUtil';
-import { getLoginErrorDesc } from './js/login';
 import postSelect from '@/components/post-select.vue';
 import postSelectTable from '@/components/post-select-table.vue';
 import forgetPassword from './forgetPassword.vue';
@@ -166,437 +169,448 @@ import {
 	getCaptcha as fetchCaptcha,
 } from '@/api/login';
 import { openHosBizDialog } from '@/composables/useHosBiz';
+import { crypt } from '@/composables/useCrypt';
+import { lsGet } from '@/utils/ls';
 import { House, Message, Picture, User } from '@element-plus/icons-vue';
 import slideVerify from '@/components/Slide-verify/index.vue';
-import cryptUtil from '@/utils/crypt/index.js';
 import generateRandomString from '@/utils/generate-random-string.js';
 import { isSuccessCode } from '@/types/api-common';
-import { ElMessage } from 'element-plus';
-export default {
-	name: 'otplogin',
-	components: {
-		postSelect,
-		postSelectTable,
-		slideVerify,
-		User,
-		Message,
-		Picture,
-		House,
-	},
-	directives: {
-		focus: {
-			// 指令的定义
-			mounted: function (el) {
-				el.getElementsByClassName('el-input__inner')[0].focus();
-			},
-		},
-	},
-	data() {
-		const validatePhoneAndMail = (rule, value, callback) => {
-			let type = '';
-			if (validPhone11(value)) {
-				type = 'phone';
-			}
-			if (validEmail(value)) {
-				type = 'mail';
-			}
-			if (type == '') {
-				callback(new Error(this.$t('请输入有效的手机号')));
-			} else {
-				this.loginType = type;
-				callback();
-			}
-		};
-		return {
-			post: '',
-			personId: '',
-			postChainId: '',
-			form: {
-				model: {
-					query: '',
-					dataType: '',
-				},
-			},
-			cols: [
-				{
-					prop: 'name',
-					label: this.$t('名称'),
-					width: '150px',
-				},
-				// {
-				// 	prop: 'type',
-				// 	width: '80px',
-				// 	label: this.$t('类型'),
-				// 	formatter: (row, column, value) => {
-				// 		return row.type == 'unit'
-				// 			? this.$t('岗位单元')
-				// 			: row.type == 'group'
-				// 			? this.$t('岗位组')
-				// 			: this.$t('岗位');
-				// 	},
-				// },
-				// {
-				// 	label: this.$t('业务单元'),
-				// 	prop: 'buNames',
-				// },
-				{
-					label: this.$t('岗位'),
-					prop: 'postNames',
-				},
-			],
-			valueConfig: {
-				label: 'name',
-				value: 'id',
-			},
-			options: [
-				{
-					label: this.$t('岗位单元'),
-					value: 'unit',
-				},
-				{
-					label: this.$t('岗位组'),
-					value: 'group',
-				},
-				{
-					label: this.$t('岗位'),
-					value: 'post',
-				},
-			],
-			openTenant: false, //是否开启租户
-			openCaptcha: false, //开启图形验证码
-			originalOpenCaptcha: false,
-			otpLoginForm: {
-				grantType: 'sms',
-				loginName: '',
-				tenantId: '',
-				smsCode: '',
-				smsId: '',
-				selectRoleId: '',
-				grantChainId: '',
-				captchaUUID: '', // 图形验证码uuid
-				captchaCode: '',
-				post: '',
-			},
-			loginType: 'phone',
-			otpLoginRules: {
-				loginName: [{ validator: validatePhoneAndMail, trigger: 'blur' }],
-				///租户id 不能为空
-				tenantId: [
-					{
-						required: false,
-						trigger: 'blur',
-						message: this.$t('租户不能为空'),
-					},
-				],
-				///口令不能为空
-				smsCode: [
-					{
-						required: true,
-						trigger: 'blur',
-						message: this.$t('验证码不能为空'),
-					},
-				],
-				captchaCode: [
-					{
-						required: false,
-						trigger: 'blur',
-						message: this.$t('图形验证码不能为空'),
-					},
-				],
-				post: [
-					{
-						required: true,
-						trigger: 'blur',
-						validator: (rule, value, callback) => {
-							if (this.postChainId) {
-								if (!value) {
-									if (this.showPostType == 'wrought') {
-										callback(new Error(this.$t('人员定岗数据不能为空')));
-									} else {
-										callback(new Error(this.$t('岗位单元不能为空')));
-									}
-								} else {
-									callback();
-								}
-							} else {
-								callback();
-							}
-						},
-					},
-				],
-			},
-			loading: false,
-			tenantData: [],
-			isRoleOrg: false,
-			oAuthId: '',
-			source: '',
-			roleId: [],
-			roleName: [],
-			inputValueChanged: false,
-			roleData: [],
-			btnShow: true,
-			count: '',
-			timer: null,
-			imgUrl: '', // 图形二维码
-			postPlaceholder: this.$t('点击登录按钮后获取岗位单元'),
-			showOTPSlider: false,
-			slideValue: 0,
-			pcode: '',
-			resetSlider: 0,
-			disabledSlider: false,
-		};
-	},
-	props: {
-		grantChainId: String,
-		loginSucessHandler: Function,
-		loginPageInfo: Object,
-		showPostType: String,
-		toggleLoading: {
-			type: Number,
-			default: 0,
-		},
-	},
-	watch: {
-		toggleLoading: function (val) {
-			this.loading = false;
-		},
-	},
-	created() {
-		///从父页面中获取初始化数据
-	},
-	computed: {
-		Simple() {
-			return this.$ls.get('hos_login_post_type') == 'simple' ? true : false;
-		},
-	},
-	methods: {
-		keyEnterLogin(name) {
-			///键盘enter事件
-			if (this.$refs[name]) {
-				this.$refs[name].focus();
-			} else {
-				this.userHandleLogin(true);
-			}
-		},
-		///登录操作
-		otpHandleLogin(isLogin) {
-			this.$refs.otpLoginForm.validate((valid) => {
-				if (valid) {
-					///用于处理二次认证的第一次认证的id
-					this.otpLoginForm.grantChainId = this.grantChainId;
-					///赋值 手机号或者邮箱的类型 phone或者mail
-					this.otpLoginForm.loginType = this.loginType;
-					let paramData = JSON.parse(JSON.stringify(this.otpLoginForm));
-					if (this.postChainId) {
-						paramData.postChainId = this.postChainId;
-					}
-					this.loading = true;
-					useUserStore()
-						.Login(paramData)
-						.then((res) => {
-							// 登录成功跳转
-							if (res && isSuccessCode(res.code)) {
-								// 获取岗位信息并展示下拉列表
-								if (res.data.personId && !this.Simple) {
-									this.postPlaceholder = this.$t('请选择岗位单元');
-									this.personId = res.data.personId;
-									this.postChainId = res.data.postChainId;
-									// this.$refs.people.refresh();
 
-									if (this.showPostType) {
-										// 下拉选组件
-										this.$nextTick(() => {
-											this.$refs.otpLoginSelect_post.getPostPage();
-										});
-									} else {
-										// 表格组件
-										this.$nextTick(() => {
-											this.$refs.otpLoginSelectTable_post.refresh();
-										});
-									}
-									this.loading = false;
-								} else if (res.data.againAuthType) {
-									// 需要二次认证
-									this.loading = false;
-									let grantChainId = res.data.grantChainId;
-									let authType = res.data.againAuthType;
-									let account = res.data.accountCode;
-									let caData = res.data.caData;
-									let phone = res.data.phone;
-									this.$emit(
-										'openTwoAuthDialog',
-										grantChainId,
-										authType,
-										account,
-										caData,
-										phone
-									);
-								} else {
-									// 不需要二次认证
-									this.$emit('loginSucessHandler');
-								}
-							}
-						})
-						.catch((err) => {
-							this.loading = false;
-							// 开启图形验证码
-							if (err.code == '101-002-004-020') {
-								this.openCaptcha = true;
-								this.getCaptcha();
-							}
-							const errCode = String(err?.code ?? '');
-							if (!errCode.includes('101-002-005-')) {
-								ElMessage.error(err?.msg ?? this.$t('登录失败'));
-							}
-							if (errCode.includes(AuthConstant.forcedJumpSetPassword)) {
-								this.$emit('forcedJumpSetPassword', err);
-							}
-						});
-					// this.loading = false;
-				} else {
-					console.log('error submit!!');
-					return false;
-				}
-			});
-		},
-		getCode() {
-			if (!this.btnShow) {
-				return;
-			}
-			this.otpLoginRules.smsCode = {
-				required: false,
-				trigger: 'blur',
-				message: '',
-			};
-			this.$refs.otpLoginForm.validate((valid) => {
-				if (valid) {
-					this.getOTPCode();
-				}
-			});
-			this.otpLoginRules.smsCode = {
-				required: true,
-				trigger: 'blur',
-				message: this.$t('验证码不能为空'),
-			};
-		},
-		countDown(timeLength) {
-			let TIME_COUNT = timeLength;
-			if (!this.timer) {
-				this.count = TIME_COUNT;
-				this.btnShow = false;
-				this.timer = setInterval(() => {
-					if (this.count > 0 && this.count <= TIME_COUNT) {
-						this.count--;
-					} else {
-						this.btnShow = true;
-						clearInterval(this.timer);
-						this.timer = null;
-					}
-				}, 1000);
-			}
-		},
-		getCertCode() {
-			const cert = cryptUtil.crypt(this.otpLoginForm.loginName);
-			return `${generateRandomString(10)}${cert}${generateRandomString(10)}`;
-		},
-		getOTPCode(token) {
-			const phoneForm = token
-				? { code: this.getCertCode(), token }
-				: {
-						phoneNumber: this.otpLoginForm.loginName,
-						smsType: 'templateCode',
-					};
-			return fetchOTPCode(phoneForm)
-				.then((response) => {
-					if (response && isSuccessCode(response.code)) {
-						this.otpLoginForm.smsId = response.data?.uuid;
-						if (!token) {
-							this.countDown(60);
-						}
-					} else {
-						this.btnShow = true;
-						clearInterval(this.timer);
-						this.timer = null;
-						ElMessage.error(
-							response?.msg ?? this.$t('获取验证码失败，请重新再试！'),
-						);
-					}
-				})
-				.catch((error) => {
-					this.btnShow = true;
-					clearInterval(this.timer);
-					this.timer = null;
-					ElMessage.error(
-						error?.msg ?? this.$t('获取验证码失败，请重新再试！'),
-					);
-					console.log(error);
-				});
-		},
-		openSlider() {
-			if (!this.btnShow) return;
-			if (!this.otpLoginForm.loginName?.trim()) return;
-			this.disabledSlider = false;
-			this.pcode = cryptUtil.crypt(this.otpLoginForm.loginName);
-			this.showOTPSlider = true;
-		},
-		onSuccess(val) {
-			this.btnShow = false;
-			this.showOTPSlider = false;
-			this.disabledSlider = true;
-			this.getOTPCode(val);
-		},
-		closeDialog() {
-			this.showOTPSlider = false;
-			this.btnShow = true;
-		},
-		// 获取图形二维码
-		getCaptcha() {
-			fetchCaptcha()
-				.then((response) => {
-					if (response && isSuccessCode(response.code)) {
-						this.imgUrl = 'data:image/gif;base64,' + response.data.img;
-						this.otpLoginForm.captchaUUID = response.data.uuid;
-						this.$forceUpdate();
-					} else {
-						///提示错误信息
-						this.$message.error(this.$t('获取验证码失败，请重新再试！'));
-					}
-				})
-				.catch((error) => {
-					console.log(error);
-				});
-		},
-		// 忘记密码
-		handleForgetPass() {
-			openHosBizDialog({
-				component: forgetPassword,
-				_uid: 'forgetPassDialog',
-				ref: 'forgetPassDialog',
-				props: {},
-			});
-		},
-		changeLoginName() {
-			this.resetSlider = Date.now();
-			this.reset();
-		},
-		reset() {
-			this.postPlaceholder = this.$t('点击登录按钮后获取岗位单元');
-			this.personId = '';
-			this.postChainId = '';
-			this.otpLoginForm.post = '';
-			if (this.$refs.otpLoginSelect_post)
-				this.$refs.otpLoginSelect_post.clear();
-			if (this.$refs.otpLoginSelectTable_post)
-				this.$refs.otpLoginSelectTable_post.clear();
-		},
-		changePost(id, post) {
-			this.otpLoginForm.post = post;
-		},
-		openLoginBtn() {
-			this.loading = false;
-		},
+const { t } = useI18n();
+
+const props = defineProps<{
+	grantChainId?: string;
+	loginSucessHandler?: () => void;
+	loginPageInfo?: Record<string, unknown>;
+	showPostType?: string;
+	toggleLoading?: number;
+}>();
+
+const emit = defineEmits<{
+	(
+		e: 'openTwoAuthDialog',
+		grantChainId: string,
+		authType: string,
+		account: string,
+		caData: unknown,
+		phone: string
+	): void;
+	(e: 'loginSucessHandler'): void;
+	(e: 'forcedJumpSetPassword', err: unknown): void;
+}>();
+
+const vFocus = {
+	mounted(el: HTMLElement) {
+		(el.getElementsByClassName('el-input__inner')[0] as HTMLInputElement)?.focus();
 	},
 };
+
+const otpLoginFormRef = ref<FormInstance>();
+const loginNameRef = ref<InputInstance | null>(null);
+const smsCodeRef = ref<InputInstance | null>(null);
+const captchaCodeRef = ref<InputInstance | null>(null);
+const otpLoginSelectPostRef = ref<InstanceType<typeof postSelect> | null>(
+	null
+);
+const otpLoginSelectTablePostRef = ref<InstanceType<
+	typeof postSelectTable
+> | null>(null);
+
+const post = ref('');
+const personId = ref('');
+const postChainId = ref('');
+const form = reactive({
+	model: {
+		query: '',
+		dataType: '',
+	},
+});
+const cols = [
+	{
+		prop: 'name',
+		label: t('名称'),
+		width: '150px',
+	},
+	{
+		label: t('岗位'),
+		prop: 'postNames',
+	},
+];
+const valueConfig = {
+	label: 'name',
+	value: 'id',
+};
+const options = [
+	{
+		label: t('岗位单元'),
+		value: 'unit',
+	},
+	{
+		label: t('岗位组'),
+		value: 'group',
+	},
+	{
+		label: t('岗位'),
+		value: 'post',
+	},
+];
+const openTenant = ref(false);
+const openCaptcha = ref(false);
+const originalOpenCaptcha = ref(false);
+
+interface OtpLoginForm {
+	grantType: string;
+	loginName: string;
+	tenantId: string;
+	smsCode: string;
+	smsId: string;
+	selectRoleId: string;
+	grantChainId: string;
+	captchaUUID: string;
+	captchaCode: string;
+	post: string;
+	loginType?: string;
+}
+
+const otpLoginForm = ref<OtpLoginForm>({
+	grantType: 'sms',
+	loginName: '',
+	tenantId: '',
+	smsCode: '',
+	smsId: '',
+	selectRoleId: '',
+	grantChainId: '',
+	captchaUUID: '',
+	captchaCode: '',
+	post: '',
+});
+const loginType = ref('phone');
+
+const validatePhoneAndMail = (
+	rule: unknown,
+	value: string,
+	callback: (error?: Error) => void
+) => {
+	let type = '';
+	if (validPhone11(value)) {
+		type = 'phone';
+	}
+	if (validEmail(value)) {
+		type = 'mail';
+	}
+	if (type == '') {
+		callback(new Error(t('请输入有效的手机号')));
+	} else {
+		loginType.value = type;
+		callback();
+	}
+};
+
+const otpLoginRules = reactive<FormRules<OtpLoginForm>>({
+	loginName: [{ validator: validatePhoneAndMail, trigger: 'blur' }],
+	tenantId: [
+		{
+			required: false,
+			trigger: 'blur',
+			message: t('租户不能为空'),
+		},
+	],
+	smsCode: [
+		{
+			required: true,
+			trigger: 'blur',
+			message: t('验证码不能为空'),
+		},
+	],
+	captchaCode: [
+		{
+			required: false,
+			trigger: 'blur',
+			message: t('图形验证码不能为空'),
+		},
+	],
+	post: [
+		{
+			required: true,
+			trigger: 'blur',
+			validator: (rule, value, callback) => {
+				if (postChainId.value) {
+					if (!value) {
+						if (props.showPostType == 'wrought') {
+							callback(new Error(t('人员定岗数据不能为空')));
+						} else {
+							callback(new Error(t('岗位单元不能为空')));
+						}
+					} else {
+						callback();
+					}
+				} else {
+					callback();
+				}
+			},
+		},
+	],
+});
+
+const loading = ref(false);
+const tenantData = ref<Array<{ name: string; tenantId: string }>>([]);
+const isRoleOrg = ref(false);
+const oAuthId = ref('');
+const source = ref('');
+const roleId = ref<unknown[]>([]);
+const roleName = ref<unknown[]>([]);
+const inputValueChanged = ref(false);
+const roleData = ref<unknown[]>([]);
+const btnShow = ref(true);
+const count = ref<number | string>('');
+const timer = ref<ReturnType<typeof setInterval> | null>(null);
+const imgUrl = ref('');
+const postPlaceholder = ref(t('点击登录按钮后获取岗位单元'));
+const showOTPSlider = ref(false);
+const slideValue = ref(0);
+const pcode = ref('');
+const resetSlider = ref(0);
+const disabledSlider = ref(false);
+
+const Simple = computed(
+	() => lsGet('hos_login_post_type') == 'simple'
+);
+
+watch(
+	() => props.toggleLoading,
+	() => {
+		loading.value = false;
+	}
+);
+
+function keyEnterLogin(name?: string) {
+	const refMap: Record<string, typeof smsCodeRef> = {
+		smsCode: smsCodeRef,
+		captchaCode: captchaCodeRef,
+	};
+	if (name && refMap[name]?.value) {
+		refMap[name].value!.focus();
+	} else {
+		otpHandleLogin(true);
+	}
+}
+
+function otpHandleLogin(isLogin: boolean) {
+	otpLoginFormRef.value?.validate((valid) => {
+		if (valid) {
+			otpLoginForm.value.grantChainId = props.grantChainId ?? '';
+			otpLoginForm.value.loginType = loginType.value;
+			const paramData = JSON.parse(JSON.stringify(otpLoginForm.value));
+			if (postChainId.value) {
+				paramData.postChainId = postChainId.value;
+			}
+			loading.value = true;
+			useUserStore()
+				.Login(paramData)
+				.then((res) => {
+					if (res && isSuccessCode(res.code)) {
+						if (res.data.personId && !Simple.value) {
+							postPlaceholder.value = t('请选择岗位单元');
+							personId.value = res.data.personId;
+							postChainId.value = res.data.postChainId;
+							if (props.showPostType) {
+								nextTick(() => {
+									otpLoginSelectPostRef.value?.getPostPage();
+								});
+							} else {
+								nextTick(() => {
+									otpLoginSelectTablePostRef.value?.refresh();
+								});
+							}
+							loading.value = false;
+						} else if (res.data.againAuthType) {
+							loading.value = false;
+							const grantChainIdVal = res.data.grantChainId;
+							const authType = res.data.againAuthType;
+							const account = res.data.accountCode;
+							const caData = res.data.caData;
+							const phone = res.data.phone;
+							emit(
+								'openTwoAuthDialog',
+								grantChainIdVal,
+								authType,
+								account,
+								caData,
+								phone
+							);
+						} else {
+							emit('loginSucessHandler');
+						}
+					}
+				})
+				.catch((err: { code?: string; msg?: string }) => {
+					loading.value = false;
+					if (err.code == '101-002-004-020') {
+						openCaptcha.value = true;
+						getCaptcha();
+					}
+					const errCode = String(err?.code ?? '');
+					if (!errCode.includes('101-002-005-')) {
+						ElMessage.error(err?.msg ?? t('登录失败'));
+					}
+					if (errCode.includes(AuthConstant.forcedJumpSetPassword)) {
+						emit('forcedJumpSetPassword', err);
+					}
+				});
+		} else {
+			console.log('error submit!!');
+		}
+	});
+}
+
+function getCode() {
+	if (!btnShow.value) {
+		return;
+	}
+	otpLoginRules.smsCode = {
+		required: false,
+		trigger: 'blur',
+		message: '',
+	};
+	otpLoginFormRef.value?.validate((valid) => {
+		if (valid) {
+			getOTPCode();
+		}
+	});
+	otpLoginRules.smsCode = {
+		required: true,
+		trigger: 'blur',
+		message: t('验证码不能为空'),
+	};
+}
+
+function countDown(timeLength: number) {
+	const TIME_COUNT = timeLength;
+	if (!timer.value) {
+		count.value = TIME_COUNT;
+		btnShow.value = false;
+		timer.value = setInterval(() => {
+			if (Number(count.value) > 0 && Number(count.value) <= TIME_COUNT) {
+				count.value = Number(count.value) - 1;
+			} else {
+				btnShow.value = true;
+				if (timer.value) {
+					clearInterval(timer.value);
+				}
+				timer.value = null;
+			}
+		}, 1000);
+	}
+}
+
+function getCertCode() {
+	const cert = crypt(otpLoginForm.value.loginName);
+	return `${generateRandomString(10)}${cert}${generateRandomString(10)}`;
+}
+
+function getOTPCode(token?: string) {
+	const phoneForm = token
+		? { code: getCertCode(), token }
+		: {
+				phoneNumber: otpLoginForm.value.loginName,
+				smsType: 'templateCode',
+			};
+	return fetchOTPCode(phoneForm)
+		.then((response) => {
+			if (response && isSuccessCode(response.code)) {
+				otpLoginForm.value.smsId = (response.data as { uuid?: string })?.uuid ?? '';
+				if (!token) {
+					countDown(60);
+				}
+			} else {
+				btnShow.value = true;
+				if (timer.value) {
+					clearInterval(timer.value);
+				}
+				timer.value = null;
+				ElMessage.error(
+					response?.msg ?? t('获取验证码失败，请重新再试！')
+				);
+			}
+		})
+		.catch((error: { msg?: string }) => {
+			btnShow.value = true;
+			if (timer.value) {
+				clearInterval(timer.value);
+			}
+			timer.value = null;
+			ElMessage.error(error?.msg ?? t('获取验证码失败，请重新再试！'));
+			console.log(error);
+		});
+}
+
+function openSlider() {
+	if (!btnShow.value) return;
+	if (!otpLoginForm.value.loginName?.trim()) return;
+	disabledSlider.value = false;
+	pcode.value = crypt(otpLoginForm.value.loginName);
+	showOTPSlider.value = true;
+}
+
+function onSuccess(val: unknown) {
+	btnShow.value = false;
+	showOTPSlider.value = false;
+	disabledSlider.value = true;
+	getOTPCode(val as string);
+}
+
+function closeDialog() {
+	showOTPSlider.value = false;
+	btnShow.value = true;
+}
+
+function getCaptcha() {
+	fetchCaptcha()
+		.then((response) => {
+			if (response && isSuccessCode(response.code) && response.data) {
+				imgUrl.value = 'data:image/gif;base64,' + response.data.img;
+				otpLoginForm.value.captchaUUID = response.data.uuid;
+			} else {
+				ElMessage.error(t('获取验证码失败，请重新再试！'));
+			}
+		})
+		.catch((error) => {
+			console.log(error);
+		});
+}
+
+function handleForgetPass() {
+	openHosBizDialog({
+		component: forgetPassword,
+		_uid: 'forgetPassDialog',
+		ref: 'forgetPassDialog',
+		props: {},
+	});
+}
+
+function changeLoginName() {
+	resetSlider.value = Date.now();
+	reset();
+}
+
+function reset() {
+	postPlaceholder.value = t('点击登录按钮后获取岗位单元');
+	personId.value = '';
+	postChainId.value = '';
+	otpLoginForm.value.post = '';
+	otpLoginSelectPostRef.value?.clear();
+	otpLoginSelectTablePostRef.value?.clear();
+}
+
+function changePost(_id: string | number, postVal: unknown) {
+	otpLoginForm.value.post = postVal as string;
+}
+
+function openLoginBtn() {
+	loading.value = false;
+}
+
+defineExpose({ openLoginBtn });
 </script>
 
 <style lang="scss" scoped>

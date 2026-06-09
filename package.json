@@ -38,6 +38,8 @@
     "@tsconfig/node24": "^24.0.4",
     "@types/jsdom": "^28.0.1",
     "@types/node": "^24.12.2",
+    "@types/qrcode": "^1.5.6",
+    "@types/qs": "^6.15.1",
     "@types/sortablejs": "^1.15.9",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vitest/eslint-plugin": "^1.6.16",

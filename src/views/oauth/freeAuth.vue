@@ -8,58 +8,50 @@
 	</div>
 </template>
 
-<script>
-import { useUserStore } from '@/stores/user';
-export default {
-	name: 'freeAuth',
-	data() {
-		return {};
-	},
-	mounted() {
-		if (document.querySelector('.login-loading-mask')) {
-			document.querySelector('.login-loading-mask').style.display = 'none';
-		}
-		this.init();
-	},
-	methods: {
-		async init() {
-			const { query } = this.$route;
-			if (query.CASTicket) {
-				let freeLoginParam = {
-					grantType: 'HISCAS',
-					CASTicket: query.CASTicket,
-				};
-				try {
-					const { data, code, msg } = await this.freeAuthLogin(freeLoginParam);
-					if (code == 200) {
-						this.freeAuthSuccessCallback('CASTicket');
-					} else {
-						this.$message.error(msg);
-					}
-				} catch (error) {
-					this.$message.error(error.msg);
-				}
-			}
-		},
-		freeAuthSuccessCallback(delParams) {
-			// 删参数
-			if (Array.isArray(delParams)) {
-				delParams.forEach((param) => {
-					delete this.$route.query[param];
-				});
-			} else {
-				delete this.$route.query[delParams];
-			}
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/stores/user'
 
-			// 跳转
-			let { redirect } = this.$route.query;
-			window.location.href = redirect;
-		},
-		freeAuthLogin(freeLoginParam) {
-			return useUserStore().Login(freeLoginParam);
-		},
-	},
-};
+defineOptions({ name: 'freeAuth' })
+
+const route = useRoute()
+const userStore = useUserStore()
+
+async function init() {
+	const { query } = route
+	if (query.CASTicket) {
+		const freeLoginParam = {
+			grantType: 'HISCAS',
+			CASTicket: query.CASTicket as string,
+		}
+		try {
+			const { code, msg } = await userStore.Login(freeLoginParam)
+			if (code == 200) {
+				freeAuthSuccessCallback('CASTicket')
+			} else {
+				ElMessage.error(msg)
+			}
+		} catch (error: unknown) {
+			const err = error as { msg?: string }
+			ElMessage.error(err.msg ?? '')
+		}
+	}
+}
+
+function freeAuthSuccessCallback(_delParams: string) {
+	const redirect = route.query.redirect as string
+	window.location.href = redirect
+}
+
+onMounted(() => {
+	if (document.querySelector('.login-loading-mask')) {
+		(document.querySelector('.login-loading-mask') as HTMLElement).style.display =
+			'none'
+	}
+	init()
+})
 </script>
 <style lang="scss" scoped>
 .authorize {

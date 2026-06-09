@@ -11,9 +11,7 @@ interface ImportMetaEnv {
   readonly VITE_APP_BASE_URL?: string
   readonly VITE_APP_TIME_OUT?: string
   readonly VITE_APP_CRYPT_TYPE?: 'aes' | 'sm4' | 'rsa'
-  readonly VUE_APP_BASE_URL?: string
-  readonly VUE_APP_TIME_OUT?: string
-  readonly VUE_APP_CRYPT_TYPE?: 'aes' | 'sm4' | 'rsa'
+  readonly VITE_APP_LOGIN_SOURCE?: string
 }
 
 interface ImportMeta {

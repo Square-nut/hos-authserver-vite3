@@ -265,6 +265,7 @@ import { ElMessage } from 'element-plus';
 import { ls } from '@/utils/ls';
 import { openHosBizDialog, setLoginAuthInfo } from '@/composables/useHosBiz';
 import { useLoginSessionStore } from '@/stores/loginSession';
+import { useUserStore } from '@/stores/user';
 import { caLoginTypeIconMap } from '@/utils/login-element-icons';
 import { fetchLicenseState } from '@/api/login';
 import { fetchOauthInfo } from '@/api/oauth';
@@ -275,6 +276,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const loginSessionStore = useLoginSessionStore();
+const userStore = useUserStore();
 const loginLayoutThis = inject('loginLayoutThis', null);
 
 const isHos = ref(import.meta.env.VITE_APP_THEME_STYLE === '1');
@@ -349,10 +351,13 @@ function normalizeLoginTypeInfo(raw) {
 }
 
 const loginState = computed(() => ({ ...loginSessionStore.$state }));
-const loginTypeDataDTO = computed(
-	() =>
-		loginState.value.loginTypeDataDTO || readSessionJSON('loginTypeDataDTO', {})
-);
+const loginTypeDataDTO = computed(() => {
+	const fromStore = userStore.loginType;
+	if (fromStore && Object.keys(fromStore).length) {
+		return fromStore;
+	}
+	return readSessionJSON('loginTypeDataDTO', {});
+});
 const loginPostVersion = computed(
 	() =>
 		loginState.value.loginPostVersion ||
@@ -419,6 +424,23 @@ function getClientId() {
 	}
 }
 
+function isAuthTypeEnabled(info, type) {
+	if (type === 'ad') return Boolean(info.enableAD);
+	const enabled = info[type]?.enable;
+	return enabled === 1 || enabled === true;
+}
+
+function resolveActiveType(info) {
+	const defaultModel = info.defaultModel;
+	if (defaultModel && isAuthTypeEnabled(info, defaultModel)) {
+		return defaultModel;
+	}
+	for (const type of ['password', 'sms', 'scanCode', 'ad']) {
+		if (isAuthTypeEnabled(info, type)) return type;
+	}
+	return '';
+}
+
 function getAuthTypeLength() {
 	const len = Object.keys(loginTypeInfo.value).filter((ele) => {
 		return ele != 'ca' && loginTypeInfo.value[ele]?.enable === 1;
@@ -428,19 +450,12 @@ function getAuthTypeLength() {
 }
 
 function loginTypeFn() {
-	const stateLoginType = loginTypeDataDTO.value;
-	const sessionLoginType = readSessionJSON('loginTypeDataDTO', {});
-	const source =
-		stateLoginType && Object.keys(stateLoginType).length
-			? stateLoginType
-			: sessionLoginType;
+	const source = loginTypeDataDTO.value;
 	loginTypeInfo.value = normalizeLoginTypeInfo(source);
-	loginPageInfo.value = JSON.parse(
-		sessionStorage.getItem('loginPageDataDTO') || '{}'
-	);
+	loginPageInfo.value = readSessionJSON('loginPageDataDTO', {});
 	getAuthTypeLength();
-	activeType.value = loginTypeInfo.value.defaultModel;
 	systemConfigTitle.value = sessionStorage.getItem('systemConfigTitle') || '';
+	activeType.value = resolveActiveType(loginTypeInfo.value);
 }
 
 function triggerClick(event) {
@@ -482,7 +497,8 @@ function licenseState() {
 	fetchLicenseState({ clientId: currentClientId })
 		.then((res) => {
 			if (res && isSuccessCode(res.code) && res.data) {
-				const data = res.data;
+				const data =
+					res.data && typeof res.data === 'object' ? { ...res.data } : {};
 				data.licenseText = '';
 				licenseInfo.value = data;
 				licenseType.value = data.type;
@@ -715,9 +731,13 @@ function closeBtnLoading() {
 	otpLoginRef.value?.openLoginBtn?.();
 }
 
-watch(loginTypeDataDTO, () => {
-	loginTypeFn();
-});
+watch(
+	() => userStore.loginType,
+	() => {
+		loginTypeFn();
+	},
+	{ immediate: true }
+);
 
 watch(i18nStatus, (val) => {
 	if (isHos.value && val) {
@@ -727,7 +747,6 @@ watch(i18nStatus, (val) => {
 
 onBeforeMount(async () => {
 	await getSysAuthInfo();
-	loginTypeFn();
 });
 </script>
 <style scoped>

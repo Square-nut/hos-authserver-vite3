@@ -22,6 +22,7 @@ export interface BackgroundSlide {
 
 /** 轮播展示用（模板） */
 export interface CarouselSlide {
+	type?: string
 	sort: number
 	actived?: boolean
 	content?: FileRef

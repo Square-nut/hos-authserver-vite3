@@ -37,56 +37,36 @@
 		</div>
 	</div>
 </template>
-<script>
-import CA from './ca.vue';
-import OauthOtplogin from './oauth-otplogin.vue';
-export default {
-	name: '',
-	components: { CA, OauthOtplogin },
-	props: {
-		// 当前用户名，用户查询支持的二次认证方式
-		account: {
-			type: String,
-			default: '',
-		},
-		// 登录时需要传 grantChainId
-		grantChainId: {
-			type: String,
-			default: '',
-		},
-		// 登录成功的回调
-		loginSucessHandler: {
-			type: Function,
-			default: () => {},
-		},
-		// 所有支持ca登录的类型
-		caList: {
-			type: Array,
-			default: () => [],
-		},
-		phoneDisplay: {
-			type: String,
-			default: '',
-		},
-		grantChainId: {
-			type: String,
-			default: '',
-		},
-	},
-	data() {
-		return {
-			activeType: '',
-		};
-	},
-	created() {
-		if (this.caList[0]) this.activeType = this.caList[0].type;
-	},
-	methods: {
-		tabClick(tab, event) {
-			console.log(this.activeType, this.$t('父页面'));
-		},
-	},
-};
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import CA from './ca.vue'
+import OauthOtplogin from './oauth-otplogin.vue'
+
+interface CaListItem {
+	type: string
+	loginName: string
+	[key: string]: unknown
+}
+
+const props = defineProps<{
+	account?: string
+	grantChainId?: string
+	loginSucessHandler?: () => void
+	caList?: CaListItem[]
+	phoneDisplay?: string
+}>()
+
+const { t } = useI18n()
+const activeType = ref('')
+
+function tabClick() {
+	console.log(activeType.value, t('父页面'))
+}
+
+onMounted(() => {
+	if (props.caList?.[0]) activeType.value = props.caList[0].type as string
+})
 </script>
 <style lang="scss" scoped>
 .sc-dialog {

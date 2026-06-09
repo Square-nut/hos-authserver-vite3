@@ -444,7 +444,7 @@ onMounted(() => {
 		policyErrorDesc.value =
 			AuthConstant.passwordError[
 				policyErrorCode as keyof typeof AuthConstant.passwordError
-			];
+			] ?? ''
 	}
 
 	if (props.code === '101-002-005-003') {

@@ -32,14 +32,12 @@ function missingFunc(
 }
 
 const i18n = createI18n({
+  legacy: false,
   locale: getLocale(),
   missing: (locale, key, vm, values) => missingFunc(locale, key, vm, values),
   missingWarn: false,
   fallbackWarn: false,
   messages: {},
 })
-
-;(i18n as any).mergeLocaleMessage = (...args: [string, Record<string, string>]) =>
-  i18n.global.mergeLocaleMessage(...args)
 
 export default i18n

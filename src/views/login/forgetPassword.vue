@@ -87,7 +87,7 @@
 							</template>
 						</el-input>
 						<span v-if="showPwdStr" class="lengthStrClass"
-							>({{ this.lengthStr }})</span
+							>({{ lengthStr }})</span
 						>
 					</el-form-item>
 					<!-- 密码强度 -->
@@ -138,9 +138,14 @@
 	</div>
 </template>
 
-<script>
-import { getLocale, setCurrentLocale } from '@/utils/i18n/i18n-util';
+<script setup lang="ts">
+import { ref, reactive, watch, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessage } from 'element-plus';
+import type { FormInstance, FormRules } from 'element-plus';
+import { getLocale } from '@/utils/i18n/i18n-util';
 import { closeHosBizDialog } from '@/composables/useHosBiz';
+import { crypt } from '@/composables/useCrypt';
 import { getOTPCode, getCaptcha as fetchCaptcha } from '@/api/login';
 import {
 	validateForgetCode,
@@ -149,384 +154,373 @@ import {
 } from '@/api/forget-password';
 import { fetchForcingPwdPolicy } from '@/api/sys-password';
 import { View } from '@element-plus/icons-vue';
-export default {
-	name: 'forgetPassword',
-	components: { View },
-	data() {
-		return {
-			loading: false,
-			active: 0,
-			showFirst: true,
-			showSecond: false,
-			showThird: false,
-			firstForm: {},
-			firstFormRules: {
-				phoneNumber: [
-					{
-						required: true,
-						message: this.$t('请输入手机号'),
-						trigger: 'blur',
-					},
-					{
-						pattern:
-							/^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/,
-						message: this.$t('请输入正确的手机号码'),
-					},
-				],
-				smsCode: [
-					{
-						required: true,
-						message: this.$t('请输入验证码'),
-						trigger: 'blur',
-					},
-				],
-				captchaCode: [
-					{
-						required: true,
-						message: this.$t('请输入图形验证码'),
-						trigger: 'blur',
-					},
-				],
-			},
-			imgCodeUrl: '',
-			// 设置密码
-			passwordForm: {},
-			passwordFormRules: {
-				newPassword: [
-					{
-						required: true,
-						trigger: 'blur',
-						validator: (rule, value, callback) => {
-							if (value && value !== '') {
-								if (value.length < this.pwdPolicy.minSize) {
-									callback(new Error(this.$t('新密码长度不符合密码策略要求')));
-								} else {
-									if (this.pwdPolicy.complexity.indexOf('number') != -1) {
-										var val = /\d+/;
-										if (!val.test(value)) {
-											callback(
-												new Error(this.$t('新密码不符合密码复杂度要求'))
-											);
-										}
-									}
 
-									if (this.pwdPolicy.complexity.indexOf('letter') != -1) {
-										var val = /[a-zA-Z]+/;
-										if (!val.test(value)) {
-											callback(
-												new Error(this.$t('新密码不符合密码复杂度要求'))
-											);
-										}
-									}
+const { t } = useI18n();
 
-									if (
-										this.pwdPolicy.complexity.indexOf('lowercaseLetter') != -1
-									) {
-										var val = /[a-z]+/;
-										if (!val.test(value)) {
-											callback(
-												new Error(this.$t('新密码不符合密码复杂度要求'))
-											);
-										}
-									}
+const firstFormRef = ref<FormInstance>();
+const passwordFormRef = ref<FormInstance>();
 
-									if (
-										this.pwdPolicy.complexity.indexOf('capitalLetter') != -1
-									) {
-										var val = /[A-Z]+/;
-										if (!val.test(value)) {
-											callback(
-												new Error(this.$t('新密码不符合密码复杂度要求'))
-											);
-										}
-									}
+const loading = ref(false);
+const active = ref(0);
+const showFirst = ref(true);
+const showSecond = ref(false);
+const showThird = ref(false);
+const firstForm = reactive<Record<string, unknown>>({});
+const imgCodeUrl = ref('');
+const passwordForm = reactive<Record<string, unknown>>({});
+const flag1 = ref(false);
+const flag2 = ref(false);
+const pwdPolicy = reactive<Record<string, unknown>>({});
+const showPwdStr = ref(false);
+const lengthStr = ref('');
+const percentage = ref(0);
+const showCode = ref(true);
+const waitTime = ref(60);
+const notCn = ref(false);
+const code = ref('');
+const maskCode = ref('');
+const showLastBtn = ref(false);
 
-									if (
-										this.pwdPolicy.complexity.indexOf('pecialCharacters') != -1
-									) {
-										var val = /((?=[\x21-\x7e]+)[^A-Za-z0-9])/;
-										if (!val.test(value)) {
-											callback(
-												new Error(this.$t('新密码不符合密码复杂度要求'))
-											);
-										}
-									}
+const firstFormRules = reactive<FormRules>({
+	phoneNumber: [
+		{
+			required: true,
+			message: t('请输入手机号'),
+			trigger: 'blur',
+		},
+		{
+			pattern:
+				/^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/,
+			message: t('请输入正确的手机号码'),
+		},
+	],
+	smsCode: [
+		{
+			required: true,
+			message: t('请输入验证码'),
+			trigger: 'blur',
+		},
+	],
+	captchaCode: [
+		{
+			required: true,
+			message: t('请输入图形验证码'),
+			trigger: 'blur',
+		},
+	],
+});
 
-									callback();
-								}
-							} else {
-								callback(new Error(this.$t('请输入新密码')));
-							}
-						},
-					},
-				],
-				rePassword: [
-					{
-						required: true,
-						trigger: 'blur',
-						validator: (rule, value, callback) => {
-							if (value && value != '') {
-								if (value == this.passwordForm.newPassword) {
-									callback();
-								} else {
-									callback(new Error(this.$t('两次输入的密码不一致')));
-								}
-							} else {
-								callback(new Error(this.$t('请再次输入新密码')));
-							}
-						},
-					},
-				],
-			},
-			flag1: false,
-			flag2: false,
-			// 密码策略
-			pwdPolicy: {},
-			showPwdStr: false,
-			lengthStr: '',
-			percentage: 0,
-			showCode: true,
-			waitTime: 60,
-			notCn: false,
-			code: '',
-			maskCode: '', // 电话掩码
-		};
-	},
-	created() {
-		this.getCaptcha();
-		this.getPwdPolicy();
-		this.notCn = getLocale() == 'zh' ? false : true;
-	},
-	watch: {
-		'passwordForm.newPassword': {
-			handler(newValue) {
-				var mark = 0;
-				// 长度得分
-				if (newValue.length < 5) {
-					mark += 5;
-				} else if (newValue.length >= 8) {
-					mark += 25;
-				} else {
-					mark += 10;
-				}
-				// 含字母得分
-				if (/[A-Za-z]/.test(newValue)) {
-					if (/[A-Z]/.test(newValue) && /[a-z]/.test(newValue)) {
-						// 大小写字母混合
-						mark += 20;
+const passwordFormRules = reactive<FormRules>({
+	newPassword: [
+		{
+			required: true,
+			trigger: 'blur',
+			validator: (rule, value, callback) => {
+				if (value && value !== '') {
+					const minSize = Number(pwdPolicy.minSize ?? 0);
+					if (value.length < minSize) {
+						callback(new Error(t('新密码长度不符合密码策略要求')));
 					} else {
-						// 只有大写或小写
-						mark += 10;
+						const complexity = String(pwdPolicy.complexity ?? '');
+						if (complexity.indexOf('number') != -1) {
+							const val = /\d+/;
+							if (!val.test(value)) {
+								callback(new Error(t('新密码不符合密码复杂度要求')));
+							}
+						}
+
+						if (complexity.indexOf('letter') != -1) {
+							const val = /[a-zA-Z]+/;
+							if (!val.test(value)) {
+								callback(new Error(t('新密码不符合密码复杂度要求')));
+							}
+						}
+
+						if (complexity.indexOf('lowercaseLetter') != -1) {
+							const val = /[a-z]+/;
+							if (!val.test(value)) {
+								callback(new Error(t('新密码不符合密码复杂度要求')));
+							}
+						}
+
+						if (complexity.indexOf('capitalLetter') != -1) {
+							const val = /[A-Z]+/;
+							if (!val.test(value)) {
+								callback(new Error(t('新密码不符合密码复杂度要求')));
+							}
+						}
+
+						if (complexity.indexOf('pecialCharacters') != -1) {
+							const val = /((?=[\x21-\x7e]+)[^A-Za-z0-9])/;
+							if (!val.test(value)) {
+								callback(new Error(t('新密码不符合密码复杂度要求')));
+							}
+						}
+
+						callback();
 					}
+				} else {
+					callback(new Error(t('请输入新密码')));
 				}
-				// 含数字得分
-				var countNum = newValue.length - newValue.replace(/\d+/g, '').length;
-				if (countNum == 1) {
-					mark += 10;
-				} else if (countNum > 1) {
-					mark += 20;
+			},
+		},
+	],
+	rePassword: [
+		{
+			required: true,
+			trigger: 'blur',
+			validator: (rule, value, callback) => {
+				if (value && value != '') {
+					if (value == passwordForm.newPassword) {
+						callback();
+					} else {
+						callback(new Error(t('两次输入的密码不一致')));
+					}
+				} else {
+					callback(new Error(t('请再次输入新密码')));
 				}
-				// 含特殊符号得分
-				var count =
-					newValue.length -
-					newValue.replace(
-						/[`~!@#$%^&*()_\-+=<>?:"{}|,.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘'，。、]/g,
-						''
-					).length;
-				if (count == 1) {
-					mark += 10;
-				} else if (count > 1) {
-					mark += 25;
-				}
-				// 组合
-				if (/[A-Za-z]/.test(newValue) && /\d/g.test(newValue)) {
+			},
+		},
+	],
+});
+
+onMounted(() => {
+	getCaptcha();
+	getPwdPolicy();
+	notCn.value = getLocale() == 'zh' ? false : true;
+});
+
+watch(
+	() => passwordForm.newPassword,
+	(newValue) => {
+		const val = String(newValue ?? '');
+		let mark = 0;
+		if (val.length < 5) {
+			mark += 5;
+		} else if (val.length >= 8) {
+			mark += 25;
+		} else {
+			mark += 10;
+		}
+		if (/[A-Za-z]/.test(val)) {
+			if (/[A-Z]/.test(val) && /[a-z]/.test(val)) {
+				mark += 20;
+			} else {
+				mark += 10;
+			}
+		}
+		const countNum = val.length - val.replace(/\d+/g, '').length;
+		if (countNum == 1) {
+			mark += 10;
+		} else if (countNum > 1) {
+			mark += 20;
+		}
+		const count =
+			val.length -
+			val.replace(
+				/[`~!@#$%^&*()_\-+=<>?:"{}|,.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘'，。、]/g,
+				''
+			).length;
+		if (count == 1) {
+			mark += 10;
+		} else if (count > 1) {
+			mark += 25;
+		}
+		if (/[A-Za-z]/.test(val) && /\d/g.test(val)) {
+			mark += 2;
+			if (
+				/[`~!@#$%^&*()_\-+=<>?:"{}|,.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘'，。、]/.test(
+					val
+				)
+			) {
+				mark += 1;
+				if (/[A-Z]/.test(val) && /[a-z]/.test(val)) {
 					mark += 2;
-					if (
-						/[`~!@#$%^&*()_\-+=<>?:"{}|,.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘'，。、]/.test(
-							newValue
-						)
-					) {
-						mark += 1;
-						if (/[A-Z]/.test(newValue) && /[a-z]/.test(newValue)) {
-							mark += 2;
-						}
-					}
-				}
-				this.percentage = mark;
-			},
-		},
-	},
-	methods: {
-		firstNextStep() {
-			this.$refs['firstFormRef'].validate(async (valid) => {
-				if (valid) {
-					const obj = JSON.parse(JSON.stringify(this.firstForm));
-					const { code, data, msg } = await validateForgetCode(obj);
-					if (code == 200) {
-						this.active++;
-						this.showFirst = false;
-						this.showSecond = true;
-						this.passwordForm.personUuid = data;
-					} else {
-						this.$message.error(msg);
-					}
-				}
-			});
-		},
-		secondNextStep() {
-			this.$refs['passwordFormRef'].validate(async (valid) => {
-				if (valid) {
-					const obj = JSON.parse(JSON.stringify(this.passwordForm));
-					if (obj.newPassword) {
-						obj.newPassword = this.$m.crypt(obj.newPassword);
-					}
-					if (obj.rePassword) {
-						obj.rePassword = this.$m.crypt(obj.rePassword);
-					}
-					const { code, msg } = await editForgetPassword(obj);
-					if (code == 200) {
-						this.active++;
-						this.showSecond = false;
-						this.showThird = true;
-					} else {
-						this.$message.error(msg);
-					}
-				}
-			});
-		},
-		async getPwdPolicy() {
-			const { code, data } = await fetchForcingPwdPolicy();
-			if (code == 200) {
-				this.pwdPolicy = data;
-				if (
-					(this.pwdPolicy.minSize == '' || this.pwdPolicy.minSize == '0') &&
-					this.pwdPolicy.complexity == ''
-				) {
-					this.showPwdStr = false;
-				} else {
-					this.showPwdStr = true;
-				}
-				if (this.pwdPolicy.minSize && this.pwdPolicy.minSize > 0) {
-					this.lengthStr =
-						this.$t('密码最小长度为') + this.pwdPolicy.minSize + '，';
-				}
-				if (this.pwdPolicy.complexity) {
-					let pass = '';
-					switch (this.pwdPolicy.complexity) {
-						case 'number,letter':
-							pass = '数字、字母';
-							break;
-						case 'number,lowercaseLetter,capitalLetter':
-							pass = '数字、小写字母、大写字母';
-							break;
-						case 'number,letter,pecialCharacters':
-							pass = '数字、字母、特殊字符组合';
-							break;
-						case 'number,lowercaseLetter,capitalLetter,pecialCharacters':
-							pass = '数字、小写字母、大写字母、特殊字符组合';
-							break;
-					}
-					this.lengthStr += this.$t('密码中至少包含') + this.$t(pass) + '，';
-				}
-				if (this.pwdPolicy.keepPas == 'true' && policyErrorCode == '003') {
-					this.showLastBtn = true;
-				}
-				if (this.lengthStr.length > 0) {
-					this.lengthStr = this.lengthStr.substring(
-						0,
-						this.lengthStr.length - 1
-					);
 				}
 			}
-		},
-		// 获取验证码
-		async handleCode() {
-			if (this.firstForm.phoneNumber) {
-				const { code, data, msg } = await getOTPCode({
-					phoneNumber: this.firstForm.phoneNumber,
-					smsType: 'forgotPasswordTemplateCode',
-				});
-				if (code == '200') {
-					this.firstForm.smsId = data.uuid;
-					this.showCode = false;
-					let timer = setInterval(() => {
-						if (this.waitTime > 1) {
-							this.waitTime--;
-						} else {
-							clearInterval(timer);
-							this.showCode = true;
-							this.waitTime = 60;
-						}
-					}, 1000);
-				} else {
-					this.$message.error(msg);
-				}
+		}
+		percentage.value = mark;
+	}
+);
+
+function firstNextStep() {
+	firstFormRef.value?.validate(async (valid) => {
+		if (valid) {
+			const obj = JSON.parse(JSON.stringify(firstForm));
+			const { code: resCode, data, msg } = await validateForgetCode(obj);
+			if (resCode == 200) {
+				active.value++;
+				showFirst.value = false;
+				showSecond.value = true;
+				passwordForm.personUuid = data;
 			} else {
-				this.$message.info(this.$t('请输入手机号'));
+				ElMessage.error(msg);
 			}
-		},
-		customColorMethod(percentage) {
-			if (percentage < 30) {
-				return '#ff0000';
-			} else if (percentage >= 30 && percentage < 50) {
-				return '#ff5500';
-			} else if (percentage >= 50 && percentage < 70) {
-				return '#ffaa00';
-			} else if (percentage >= 70 && percentage < 90) {
-				return '#ffaa7f';
-			} else if (percentage >= 90) {
-				return '#67c23a';
+		}
+	});
+}
+
+function secondNextStep() {
+	passwordFormRef.value?.validate(async (valid) => {
+		if (valid) {
+			const obj = JSON.parse(JSON.stringify(passwordForm));
+			if (obj.newPassword) {
+				obj.newPassword = crypt(obj.newPassword);
 			}
-		},
-		percentageFormat(percentage) {
-			var formatResult = '';
-			if (percentage >= 90) {
-				formatResult = this.$t('非常安全');
-			} else if (percentage >= 80 && percentage < 90) {
-				formatResult = this.$t('安全');
-			} else if (percentage >= 70 && percentage < 80) {
-				formatResult = this.$t('非常强');
-			} else if (percentage >= 60 && percentage < 70) {
-				formatResult = this.$t('强');
-			} else if (percentage >= 50 && percentage < 60) {
-				formatResult = this.$t('一般');
-			} else if (percentage >= 25 && percentage < 50) {
-				formatResult = this.$t('弱');
-			} else if (percentage >= 0 && percentage < 25) {
-				formatResult = this.$t('非常弱');
+			if (obj.rePassword) {
+				obj.rePassword = crypt(obj.rePassword);
 			}
-			return formatResult;
-		},
-		async getCaptcha() {
-			const { code, data } = await fetchCaptcha();
-			if (code == 200) {
-				this.imgCodeUrl = 'data:image/gif;base64,' + data.img;
-				this.firstForm.captchaUUID = data.uuid;
+			const { code: resCode, msg } = await editForgetPassword(obj);
+			if (resCode == 200) {
+				active.value++;
+				showSecond.value = false;
+				showThird.value = true;
 			} else {
-				this.$message.error(this.$t('获取验证码失败，请重新再试！'));
+				ElMessage.error(msg);
 			}
-		},
-		cancel() {
-			closeHosBizDialog({
-				_uid: 'forgetPassDialog',
-			});
-		},
-		getPhone(val) {
-			fetchForgetPhone(val)
-				.then((res) => {
-					if (res.code == 200) {
-						this.firstForm.phoneNumber = res.data;
-						this.maskCode = `${res.data.substring(0, 3)}****${res.data.substring(7)}`;
-					} else {
-						this.$message.error(res.msg);
-					}
-				})
-				.catch((e) => {
-					this.$message.error(e.msg);
-				});
-		},
-	},
-};
+		}
+	});
+}
+
+async function getPwdPolicy() {
+	const { code, data } = await fetchForcingPwdPolicy();
+	if (code == 200) {
+		Object.assign(pwdPolicy, data);
+		if (
+			(pwdPolicy.minSize == '' || pwdPolicy.minSize == '0') &&
+			pwdPolicy.complexity == ''
+		) {
+			showPwdStr.value = false;
+		} else {
+			showPwdStr.value = true;
+		}
+		if (pwdPolicy.minSize && Number(pwdPolicy.minSize) > 0) {
+			lengthStr.value = t('密码最小长度为') + pwdPolicy.minSize + '，';
+		}
+		if (pwdPolicy.complexity) {
+			let pass = '';
+			switch (pwdPolicy.complexity) {
+				case 'number,letter':
+					pass = '数字、字母';
+					break;
+				case 'number,lowercaseLetter,capitalLetter':
+					pass = '数字、小写字母、大写字母';
+					break;
+				case 'number,letter,pecialCharacters':
+					pass = '数字、字母、特殊字符组合';
+					break;
+				case 'number,lowercaseLetter,capitalLetter,pecialCharacters':
+					pass = '数字、小写字母、大写字母、特殊字符组合';
+					break;
+			}
+			lengthStr.value += t('密码中至少包含') + t(pass) + '，';
+		}
+		if (pwdPolicy.keepPas == 'true' && policyErrorCode == '003') {
+			showLastBtn.value = true;
+		}
+		if (lengthStr.value.length > 0) {
+			lengthStr.value = lengthStr.value.substring(
+				0,
+				lengthStr.value.length - 1
+			);
+		}
+	}
+}
+
+async function handleCode() {
+	if (firstForm.phoneNumber) {
+		const { code: resCode, data, msg } = await getOTPCode({
+			phoneNumber: firstForm.phoneNumber,
+			smsType: 'forgotPasswordTemplateCode',
+		});
+		if (resCode == '200') {
+			firstForm.smsId = (data as { uuid?: string })?.uuid ?? ''
+			showCode.value = false;
+			const timer = setInterval(() => {
+				if (waitTime.value > 1) {
+					waitTime.value--;
+				} else {
+					clearInterval(timer);
+					showCode.value = true;
+					waitTime.value = 60;
+				}
+			}, 1000);
+		} else {
+			ElMessage.error(msg);
+		}
+	} else {
+		ElMessage.info(t('请输入手机号'));
+	}
+}
+
+function customColorMethod(percentageVal: number) {
+	if (percentageVal < 30) {
+		return '#ff0000';
+	} else if (percentageVal >= 30 && percentageVal < 50) {
+		return '#ff5500';
+	} else if (percentageVal >= 50 && percentageVal < 70) {
+		return '#ffaa00';
+	} else if (percentageVal >= 70 && percentageVal < 90) {
+		return '#ffaa7f';
+	} else if (percentageVal >= 90) {
+		return '#67c23a';
+	}
+}
+
+function percentageFormat(percentageVal: number) {
+	let formatResult = '';
+	if (percentageVal >= 90) {
+		formatResult = t('非常安全');
+	} else if (percentageVal >= 80 && percentageVal < 90) {
+		formatResult = t('安全');
+	} else if (percentageVal >= 70 && percentageVal < 80) {
+		formatResult = t('非常强');
+	} else if (percentageVal >= 60 && percentageVal < 70) {
+		formatResult = t('强');
+	} else if (percentageVal >= 50 && percentageVal < 60) {
+		formatResult = t('一般');
+	} else if (percentageVal >= 25 && percentageVal < 50) {
+		formatResult = t('弱');
+	} else if (percentageVal >= 0 && percentageVal < 25) {
+		formatResult = t('非常弱');
+	}
+	return formatResult;
+}
+
+async function getCaptcha() {
+	const { code, data } = await fetchCaptcha()
+	const payload = (data ?? {}) as { img?: string; uuid?: string }
+	if (code == 200) {
+		imgCodeUrl.value = 'data:image/gif;base64,' + (payload.img ?? '')
+		firstForm.captchaUUID = payload.uuid ?? ''
+	} else {
+		ElMessage.error(t('获取验证码失败，请重新再试！'));
+	}
+}
+
+function cancel() {
+	closeHosBizDialog({
+		_uid: 'forgetPassDialog',
+	});
+}
+
+function getPhone(val: string) {
+	fetchForgetPhone(val)
+		.then((res) => {
+			if (res.code == 200) {
+				const phone = String(res.data ?? '')
+				firstForm.phoneNumber = phone
+				maskCode.value = `${phone.substring(0, 3)}****${phone.substring(7)}`
+			} else {
+				ElMessage.error(res.msg);
+			}
+		})
+		.catch((e: { msg?: string }) => {
+			ElMessage.error(e.msg);
+		});
+}
+
+declare const policyErrorCode: string | undefined;
 </script>
 <style scoped lang="scss">
 .forget-pass {

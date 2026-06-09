@@ -19,34 +19,21 @@
 	</el-card>
 </template>
 
-<script>
-import { INDEX_MAIN_PAGE_PATH } from '@/store/mutation-types';
-import * as tokenUtil from '@/utils/base/token-util';
-import { useUserStore } from '@/stores/user';
-export default {
-	data() {
-		return {};
-	},
-	created() {
-		///
-	},
-	mounted() {},
-	methods: {
-		logoutSystem() {
-			console.log('退出操作');
-			useUserStore()
-				.Logout()
-				.then((res) => {
-					location.href = INDEX_MAIN_PAGE_PATH;
-					// this.$router.push({path: INDEX_MAIN_PAGE_PATH});
-				})
-				.catch((error) => {
-					location.href = INDEX_MAIN_PAGE_PATH;
-					// this.$router.push({path: INDEX_MAIN_PAGE_PATH});
-				});
-		},
-	},
-};
+<script setup lang="ts">
+import { INDEX_MAIN_PAGE_PATH } from '@/store/mutation-types'
+import { useUserStore } from '@/stores/user'
+
+function logoutSystem() {
+	console.log('退出操作')
+	useUserStore()
+		.Logout()
+		.then(() => {
+			location.href = INDEX_MAIN_PAGE_PATH
+		})
+		.catch(() => {
+			location.href = INDEX_MAIN_PAGE_PATH
+		})
+}
 </script>
 
 <style>

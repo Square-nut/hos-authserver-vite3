@@ -3,6 +3,7 @@
 		<el-select
 			v-model="post"
 			v-bind="$attrs"
+			:disabled="props.disabled"
 			popper-class="post-select-popper"
 			@change="change"
 		>
@@ -25,9 +26,12 @@ import { Briefcase } from '@element-plus/icons-vue';
 import { ref } from 'vue';
 import { fetchSelectPostPage, type PostPageRecord } from '@/api/org';
 
+defineOptions({ inheritAttrs: false });
+
 const props = defineProps<{
 	type?: string;
 	personId?: string;
+	disabled?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -78,3 +82,12 @@ function clear() {
 
 defineExpose({ getPostPage, clear });
 </script>
+
+<style lang="scss">
+.post-select {
+	.el-select__prefix {
+		left: 0;
+		right: auto;
+	}
+}
+</style>

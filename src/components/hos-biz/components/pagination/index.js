@@ -71,7 +71,9 @@ export default {
 					});
 				},
 			},
-			this.$slots.default?.(),
+			{
+				default: () => this.$slots.default?.(),
+			},
 		);
 	},
 	methods: {

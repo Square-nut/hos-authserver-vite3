@@ -11,13 +11,12 @@
           simpleLeftMenu == 1 ? 'leftMenu' : '',
         ]"
       >
-        <template slot="title">
+        <template #title>
           <i
             v-if="showIcon"
             :class="item.meta.icon ? item.meta.icon : 'hos-icon-menu'"
           ></i>
           <span
-            slot="title"
             :style="item.meta.oneMenu ? { color: '#fff' } : {}"
             >{{ item.meta.title }}</span
           >
@@ -36,24 +35,34 @@
         ]"
       >
         <i v-if="showIcon" :class="item.meta.icon ? item.meta.icon : 'hos-icon-menu'"></i>
-        <span slot="title">{{ item.meta.title }}</span>
+        <template #title>{{ item.meta.title }}</template>
       </hos-menu-item>
     </template>
   </div>
 </template>
 
-<script>
-export default {
-  name: "MenuTree",
-  data() {
-    return {
-      simpleLeftMenu: localStorage.getItem("leftMenu"),
-    };
-  },
-  props: ["menuList", "showIcon"],
-  methods: {
-  },
-};
+<script setup lang="ts">
+defineOptions({ name: 'MenuTree' })
+
+interface MenuItem {
+	name: string | number
+	hidden?: boolean
+	disabled?: boolean
+	path?: string
+	children?: MenuItem[]
+	meta: {
+		oneMenu?: boolean
+		icon?: string
+		title?: string
+	}
+}
+
+defineProps<{
+	menuList: MenuItem[]
+	showIcon?: boolean
+}>()
+
+const simpleLeftMenu = Number(localStorage.getItem('leftMenu'))
 </script>
 
 <style scoped>
@@ -75,7 +84,7 @@ export default {
 .hos-menu--horizontal > div > .hos-submenu {
   float: left;
 }
-::v-deep .hos-submenu__icon-arrow {
+:deep(.hos-submenu__icon-arrow) {
   position: relative;
   margin-top: 0;
   top: 0;

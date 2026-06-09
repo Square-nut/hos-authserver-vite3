@@ -1,0 +1,14 @@
+---
+description: Vue3 + Vite 项目约束
+globs: src/**/*.vue,src/**/*.js,src/**/*.ts
+alwaysApply: false
+---
+
+# Vue3 + Vite Project Constraints
+
+- 新组件一律 `<script setup lang="ts">` + Composition API
+- 状态：Pinia（`storeToRefs`）；路由：`vue-router` 4 composables
+- 环境变量：`import.meta.env.VITE_*`；主题常量：`@/constants/ui-theme`
+- 工具：`crypt` / `useApi` / `ElMessage` / `lsGet` 等 composable 或显式 import，禁止 `globalProperties`
+- 动态视图：`import.meta.glob`（`resolve-view-component.js`）
+- 模板：`#slot`、`:deep()`、`unmounted`；禁止 `require`、`vuex`、mixins

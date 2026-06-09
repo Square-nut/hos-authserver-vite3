@@ -10,84 +10,78 @@
 	</div>
 </template>
 
-<script>
-import { fetchOauthAuthorize } from '@/api/oauth';
-import { getToken } from '@/utils/base/token-util';
-import { getLocale } from '@/utils/i18n/i18n-util';
-export default {
-	name: 'oauth_authorize',
-	data() {
-		return {
-			result: '',
-		};
-	},
-	watch: {},
-	created() {
-		this.init();
-	},
-	methods: {
-		init() {
-			if (document.querySelector('.login-loading-mask'))
-				document.querySelector('.login-loading-mask').style.display = 'none';
-			// 把参数中的redirect_uri解码再编码
-			let urlQuery = this.$route.query;
-			const urlParams = new URLSearchParams(urlQuery);
-			const paramValue = urlParams.get('redirect_uri');
-			let redirect_uri = this.decodeSpecialURI(paramValue);
-			redirect_uri = encodeURIComponent(redirect_uri);
-			urlParams.set('redirect_uri', redirect_uri);
-			const upData = {};
-			urlParams.forEach(function (value, key) {
-				upData[key] = value;
-			});
-			const IP = this.$ls.get('IP');
-			const MAC = this.$ls.get('MAC');
-			if (!upData.scope) upData.scope = 'openid';
-			fetchOauthAuthorize(upData)
-				.then((response) => {
-					//处理回调
-					if (response && response.code == 200) {
-						// let token = getToken()
-						// location.href =response.data.url + `&token=${token}`;
-						let redirectUri =
-							response.data.redirectUri + '&language=' + getLocale();
-						if (IP && MAC) {
-							redirectUri =
-								redirectUri +
-								'&ip=' +
-								this.$ls.get('IP') +
-								'&mac=' +
-								this.$ls.get('MAC');
-						}
-						location.href = redirectUri;
-					} else {
-						if (response) {
-							this.result = response.msg;
-						}
-					}
-				})
-				.catch((e) => {
-					this.result = e.msg;
-					// this.$m.msg.error("认证失败,请刷新页面后重试")
-				});
-		},
-		// 专门处理包含 %uXXXX 中文编码的 URI 解码
-		decodeSpecialURI(str) {
-			if (!str) return '';
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { fetchOauthAuthorize } from '@/api/oauth'
+import { getLocale } from '@/utils/i18n/i18n-util'
+import { lsGet } from '@/utils/ls'
 
-			str = str.replace(/%u([0-9A-Fa-f]{4})/gi, (match, hex) => {
-				return String.fromCharCode(parseInt(hex, 16));
-			});
+defineOptions({ name: 'oauth_authorize' })
 
-			try {
-				return decodeURIComponent(str);
-			} catch (e) {
-				console.warn('decodeURIComponent 仍然失败，使用备用方案', e);
-				return str; // 兜底方案
+const route = useRoute()
+const result = ref('')
+
+function decodeSpecialURI(str: string | null) {
+	if (!str) return ''
+
+	let decoded = str.replace(/%u([0-9A-Fa-f]{4})/gi, (_match, hex: string) => {
+		return String.fromCharCode(parseInt(hex, 16))
+	})
+
+	try {
+		return decodeURIComponent(decoded)
+	} catch (e) {
+		console.warn('decodeURIComponent 仍然失败，使用备用方案', e)
+		return decoded
+	}
+}
+
+function init() {
+	if (document.querySelector('.login-loading-mask'))
+		(document.querySelector('.login-loading-mask') as HTMLElement).style.display =
+			'none'
+	const urlQuery = route.query
+	const urlParams = new URLSearchParams(urlQuery as Record<string, string>)
+	const paramValue = urlParams.get('redirect_uri')
+	let redirect_uri = decodeSpecialURI(paramValue)
+	redirect_uri = encodeURIComponent(redirect_uri)
+	urlParams.set('redirect_uri', redirect_uri)
+	const upData: Record<string, string> = {}
+	urlParams.forEach(function (value, key) {
+		upData[key] = value
+	})
+	const IP = lsGet('IP')
+	const MAC = lsGet('MAC')
+	if (!upData.scope) upData.scope = 'openid'
+	fetchOauthAuthorize(upData)
+		.then((response) => {
+			if (response && response.code == 200) {
+				const data = response.data as { redirectUri: string }
+				let redirectUri = data.redirectUri + '&language=' + getLocale()
+				if (IP && MAC) {
+					redirectUri =
+						redirectUri +
+						'&ip=' +
+						lsGet('IP') +
+						'&mac=' +
+						lsGet('MAC')
+				}
+				location.href = redirectUri
+			} else {
+				if (response) {
+					result.value = response.msg
+				}
 			}
-		},
-	},
-};
+		})
+		.catch((e: { msg?: string }) => {
+			result.value = e.msg ?? ''
+		})
+}
+
+onMounted(() => {
+	init()
+})
 </script>
 <style lang="scss" scoped>
 .authorize {

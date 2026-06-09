@@ -17,7 +17,12 @@ export const useLoginSessionStore = defineStore('loginSession', {
 		},
 		SET_LOGIN_POST_VERSION(version: string) {
 			this.loginPostVersion = version;
-			sessionStorage.setItem('loginPostVersion', String(version));
+			try {
+				sessionStorage.setItem('loginPostVersion', String(version));
+			} catch (error) {
+				// Keep runtime stable when browser storage is unavailable/blocked.
+				console.warn('set loginPostVersion failed:', error);
+			}
 		},
 		SET_PORTAL_URL(url: string) {
 			this.portalUrl = url;

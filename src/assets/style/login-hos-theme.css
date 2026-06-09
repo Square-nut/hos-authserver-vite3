@@ -214,3 +214,138 @@
 .login-box .ca-box .ca-login-icon:hover {
 	color: #fff;
 }
+
+/* 岗位选择（对齐 v2：紧凑白底、左对齐） */
+.hos-login-card .login-form .post-select,
+.hos-login-card .login-form .post-select-table,
+.el-login-card .login-form .post-select,
+.el-login-card .login-form .post-select-table {
+	display: block;
+	width: fit-content;
+	max-width: 100%;
+}
+
+.hos-login-card .login-form .post-select .el-select,
+.hos-login-card .login-form .post-select-table .select-table-v2-popover-select,
+.el-login-card .login-form .post-select .el-select,
+.el-login-card .login-form .post-select-table .select-table-v2-popover-select {
+	--post-select-compact-width: 80px;
+}
+
+.hos-login-card .login-form .post-select .el-select.is-disabled .el-select__wrapper,
+.hos-login-card .login-form .post-select .el-select__wrapper.is-disabled,
+.hos-login-card .login-form .post-select-table .select-table-v2-popover-select.is-disabled .el-select__wrapper,
+.hos-login-card .login-form .post-select-table .select-table-v2-popover-select .el-select__wrapper.is-disabled,
+.el-login-card .login-form .post-select .el-select.is-disabled .el-select__wrapper,
+.el-login-card .login-form .post-select .el-select__wrapper.is-disabled,
+.el-login-card .login-form .post-select-table .select-table-v2-popover-select.is-disabled .el-select__wrapper,
+.el-login-card .login-form .post-select-table .select-table-v2-popover-select .el-select__wrapper.is-disabled {
+	background-color: #fff !important;
+	cursor: not-allowed;
+}
+
+.hos-login-card .login-form .post-select .el-select.is-disabled,
+.hos-login-card .login-form .post-select-table .select-table-v2-popover-select.is-disabled,
+.hos-login-card .login-form .post-select-table .select-table-v2-popover-select:has(.el-select__wrapper.is-disabled),
+.el-login-card .login-form .post-select .el-select.is-disabled,
+.el-login-card .login-form .post-select-table .select-table-v2-popover-select.is-disabled,
+.el-login-card .login-form .post-select-table .select-table-v2-popover-select:has(.el-select__wrapper.is-disabled) {
+	width: var(--post-select-compact-width);
+}
+
+.hos-login-card .login-form .post-select .el-select:not(.is-disabled):has(.el-select__selected-item),
+.hos-login-card .login-form .post-select-table .select-table-v2-popover-select:not(.is-disabled):has(.el-select__selected-item),
+.el-login-card .login-form .post-select .el-select:not(.is-disabled):has(.el-select__selected-item),
+.el-login-card .login-form .post-select-table .select-table-v2-popover-select:not(.is-disabled):has(.el-select__selected-item) {
+	width: 100%;
+	max-width: 350px;
+	min-width: var(--post-select-compact-width);
+}
+
+.hos-login-card .login-form .post-select .el-select__wrapper,
+.hos-login-card .login-form .post-select-table .select-table-v2-popover-select .el-select__wrapper,
+.el-login-card .login-form .post-select .el-select__wrapper,
+.el-login-card .login-form .post-select-table .select-table-v2-popover-select .el-select__wrapper {
+	background-color: #fff !important;
+	box-shadow: 0 0 0 1px rgba(65, 165, 255, 0.6) inset !important;
+	border: none !important;
+	border-radius: 4px;
+	min-height: 45px;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
+.hos-login-card .login-form .post-select .el-select__prefix,
+.hos-login-card .login-form .post-select-table .el-select__prefix,
+.el-login-card .login-form .post-select .el-select__prefix,
+.el-login-card .login-form .post-select-table .el-select__prefix {
+	color: #909399;
+}
+
+.hos-login-card .login-form .post-select .el-select__suffix,
+.hos-login-card .login-form .post-select-table .el-select__suffix,
+.el-login-card .login-form .post-select .el-select__suffix,
+.el-login-card .login-form .post-select-table .el-select__suffix {
+	color: #909399;
+}
+
+.hos-login-card .login-form .post-select .el-select__selected-item,
+.hos-login-card .login-form .post-select-table .el-select__selected-item,
+.el-login-card .login-form .post-select .el-select__selected-item,
+.el-login-card .login-form .post-select-table .el-select__selected-item {
+	color: #606266;
+}
+
+.hos-login-card .login-form .post-select .el-select__placeholder,
+.hos-login-card .login-form .post-select-table .select-table-v2-popover-select .el-select__placeholder,
+.el-login-card .login-form .post-select .el-select__placeholder,
+.el-login-card .login-form .post-select-table .select-table-v2-popover-select .el-select__placeholder {
+	opacity: 0;
+	width: 0;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+}
+
+.hos-login-card .login-form .post-select .el-select:not(.is-disabled):not(:has(.el-select__selected-item)),
+.hos-login-card .login-form .post-select-table .select-table-v2-popover-select:not(.is-disabled):not(:has(.el-select__selected-item)),
+.el-login-card .login-form .post-select .el-select:not(.is-disabled):not(:has(.el-select__selected-item)),
+.el-login-card .login-form .post-select-table .select-table-v2-popover-select:not(.is-disabled):not(:has(.el-select__selected-item)) {
+	width: var(--post-select-compact-width);
+}
+
+.hos-login-card .login-form .post-select .el-select__prefix,
+.hos-login-card .login-form .post-select-table .el-select__prefix,
+.el-login-card .login-form .post-select .el-select__prefix,
+.el-login-card .login-form .post-select-table .el-select__prefix {
+	left: 0;
+	right: auto;
+}
+
+.hos-login-card .login-form .post-select-table .select-table-v2-popover-select .el-select__caret,
+.el-login-card .login-form .post-select-table .select-table-v2-popover-select .el-select__caret {
+	color: #909399;
+}
+
+/* 岗位下拉面板 */
+.post-select-popper.el-popper {
+	background-color: rgba(25, 47, 95, 1);
+	border: 1px solid rgba(65, 165, 255, 0.43);
+	box-shadow: none;
+}
+
+.post-select-popper .el-select-dropdown__item {
+	height: 40px;
+	line-height: 40px;
+	color: #fff;
+}
+
+.post-select-popper .el-select-dropdown__item.is-selected,
+.post-select-popper .el-select-dropdown__item.is-hovering {
+	color: #fff;
+	background-color: rgba(65, 165, 255, 0.4);
+}
+
+.select-table-v2-dropdown-select {
+	display: none !important;
+}

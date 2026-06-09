@@ -10,6 +10,7 @@ import {
 	ElTable,
 	ElTableColumn,
 } from '../../utils/element-plus-resolve';
+import { h } from 'vue';
 import SingleArray from '../../utils/single-array';
 import { tableStoreComputed, hosBizUidMatches } from '../../utils/pinia-bridge';
 
@@ -231,7 +232,7 @@ export default {
 		},
 	},
 	computed: tableStoreComputed(),
-	render(h) {
+	render() {
 		const attrs = { ...this.$attrs };
 		// 解析表格
 		const cols = tableColumnParser.parse.call(this, this.cols, h);
@@ -242,6 +243,8 @@ export default {
 			cols.push(...defaultSlot);
 		}
 		
-		return h(ElTable, { ...attrs, ref: EL_TABLE_REF }, cols);
+		return h(ElTable, { ...attrs, ref: EL_TABLE_REF }, {
+			default: () => cols,
+		});
 	},
 };

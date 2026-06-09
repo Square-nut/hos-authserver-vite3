@@ -48,7 +48,9 @@ export default {
 					e.preventDefault()
 				},
 			},
-			this.$slots.default?.(),
+			{
+				default: () => this.$slots.default?.(),
+			},
 		)
 	},
 	props,
