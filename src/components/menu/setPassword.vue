@@ -114,7 +114,7 @@ import { InfoFilled, View } from '@element-plus/icons-vue';
 import AuthConstant from '@/constant/auth-constant';
 import { getLocale } from '@/utils/i18n/i18n-util';
 import { getPolicyErrorCode } from '@/utils/base/user-store-util';
-import cryptUtil from '@/utils/crypt/index.js';
+import cryptUtil from '@/utils/crypt/index';
 import { closeHosBizDialog } from '@/composables/useHosBiz';
 import { isSuccessCode } from '@/types/api-common';
 import { useUserStore } from '@/stores/user';

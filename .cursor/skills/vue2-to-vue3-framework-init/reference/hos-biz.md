@@ -36,10 +36,11 @@
 | 项 | 说明 |
 |----|------|
 | `main.ts` 注册 `HosBiz` | `app.use(HosBiz)` |
-| Element Plus | `element-plus-resolve.js` 解析组件 |
+| Element Plus | `element-plus-resolve.ts` 解析组件 |
 | Pinia | `hosBizTable` / `hosBizDialog` 替代 Vuex |
 | `useHosBiz.ts` | 业务勿直接 commit store |
-| 删除 Vuex | `store/table.js`、`store/dialog.js` |
+| 底层实现 | 全部 `.ts`（`defineComponent` + `h()` render） |
+| 删除 Vuex | 原 `store/table.js`、`store/dialog.js` |
 | 样式 | `element-biz-table.css` + 主题 scss |
 | 主题判断 | `UI_THEME` 常量，非 `$theme` globalProperties |
 
@@ -101,10 +102,10 @@
 | `data-patch-v1/*` | setTableData / 列表归一 |
 | `table-methods/index` | 转发 EP 表格 API |
 | `filter-empty` | parseData 参数过滤 |
-| `pinia-bridge.js` | store 订阅 + uid 匹配 |
-| `store-config.js` | `commonTable` 初始化 params 对象 |
+| `pinia-bridge.ts` | store 订阅 + uid 匹配 |
+| `store-config.ts` | `commonTable` 初始化 params 对象 |
 
-JS 模块旁补 `.d.ts`（table、form、pagination、store-config、filter-empty、render-label 等）。
+v3 标杆：hos-biz 目录内已无 `.js` / 旁挂 `.d.ts`，类型内联于 `.ts`。
 
 ---
 

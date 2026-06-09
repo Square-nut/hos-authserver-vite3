@@ -2,13 +2,13 @@
 
 ## 1. 构建与配置
 
-### 核心依赖（参考 hos-authserver-web-v3）
+### 核心依赖（hos-authserver-web-v3）
 
 - `vue@3`、`vue-router@4+`、`pinia`、`pinia-plugin-persistedstate`
 - `element-plus`、`vue-i18n@9+`（`legacy: false`）
 - `vite`、`@vitejs/plugin-vue`、`vue-tsc`、`typescript`
 
-### vite.config.ts 要点
+### vite.config.ts
 
 ```ts
 export default defineConfig({
@@ -17,7 +17,6 @@ export default defineConfig({
     dedupe: ['vue', 'vue-router', 'pinia', 'element-plus'],
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
-  // dev proxy 按环境配置
 })
 ```
 
@@ -25,18 +24,10 @@ export default defineConfig({
 
 | 旧 | 新 |
 |----|-----|
-| `.env` 中 `VUE_APP_BASE_URL` | `VITE_APP_BASE_URL` |
+| `VUE_APP_BASE_URL` | `VITE_APP_BASE_URL` |
 | `process.env.VUE_APP_*` | `import.meta.env.VITE_*` |
 
-`env.d.ts`：
-
-```ts
-interface ImportMetaEnv {
-  readonly VITE_APP_BASE_URL: string
-  // ...
-}
-declare const __hos: Record<string, unknown>  // environment.js 如有
-```
+`env.d.ts` 声明 `ImportMetaEnv`；`__hos` 来自 `public/environment.js`。
 
 ### npm scripts
 
@@ -53,37 +44,17 @@ declare const __hos: Record<string, unknown>  // environment.js 如有
 
 ## 2. main.ts
 
-**只做注册，不做 globalProperties 注入。**
+仅注册插件，**无 globalProperties**：
 
-注册顺序建议：Pinia → Router → i18n → 指令 → ElementPlus → elementAliases → HosBiz → mount。
-
-删除项：
-- `Vue.prototype` / `app.config.globalProperties`
-- 旧 util plugin（`$m`）
-- Vuex store
-- 全局 mixin
-
-保留项：
-- `import './permission'`（路由守卫）
-- `v-hasPermi` 指令（可从 `@/utils/permission` 直接注册）
+Pinia → Router → i18n → 指令 → ElementPlus → elementAliases → HosBiz → `import './permission'` → mount
 
 ---
 
 ## 3. i18n
 
-`src/i18n/index.ts`：
-
-```ts
-const i18n = createI18n({
-  legacy: false,
-  locale: 'zh',
-  messages: { ... },
-})
-```
-
-非组件文件：
-- `i18n.global.t('key')`
-- `i18n.global.mergeLocaleMessage(locale, partial)`
+- `src/i18n/index.ts`：`createI18n({ legacy: false })`
+- 静态语言包：`src/i18n/langs/zh.ts`、`en.ts`（可选，v3 主要运行时加载）
+- 登录页文案：`permission.ts` 中 `fetchI18nLoginPageConfig` + `mergeLocaleMessage`
 
 ---
 
@@ -91,133 +62,134 @@ const i18n = createI18n({
 
 | Store | 职责 |
 |-------|------|
-| `user.ts` | Token、用户信息、Login/Logout actions |
-| `loginSession.ts` | 登录页 i18n 列表、岗位版本、portal URL |
-| `hosBizTable.ts` | 表格 refresh/update/reload（替代 Vuex table） |
-| `hosBizDialog.ts` | 弹窗 open/close（替代 Vuex dialog） |
-| `sys.ts` / `i18n.ts` | 系统与语言配置 |
+| `user.ts` | Token、Login/Logout |
+| `loginSession.ts` | 登录页 i18n、岗位版本 |
+| `hosBizTable.ts` / `hosBizDialog.ts` | hos-biz 刷新/弹窗 |
+| `sys.ts` / `device.ts` | 系统、设备 |
 
-hos-biz store 使用 `store-config.js` 的 `commonTable` / `common`，通过 `useHosBiz.ts` 暴露，业务不直接调用 store action。
+hos-biz 通过 `useHosBiz.ts` 暴露，业务不直接 commit。
 
 ---
 
-## 5. Composables
+## 5. Composables（v3 清单）
 
-| 文件 | 导出 |
+| 文件 | 用途 |
 |------|------|
-| `useCrypt.ts` | `useCrypt()` / `crypt` / `decrypt` |
-| `useHosBiz.ts` | open/close dialog、refresh table、login session 写入 |
-| `useCaUk.ts` | CA UKey 选择与签名（供 views 使用） |
-| `useCaPin.ts` | CA PIN 验证 |
+| `useCrypt.ts` | 加解密 |
+| `useHosBiz.ts` | 弹窗、表格刷新、登录会话写入 |
+| `useCaUk.ts` / `useCaPin.ts` | CA UKey / PIN |
 | `useElementBiz.ts` | Element 业务封装 |
+
+**已移除**：`useApi.ts`（原 `$api` / loader 入口）
 
 ---
 
 ## 6. API / Axios（纯 Vue3，无 loader）
 
+### 目录结构（v3）
+
 ```
-src/api/<domain>.ts   → fetchXxx()
-    ↓ httpGet / httpPost / http
-src/axios/api-request.ts
-    ↓
-src/axios/http.ts → interceptors.ts
-```
-
-**禁止**：`loader.ts`、`apiRequest(key)`、`useApi()`、`$api('module.method')`、返回 `{ url, method }` 的 config builder。
-
-### 类型
-
-`src/types/api-common.ts`：
-
-```ts
-export interface ApiResult<T = unknown> {
-  code?: string | number
-  data?: T
-  msg?: string
-}
-export function isSuccessCode(code: string | number | undefined | null): boolean
+src/axios/
+├── http.ts           # HttpService.requestConfig
+├── api-request.ts    # http / httpGet / httpPost
+├── interceptors.ts
+└── index.ts          # export { http, httpGet, httpPost }
 ```
 
-### index.ts 导出
+**已删除**：`loader.ts`、`typed-request.ts`、`apiRequest`、`useApi.ts`、`legacy-index.ts`
 
-避免：
+### 请求链路
 
-```ts
-export * from './staff'
-export { staffApi } from './staff'  // Duplicate identifier
+```
+组件 → import { fetchXxx } from '@/api/<domain>'
+     → httpGet / httpPost / http
+     → interceptors → ApiResult<T>
 ```
 
-改为：要么 `export *`，要么具名列表（不含重复 Api 对象）。
+### API 模块
+
+- `src/api/*.ts`：按域拆分，函数命名 `fetchXxx`
+- `src/api/index.ts`：re-export（避免重复 export 标识符）
+- 响应：`isSuccessCode(code)` + `ApiResult<T>`
+
+Rule：`.cursor/rules/api-http-conventions.mdc`
 
 ---
 
 ## 7. permission 与 router
 
-- `router/index.ts`：`createRouter` + `createWebHistory(import.meta.env.BASE_URL)`
-- `permission.js`：beforeEach 守卫；动态路由加载可保留原有 eval（后续可 refactor）
-- 动态视图：`src/utils/resolve-view-component.ts` + `import.meta.glob`
+- `src/permission.ts`：路由守卫（typed）；`fetchI18nLoginPageConfig` 加载登录 i18n
+- `router/index.ts`：`createWebHistory(import.meta.env.BASE_URL)`
+- 动态路由 `eval`：可暂留（build warning，非阻塞）
+- 动态视图：`resolve-view-component.ts` + `import.meta.glob`
 
 ---
 
 ## 8. 常量与主题
 
-- `src/constants/ui-theme.ts`：`UI_THEME` 枚举/常量，替代 `$theme`
-- `src/constant/auth-constant.ts`：错误码（框架与 views 共用）
+- `constants/ui-theme.ts`：`UI_THEME`
+- `constant/auth-constant.ts`、`constant/common-constant.ts`
 
 ---
 
-## 9. 类型与 shims
+## 9. 类型与 shims（v3 现状）
 
-### JS 模块
+### src/ 全 TS
 
-在 `.js` 旁建 `.d.ts`（hos-biz 优先）：
-
-```
-components/hos-biz/components/table/index.js
-components/hos-biz/components/table/index.d.ts
-```
+- `src/` 内 **0 个 `.js`**
+- hos-biz 底层：`components/**/index.ts`、`utils/*.ts`（无需旁挂 `.d.ts`）
 
 ### 全局 shims
 
-`src/shims-js.d.ts`：permission、qs、qrcode、validateUtil、crypt 等。
+`src/shims-js.d.ts` — 仅第三方：
+
+- `qs`、`qrcode`、`@/utils/theme/themeConfig`
+- `Window.strServerRan`
+
+`src/utils/utils-modules.d.ts` — `crypto-js`、`encryptlong`、`sm-crypto` 等（如需要）
 
 ### devDependencies
 
-```
-@types/qrcode @types/qs @types/sortablejs @types/node
-```
+`@types/qrcode`、`@types/qs`、`@types/sortablejs`、`@types/node`
 
 ---
 
-## 10. Layout（框架层）
+## 10. utils（全 TS）
 
-| 文件 | 改造 |
+| 模块 | 路径 |
 |------|------|
-| `LoginLayout.vue` | script setup；inject/provide 登录配置；内嵌 views/login/index（不改造 index 本身） |
-| `GlobleLayout.vue` | `useRoute()`；SideMenu props 类型；string 比较 localStorage |
-| `TabLayout.vue` | 同上 |
+| 通用 | `utils/index.ts` |
+| 加解密 | `utils/crypt/*.ts` |
+| MAC/websys | `utils/mac-util.ts`、`utils/websys.ts` |
+| 权限指令 | `utils/permission/index.ts` |
+| 校验 | `utils/validate.ts`、`utils/validateUtil.ts` |
+| 存储 | `utils/ls.ts`、`utils/base/storage-util.ts` |
+
+部分大文件可保留 `@ts-nocheck`，不阻断 `vue-tsc`。
 
 ---
 
-## 11. 加密 utils（如项目含 crypt）
+## 11. Layout
 
-- `rsa-crypt.js`：`import { JSEncrypt } from 'encryptlong'`（勿用旧 bin 路径）
-- `aes-md5-crypt.js`：与 v2 对齐 MD5 key / sortObj
-- `index.d.ts` 导出 crypt/decrypt 签名
+| 文件 | 状态 |
+|------|------|
+| `LoginLayout.vue` | script setup + `UI_THEME` |
+| `GlobleLayout.vue` / `TabLayout.vue` | script setup + `useRoute()` |
 
 ---
 
-## 12. 验收命令
+## 12. 加密
+
+- `rsa-crypt.ts`：`import { JSEncrypt } from 'encryptlong'`
+- `aes-md5-crypt.ts`：与 v2 对齐 MD5 key
+- `index.ts`：统一 `crypt` / `decrypt` 导出
+
+---
+
+## 13. 验收
 
 ```bash
-npm run type-check
-npm run build-only
-npm run build
-```
-
-框架层 grep 确认：
-
-```bash
-rg "globalProperties|vuex|mixins:" src --glob '!src/views' -l
-# 期望：无关键框架文件命中（或仅 permission 等待 refactor）
+find src -name '*.js' | wc -l     # 0
+rg "apiRequest|useApi|loader" src  # 无
+npm run type-check && npm run build
 ```

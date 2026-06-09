@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import { EL_TABLE_REF } from '../components/table/index.js'
+import { EL_TABLE_REF } from '../components/table'
 
 type TableWrapper = {
 	$refs?: Record<string, unknown>

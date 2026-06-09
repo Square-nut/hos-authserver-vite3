@@ -165,7 +165,7 @@ import { resolveUiTheme } from '@/layout/login-layout-utils';
 import AuthConstant from '@/constant/auth-constant';
 import { useUserStore } from '@/stores/user';
 import { loginApi } from '@/api/login';
-import cryptUtil from '@/utils/crypt/index.js';
+import cryptUtil from '@/utils/crypt/index';
 import { ref, watch, onMounted, reactive, nextTick } from 'vue';
 import type { FormInstance, FormRules, InputInstance } from 'element-plus';
 import { isSuccessCode } from '@/types/api-common';
@@ -394,7 +394,7 @@ function userHandleLogin(isLogin: boolean) {
 		// if (!isOpenDb(loginForm.loginName)) return;
 		const upData: LoginSubmitPayload = {
 			...loginForm.value,
-			password: cryptUtil.crypt(loginForm.value.password),
+			password: cryptUtil.crypt(loginForm.value.password) || '',
 			...(postChainId.value ? { postChainId: postChainId.value } : {}),
 		};
 		loading.value = true;

@@ -16,13 +16,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import types from './type'
+import types, { type ExceptionType } from './type'
 
 defineOptions({ name: 'Exception' })
 
 const props = withDefaults(
 	defineProps<{
-		type?: keyof typeof types
+		type?: ExceptionType
 	}>(),
 	{
 		type: '404',

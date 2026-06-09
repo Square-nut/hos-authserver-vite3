@@ -6,7 +6,12 @@
 
 | Vue2 | Vue3 |
 |------|------|
-| `this.$api('key', params)` | `import { fetchXxx } from '@/api/...'` |
+| `this.$api('key', params)` | `import { fetchXxx } from '@/api/...'`（**无** loader / useApi） |
+| `apiRequest('module.method')` | 删除；改为 `fetchXxx` |
+| `useApi()` | 删除；不再存在 |
+| `utils/*.js` | `utils/*.ts`，import 不带 `.js` 后缀 |
+| `permission.js` | `permission.ts` |
+| hos-biz `*.js` render | `*.ts` + `defineComponent` + `h()` |
 | `this.$message.error(msg)` | `import { ElMessage } from 'element-plus'` |
 | `this.$crypt(data)` | `useCrypt().crypt(data)` 或 `import { crypt } from '@/composables/useCrypt'` |
 | `this.$ls.get/set` | `import { lsGet, lsSet } from '@/utils/ls'` 或 Pinia |

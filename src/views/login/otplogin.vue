@@ -173,7 +173,7 @@ import { crypt } from '@/composables/useCrypt';
 import { lsGet } from '@/utils/ls';
 import { House, Message, Picture, User } from '@element-plus/icons-vue';
 import slideVerify from '@/components/Slide-verify/index.vue';
-import generateRandomString from '@/utils/generate-random-string.js';
+import generateRandomString from '@/utils/generate-random-string';
 import { isSuccessCode } from '@/types/api-common';
 
 const { t } = useI18n();
@@ -548,7 +548,7 @@ function openSlider() {
 	if (!btnShow.value) return;
 	if (!otpLoginForm.value.loginName?.trim()) return;
 	disabledSlider.value = false;
-	pcode.value = crypt(otpLoginForm.value.loginName);
+	pcode.value = crypt(otpLoginForm.value.loginName) || '';
 	showOTPSlider.value = true;
 }
 

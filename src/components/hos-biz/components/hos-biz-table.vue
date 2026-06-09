@@ -119,7 +119,12 @@ import tryGetOnlyArray from '../utils/data-patch-v1/try-get-only-array'
 import tryGetPaginationParams from '../utils/data-patch-v1/try-get-pagination-params'
 import { useHosBizTableStore, subscribeHosBizTableMutations } from '@/stores/hosBizTable'
 import { hosBizUidMatches } from '../utils/pinia-bridge'
-import { timestamp, uid, event, params } from '../utils/store-config'
+import {
+	timestamp as storeTimestampKey,
+	uid as storeUidKey,
+	event as storeEventKey,
+	params as storeParamsKey,
+} from '../utils/store-config'
 import { isSuccessCode } from '@/types/api-common'
 import filterEmpty from '../utils/filter-empty'
 import Sortable from 'sortablejs'
@@ -190,10 +195,10 @@ const slots = useSlots()
 const hosBizTableStore = useHosBizTableStore()
 storeToRefs(hosBizTableStore)
 
-const sTimestamp = computed(() => hosBizTableStore[timestamp])
-const sUID = computed(() => hosBizTableStore[uid])
-const sEvent = computed(() => hosBizTableStore[event])
-const sParams = computed(() => hosBizTableStore[params] as Record<string, unknown>)
+const sTimestamp = computed(() => hosBizTableStore[storeTimestampKey])
+const sUID = computed(() => hosBizTableStore[storeUidKey])
+const sEvent = computed(() => hosBizTableStore[storeEventKey])
+const sParams = computed(() => hosBizTableStore[storeParamsKey] as Record<string, unknown>)
 
 const formRef = ref<{ getParams: () => Promise<Record<string, unknown>> } | null>(null)
 const pageRef = ref<{ getParams: () => Promise<Record<string, unknown>> } | null>(null)
