@@ -1,14 +1,17 @@
 # 基础设施改造参考
 
+> **范围**：本文仅 **基建**。业务页见 [`docs/vue3-migration/`](../../../../docs/vue3-migration/README.md)。  
+> **Profile**：默认 **单层**；多层见 [multi-layer.md](multi-layer.md)。
+
 ## 1. 构建与配置
 
-### 核心依赖（hos-authserver-web-v3）
+### 核心依赖（单层参考）
 
 - `vue@3`、`vue-router@4+`、`pinia`、`pinia-plugin-persistedstate`
 - `element-plus`、`vue-i18n@9+`（`legacy: false`）
 - `vite`、`@vitejs/plugin-vue`、`vue-tsc`、`typescript`
 
-### vite.config.ts
+### vite.config.ts（single-layer）
 
 ```ts
 export default defineConfig({
@@ -19,6 +22,25 @@ export default defineConfig({
   },
 })
 ```
+
+### vite.config.ts（multi-layer）
+
+```ts
+resolve: {
+  dedupe: ['vue', 'vue-router', 'pinia'],
+  alias: {
+    '@': fileURLToPath(new URL('./src/biz', import.meta.url)),
+    '@base': fileURLToPath(new URL('./src/sys/hos-app-base', import.meta.url)),
+    '@core': fileURLToPath(new URL('./src/sys', import.meta.url)),
+    '@src': fileURLToPath(new URL('./src', import.meta.url)),
+    '@components': fileURLToPath(
+      new URL('./src/sys/hos-app-base/components', import.meta.url)
+    ),
+  },
+},
+```
+
+`package.json`：`"predev": "node bin/gen-loader-files.js"`（或保留原 `npm run gen`）。
 
 ### 环境变量
 
@@ -84,9 +106,11 @@ hos-biz 通过 `useHosBiz.ts` 暴露，业务不直接 commit。
 
 ---
 
-## 6. API / Axios（纯 Vue3，无 loader）
+## 6. API / Axios
 
-### 目录结构（v3）
+### single-layer（纯 Vue3，无 loader）
+
+目录结构（v3）：
 
 ```
 src/axios/
@@ -98,7 +122,7 @@ src/axios/
 
 **已删除**：`loader.ts`、`typed-request.ts`、`apiRequest`、`useApi.ts`、`legacy-index.ts`
 
-### 请求链路
+请求链路：
 
 ```
 组件 → import { fetchXxx } from '@/api/<domain>'
@@ -106,22 +130,46 @@ src/axios/
      → interceptors → ApiResult<T>
 ```
 
-### API 模块
-
 - `src/api/*.ts`：按域拆分，函数命名 `fetchXxx`
 - `src/api/index.ts`：re-export（避免重复 export 标识符）
 - 响应：`isSuccessCode(code)` + `ApiResult<T>`
 
 Rule：`.cursor/rules/api-http-conventions.mdc`
 
+### multi-layer（双轨 API）
+
+**新代码**（与 flat 相同）：
+
+```
+import { fetchXxx } from '@base/api/<domain>'
+  → httpGet / httpPost → interceptors
+```
+
+**存量 / 菜单配置**（保留 dynamic-loader）：
+
+```
+$api('lowCode.foo.bar') 或 loader(key)
+  → @base/axios/loader.js
+  → dynamicLoadApi(moduleName, path)   // src/dynamic-loader.ts
+  → load-api.js（gen 生成，覆盖 base/biz/lowCode/originData）
+```
+
+迁移期允许两轨并存；最终新代码全部 `fetchXxx`，loader 仅服务存量 key。详见 [multi-layer.md §7](multi-layer.md#7-phase-4-补充api)。
+
 ---
 
 ## 7. permission 与 router
 
-- `src/permission.ts`：路由守卫（typed）；`fetchI18nLoginPageConfig` 加载登录 i18n
+- `src/permission.ts`（或 `@base/permission.ts`）：路由守卫；`fetchI18nLoginPageConfig` 加载登录 i18n
 - `router/index.ts`：`createWebHistory(import.meta.env.BASE_URL)`
 - 动态路由 `eval`：可暂留（build warning，非阻塞）
-- 动态视图：`resolve-view-component.ts` + `import.meta.glob`
+
+**动态视图加载（按 Profile）**：
+
+| Profile | 机制 |
+|---------|------|
+| single-layer | `resolve-view-component.ts` + `import.meta.glob` |
+| multi-layer | `dynamicLoadViews` / `dynamicLoadLayout` + `load-views.js` / `load-layout.js`（gen 生成） |
 
 ---
 
@@ -188,8 +236,21 @@ Rule：`.cursor/rules/api-http-conventions.mdc`
 
 ## 13. 验收
 
+### single-layer（基建路径）
+
 ```bash
-find src -name '*.js' | wc -l     # 0
-rg "apiRequest|useApi|loader" src  # 无
+# 排除 views
+find src -path '*/views/*' -prune -o -name '*.js' -print | wc -l   # 0
+rg "apiRequest|useApi|loader" src --glob '!src/views/**'
 npm run type-check && npm run build
+```
+
+### multi-layer（基建路径）
+
+```bash
+# Shell + @base 非 views
+rg "dynamicLoadApi|dynamicLoadViews" src
+rg "apiRequest|useApi" src/sys/hos-app-base --glob '!**/views/**' --glob '!**/loader*'
+npm run build
+# 抽测：未改业务菜单可打开
 ```

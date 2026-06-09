@@ -150,4 +150,4 @@ v3 标杆：hos-biz 目录内已无 `.js` / 旁挂 `.d.ts`，类型内联于 `.t
 - `table-data` 传函数引用 `fetchXxx`，不支持字符串 key
 - 顶部分页 `pagePos=top` + toolbar 渲染正常
 
-业务页详细回归（登录忘记密码、岗位选择等）在 views 迁移流程中跟踪。
+业务页用法与回归见 [`docs/vue3-migration/03-hos-biz用法.md`](../../../../docs/vue3-migration/03-hos-biz用法.md)。

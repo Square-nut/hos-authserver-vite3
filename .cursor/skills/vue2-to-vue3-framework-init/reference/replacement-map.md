@@ -1,12 +1,15 @@
 # 旧写法 → 新写法对照表
 
-框架层（layout、components、stores、utils）迁移时使用。业务页 `src/views/` 同样适用，但由 views 专项流程跟踪。
+**基建组**改 layout、stores、hos-biz 内部时使用。  
+**业务组**改单个 `.vue` / api 时请用 [`docs/vue3-migration/`](../../../../docs/vue3-migration/README.md)（小上下文友好），不必通读本文。
+
+> **Profile**：单层基建删除 loader；多层基建保留 dynamic-loader，业务页存量 `$api` 可暂留。见 [multi-layer.md](multi-layer.md)。
 
 ## 全局能力
 
 | Vue2 | Vue3 |
 |------|------|
-| `this.$api('key', params)` | `import { fetchXxx } from '@/api/...'`（**无** loader / useApi） |
+| `this.$api('key', params)` | `import { fetchXxx } from '@/api/...'`（单层：**无** loader；多层存量可经 `dynamicLoadApi`） |
 | `apiRequest('module.method')` | 删除；改为 `fetchXxx` |
 | `useApi()` | 删除；不再存在 |
 | `utils/*.js` | `utils/*.ts`，import 不带 `.js` 后缀 |

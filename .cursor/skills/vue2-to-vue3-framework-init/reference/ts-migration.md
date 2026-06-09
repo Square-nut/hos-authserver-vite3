@@ -1,6 +1,7 @@
 # `src/` JS → TS 迁移参考
 
-> v3 标杆：`hos-authserver-web-v3` 的 `src/` 已无 `.js`（`public/ca/*.js` 与 `public/environment.js` 除外）。
+> **基建 only**：单层 = `src/**` 排除 `views/`；多层 = Shell + `@base/**` 排除 `views/`。  
+> `views/`、子产品、`biz` 由业务组按 [`docs/vue3-migration/`](../../../../docs/vue3-migration/README.md) 逐文件迁移。
 
 ## 不迁移
 

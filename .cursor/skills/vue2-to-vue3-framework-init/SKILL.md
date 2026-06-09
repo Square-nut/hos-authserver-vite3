@@ -1,217 +1,214 @@
 ---
 name: vue2-to-vue3-framework-init
 description: >-
-  Upgrade HOS-style Vue2 + Webpack business frameworks to Vue3 + Vite + TypeScript
-  (main, Pinia, pure httpGet/httpPost API, composables, hos-biz, full src TS).
-  Use when migrating framework/base code to Vue3, forking from hos-authserver-web-v3,
-  removing globalProperties/vuex/mixins/loader, or running vue-tsc on non-views code.
-  Excludes src/views/ business logic — use a separate views migration workflow.
+  Build HOS Vue3 infrastructure (基建) only: Shell, @base non-views, build,
+  dynamic-loader, Pinia, composables, hos-biz internals. Auto-detects
+  single-layer vs multi-layer. Business views and sub-products are NOT in scope
+  — hand off to docs/vue3-migration for one-by-one migration by other devs.
 ---
 
-# Vue2 → Vue3 框架初始化升级
+# Vue2 → Vue3 基建建设
 
-基于 **`hos-authserver-web-v3` 标杆实现**，将 **框架层**（不含 `src/views/` 业务语义改造）从 Vue2 + Webpack 升级到 Vue3 + Vite + Pinia + **全 TypeScript**。
+**本 Skill 仅负责基建** + **制定转换规则**。业务页、子产品由其他同事按文件/按业务渐进迁移，见 [`docs/vue3-migration/`](../../../docs/vue3-migration/README.md)。
 
-**日常约束**：`.cursor/rules/vue3-constraints.mdc`、`.cursor/rules/api-http-conventions.mdc`
+将 **基建** 从 Vue2 + Webpack 升级到 Vue3 + Vite + Pinia + TypeScript，并保证 **未改造的业务 `.vue` 仍可通过 dynamic-loader / 路由加载**（Vue3 兼容 Options API）。
+
+---
+
+## 基建范围（Definition of Done 边界）
+
+### 单层（single-layer）
+
+| 算基建 ✅ | 不算基建 ❌（交业务组） |
+|-----------|-------------------------|
+| `src/main.ts`、`App.vue`、构建配置 | `src/views/**` |
+| `src/` 下除 `views/`：`api/`、`axios/`、`router/`、`stores/`、`layout/`、`components/`（含 hos-biz **内部**）、`utils/`、`composables/`、`permission.ts`、`i18n/` 等 | |
+
+### 多层（multi-layer）
+
+| 算基建 ✅ | 不算基建 ❌（交业务组） |
+|-----------|-------------------------|
+| **Shell**：`main.js`、`App.vue`、`moduleConfig.js`、`dynamic-loader.js`、`load-*.js`（gen）、`bin/gen-loader-files.js` | `@base/views/**` |
+| **`@base` 非 views**：`api/`、`axios/`、`router/`、`store/`、`components/`（含 hos-biz 内部）、`utils/`、`i18n/`、`directive/`、`mixins/`（基建内消化）、`assets/`、`styles/`、根目录 `permission.js`、`defaultSettings.js`、`public-path.js`、`log.js`、`printSettings.js`、`version.js` 等 | `sys/low-code/**`、`sys/origin-data/**`、`biz/**` |
+| Shell 中对子产品的 **最小挂载**（`app.use(widgetPlugins)`），不迁子产品内部 | |
+
+---
+
+## 结构 Profile
+
+| Profile | 识别特征 |
+|---------|----------|
+| **single-layer** | 无 `moduleConfig.js`，`@` → `src/` |
+| **multi-layer** | 有 `moduleConfig.js` + `dynamic-loader`，`@` → 子目录 |
 
 **详细参考**：
-- [infrastructure.md](reference/infrastructure.md) — 入口、状态、API、i18n、类型
-- [hos-biz.md](reference/hos-biz.md) — hos-biz 子组件改造顺序与契约
-- [replacement-map.md](reference/replacement-map.md) — 旧写法 → 新写法对照
-- [ts-migration.md](reference/ts-migration.md) — `src/` JS → TS 转换规则
-- [checklist.md](checklist.md) — 可勾选进度模板
+- [infrastructure.md](reference/infrastructure.md)
+- [multi-layer.md](reference/multi-layer.md)
+- [hos-biz.md](reference/hos-biz.md) — hos-biz **内部**改造
+- [replacement-map.md](reference/replacement-map.md) — 基建改写对照
+- [ts-migration.md](reference/ts-migration.md) — **基建路径** JS → TS
+- [checklist.md](checklist.md)
 
-**配套 skill**：`migrate-api-to-ts`（API 开发与迁移）
+**业务组手册**：[`docs/vue3-migration/`](../../../docs/vue3-migration/README.md)（小上下文 / 古法编程可用）
+
+**配套 skill**：`migrate-api-to-ts`
 
 ---
 
-## v3 标杆状态（2025-06）
-
-`hos-authserver-web-v3` 框架层已达成：
+## 单层标杆（基建已完成的对照）
 
 | 项 | 状态 |
 |----|------|
-| `src/**/*.js` | **0**（仅 `public/ca/*.js`、`public/environment.js` 保留） |
-| axios | 纯 `httpGet` / `httpPost` / `http`，**无 loader / apiRequest / useApi** |
-| composables | `useCrypt`、`useHosBiz`、`useCaUk`、`useCaPin`（无 `useApi`） |
-| hos-biz 底层 | 全部 `.ts`（`defineComponent` + `h()` render） |
-| utils / permission | 全部 `.ts`（`permission.ts` 路由守卫） |
-| i18n langs | `zh.ts` / `en.ts`；运行时 `mergeLocaleMessage` |
-| 验收 | `npm run type-check` + `npm run build` 通过 |
-
----
-
-## 范围
-
-| 在范围内 | 不在范围内 |
-|----------|------------|
-| `main.ts`、`vite.config.ts`、env | `src/views/` 业务逻辑语义改造 |
-| `src/api/`、`src/axios/`（纯 TS HTTP） | 全库一次性 Options API → script setup |
-| Pinia stores、composables | 改 hos-biz cols 字段语义 / 换 Vben schema |
-| `src/layout/`、`src/components/`（含 hos-biz） | 去掉 `uid` 刷新模型 / `el-biz-*` 别名 |
-| `permission.ts`、router、i18n | `public/ca/*.js` CA 厂商脚本 |
-| `src/utils/` 全 TS 化 | |
+| 基建路径无 `.js` | 是（`public/ca` 除外） |
+| axios（单层） | 纯 `httpGet` / `httpPost`，无 loader |
+| composables | `useCrypt`、`useHosBiz`、`useCaUk`、`useCaPin` |
+| hos-biz 内部 | `.ts` + Vue3 render；**对外契约不变** |
+| 验收 | 基建范围 `type-check` + `build`；**不要求** `views/` 全改 |
 
 ---
 
 ## 执行原则
 
-1. **对外契约不变**：hos-biz `el-biz-table` / `openHosBizDialog` API 语义不改
-2. **纯 Vue3 栈**：无 loader、无 `$api`、无 `globalProperties`、无 Vuex、无 mixins
-3. **分阶段验收**：每 Phase 结束 `npm run build-only`；最终 `type-check && build`
-4. **先基础设施、后组件**：hos-biz 顺序 dialog → form → pagination → table → hos-biz-table
-5. **全 TS**：`src/` 除 `public/ca` 外无 `.js`（见 [ts-migration.md](reference/ts-migration.md)）
+1. **只做基建**；`views/` 与子产品交给 `docs/vue3-migration`
+2. **对外契约不变**：hos-biz `el-biz-table` / `openHosBizDialog` 用法不变
+3. **未改业务页能跑**：dynamic-loader / router 仍能懒加载 Options API `.vue`
+4. **Profile 分叉**：单层删 loader；多层保留 dynamic-loader（见 [multi-layer.md](reference/multi-layer.md)）
+5. **基建路径全 TS**；非基建可保留 `.js` / Options API 直至业务组改造
+6. **规则交付**：Phase 8 发布 `docs/vue3-migration/` + `.cursor/rules/`
 
 ---
 
-## Phase 0：盘点
+## Phase 0：盘点与 Profile 识别
 
 ```bash
-rg "globalProperties|\$api|\$message|\$crypt|\$theme|\$ls|\$m\b" src --glob '!src/views'
-rg "mixins:|vuex|mapState|mapGetters|this\.\$store" src --glob '!src/views'
-rg "require\(|apiRequest|useApi|loader" src
-rg "export default \{" src --glob '*.vue' --glob '!src/views/**'
-find src -name '*.js' ! -path '*/ca/*'
+test -f src/moduleConfig.js && echo "multi-layer signal"
+rg "alias|resolve\(" vue.config.js vite.config.ts 2>/dev/null
+
+# 仅盘点基建路径（单层示例）
+rg "globalProperties|vuex|mixins" src --glob '!**/views/**' --glob '!src/sys/low-code/**' --glob '!src/sys/origin-data/**' --glob '!src/biz/**'
 ```
 
-**产出**：改造清单（[checklist.md](checklist.md)）
+产出：[checklist.md](checklist.md) 勾选 Profile。
 
 ---
 
 ## Phase 1：构建与配置
 
-1. Vite + Vue3：`vue@3`、`vue-router@4+`、`pinia`、`element-plus`、`vue-i18n@9+`
-2. 环境变量：`VUE_APP_*` → `VITE_*`；`import.meta.env.VITE_*`
-3. `vite.config.ts`：`@` alias、`dedupe: ['vue', ...]`
-4. TypeScript：`vue-tsc --build`；`env.d.ts`
+### single-layer
 
-详见 [infrastructure.md §1](reference/infrastructure.md#1-构建与配置)。
+Vite + Vue3 + Pinia + UI 库 + i18n；`@` → `src/`；`VUE_APP_*` → `VITE_*`。
+
+### multi-layer
+
+多 alias（`@base`、`@core`、`@src` 等）；`predev`/`prebuild` 执行 `npm run gen`。
+
+详见 [infrastructure.md §1](reference/infrastructure.md#1-构建与配置)、[multi-layer.md](reference/multi-layer.md)。
 
 ---
 
-## Phase 2：入口与全局插件
+## Phase 2：入口（Shell + main）
+
+### single-layer
 
 ```ts
-// main.ts — 仅注册，无 globalProperties
 const app = createApp(App)
 app.use(pinia)
 app.use(router)
-app.use(i18n)          // legacy: false
-app.directive('hasPermi', hasPermi)
-app.use(ElementPlus, { locale: zhCn, size: 'small' })
-app.use(elementAliases)
+app.use(i18n)
 app.use(HosBiz)
-import './permission'  // → permission.ts
+import './permission'
 app.mount('#app')
 ```
 
-删除：`$api` / `$message` / `$crypt` / `$theme` / `$ls` plugin 注入。
+无 `globalProperties`；无 `$api` plugin（单层）。
+
+### multi-layer
+
+- 从 `@base` 引入 router / store / i18n / axios / permission
+- **最小集成**：`main.ts` 里 `app.use` 注册子产品插件（保证能启动），**不**改子产品源码
+- `App.vue` 基建相关 mixin → composable
+- `bizMain(app)` 签名更新
+
+详见 [multi-layer.md §6](reference/multi-layer.md#6-phase-2-补充入口)。
 
 ---
 
-## Phase 3：状态与 Composables
+## Phase 3：状态与 Composables（基建）
 
-| 旧 | 新 |
-|----|-----|
-| Vuex user | `stores/user.ts` |
-| Vuex table/dialog | `stores/hosBizTable.ts` / `hosBizDialog.ts` |
-| `this.$crypt` | `useCrypt()` |
-| CA mixins | `useCaUk()` / `useCaPin()` |
-| hos-biz 弹窗/表格 | `useHosBiz()` |
-
-**无 `useApi()`** — API 一律 `import { fetchXxx } from '@/api/...'`。
+Vuex → Pinia；`useCrypt` / `useHosBiz` / `useCaUk` / `useCaPin`。基建内无 mixins。
 
 ---
 
-## Phase 4：API 层（纯 Vue3，无兼容）
+## Phase 4：API 层（基建）
 
-```
-src/api/<domain>.ts  →  fetchXxx()
-    ↓ httpGet / httpPost / http
-src/axios/api-request.ts → http.ts → interceptors.ts
-```
+**single-layer**：`src/axios/` + `src/api/*.ts`，删除 loader / `useApi`。
 
-**必须删除**：`loader.ts`、`apiRequest`、`useApi.ts`、`legacy-index.ts`、返回 `{ url, method }` 的 config builder。
-
-**hos-biz `table-data`**：仅函数 `(params) => fetchXxx(params)`。
-
-详见 `migrate-api-to-ts` skill 与 [infrastructure.md §6](reference/infrastructure.md#6-api--axios纯-vue3无-loader)。
-
-验收：
-
-```bash
-rg "apiRequest|useApi|loader\.ts|legacy-index" src
-# 期望：无命中
-```
+**multi-layer**：`@base/axios` 保留 dynamic-loader；`@base/api` 新代码用 `httpGet`/`httpPost`；存量 `$api` key 由 loader 解析（业务页可继续用，见业务手册）。
 
 ---
 
-## Phase 5：hos-biz 改造
+## Phase 5：hos-biz 内部（基建）
 
-对外契约不变；底层全部 `.ts` + Vue3 render。顺序见 [hos-biz.md](reference/hos-biz.md)。
-
-1. dialog → 2. form/button → 3. pagination → 4. table → 5. hos-biz-table.vue → 6. select-table-v2
-
-`pinia-bridge.ts` + `onBeforeUnmount` 取消订阅。
+仅 `@base/components/hos-biz`（或单层 `src/components/hos-biz`）。顺序见 [hos-biz.md](reference/hos-biz.md)。业务页用法写入 [03-hos-biz用法.md](../../../docs/vue3-migration/03-hos-biz用法.md)。
 
 ---
 
-## Phase 6：Layout 与框架组件
+## Phase 6：路由与 Layout（基建）
 
-`LoginLayout` / `GlobleLayout` / `TabLayout` → `<script setup lang="ts">`  
-动态视图 → `import.meta.glob` + `resolve-view-component.ts`
+**single-layer**：`layout/` + `resolve-view-component`（加载 **未改** 的 `views/*.vue`）。
 
----
-
-## Phase 7：`src/` 全 TypeScript 化
-
-将 `src/` 内剩余 `.js` 改为 `.ts`（**排除 `public/ca`**）。分批顺序见 [ts-migration.md](reference/ts-migration.md)：
-
-1. `permission.ts`、`constant/*.ts`
-2. `utils/**/*.ts`（含 `crypt/`、`permission/`）
-3. `i18n/langs/*.ts`
-4. `components/hos-biz/**/*.ts`（render 组件用 `defineComponent` + `h()`）
-5. `views/**/js/*.ts`（login 错误码等小模块）
-
-删除冗余：`.d.ts` 垫片（类型内联到 `.ts`）、`is-open-db.js` 重导出、`websys.addins copy.js` 等。
-
-`shims-js.d.ts` 仅保留第三方库（`qs`、`qrcode` 等）。
-
-```bash
-find src -name '*.js' | wc -l   # 目标：0
-npm run type-check && npm run build
-```
+**multi-layer**：`@base/router` + `dynamicLoadViews/Layout`；须能加载各模块 **未改造** 的 views。不要求改 `@base/views` 或子产品页面。
 
 ---
 
-## Phase 8：启用日常约束
+## Phase 7：基建路径 TypeScript 化
 
-1. `.cursor/rules/vue3-constraints.mdc`
-2. `.cursor/rules/api-http-conventions.mdc`
-3. `hos-biz/README.md`、`src/api/README.md`、`src/axios/README.md`
+**仅基建目录** `find … -name '*.js' → 0`（`public/ca` 除外）。
 
----
+| Profile | 范围 |
+|---------|------|
+| single-layer | `src/**` 排除 `views/` |
+| multi-layer | Shell + `@base/**` 排除 `views/` |
 
-## 常见问题
-
-| 现象 | 处理 |
-|------|------|
-| `Duplicate identifier` in `api/index.ts` | 避免 `export *` 与具名 export 重复 |
-| `isSuccessCode` 参数 unknown | `as string \| number \| undefined \| null` |
-| localStorage `== 0` | 改为 `=== '0'` |
-| `crypt()` 返回 `string \| false \| null` | 赋值时用 `\|\| ''` |
-| hos-biz 复杂 utils 类型难推 | 可暂留 `@ts-nocheck`，不阻断 build |
-| permission `eval` warning | 动态路由遗留，非阻塞 |
+`views/`、low-code、origin-data、biz **不在此 Phase**。
 
 ---
 
-## 升级完成标准
+## Phase 8：规则交付
 
-- [ ] `src/` 无 `.js`（`public/ca` 除外）
-- [ ] 无 `globalProperties`、`vuex`、`mixins`、`require`、`loader`、`useApi`
-- [ ] axios 仅 `httpGet` / `httpPost` / `http`
+1. `.cursor/rules/vue3-constraints.mdc`、`api-http-conventions.mdc`
+2. **`docs/vue3-migration/`** 五篇小文档（已提供模板，按项目微调路径）
+3. `hos-biz/README.md`、`src/api/README.md` — 注明「业务迁移见 docs/vue3-migration」
+
+---
+
+## 基建完成标准
+
+### 共同
+
+- [ ] 基建路径无 `globalProperties`、Vuex、mixins（hos-biz 内部已处理）
 - [ ] hos-biz 对外 API 未变
-- [ ] `npm run type-check` + `npm run build` 通过
-- [ ] `vue3-constraints.mdc` + `api-http-conventions.mdc` 生效
+- [ ] `npm run build` 通过
+- [ ] 抽一条未改业务菜单能打开、无阻断性红错
+- [ ] `docs/vue3-migration/` 已就绪
 
-**下一步**：`src/views/` 业务页迁移（另开任务或专项 skill）。
+### single-layer 额外
+
+- [ ] 基建无 loader / `$api` / `useApi`
+- [ ] 基建路径 `type-check` 通过
+
+### multi-layer 额外
+
+- [ ] dynamic-loader 可解析各注册模块（含未改 views）
+- [ ] alias 与 Vue2 一致
+- [ ] 基建新 API 用 `httpGet`/`httpPost`
+
+---
+
+## 不在本 Skill（业务组）
+
+- `@base/views/**`、`low-code/**`、`origin-data/**`、`biz/**` 的逐文件 / 逐业务改造
+- 全仓 `type-check` 零警告
+- 子产品内部 widget 全面 script setup 化
+
+**业务组入口**：[`docs/vue3-migration/README.md`](../../../docs/vue3-migration/README.md)
