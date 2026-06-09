@@ -1,14 +1,26 @@
 ---
-description: Vue3 + Vite 项目约束
+description: Vue3 + Vite 项目约束（升级完成后日常开发）
 globs: src/**/*.vue,src/**/*.js,src/**/*.ts
 alwaysApply: false
 ---
 
 # Vue3 + Vite Project Constraints
 
+升级工作流见：`.cursor/skills/vue2-to-vue3-framework-init/SKILL.md`
+
+## 编码约束
+
 - 新组件一律 `<script setup lang="ts">` + Composition API
-- 状态：Pinia（`storeToRefs`）；路由：`vue-router` 4 composables
-- 环境变量：`import.meta.env.VITE_*`；主题常量：`@/constants/ui-theme`
-- 工具：`crypt` / `useApi` / `ElMessage` / `lsGet` 等 composable 或显式 import，禁止 `globalProperties`
-- 动态视图：`import.meta.glob`（`resolve-view-component.js`）
-- 模板：`#slot`、`:deep()`、`unmounted`；禁止 `require`、`vuex`、mixins
+- 状态：Pinia（`storeToRefs`）；路由：`vue-router` composables（`useRoute` / `useRouter`）
+- 环境变量：`import.meta.env.VITE_*`；主题常量：`@/constants/ui-theme`（`UI_THEME`）
+- 工具：`useCrypt` / `ElMessage` / `lsGet` 等 composable 或显式 import；API 用 `import { fetchXxx } from '@/api/...'`，**禁止** `globalProperties` / loader / `$api`
+- hos-biz：表格/弹窗走 `useHosBiz`（`openHosBizDialog`、`refreshHosBizTable` 等），勿直接 commit store
+- API：新接口写 `src/api/*.ts`；成功码用 `isSuccessCode(code)`
+- 动态视图：`import.meta.glob` + `resolve-view-component.ts`
+- 模板：`#slot`、`:deep()`、`onUnmounted`；禁止 `require`、`vuex`、mixins
+
+## 禁止回退
+
+- 不新增 `app.config.globalProperties.$*`
+- 不新增 Vuex module 或 mixins 文件
+- 不改 hos-biz 对外契约（cols / uid / el-biz-* 注册名）

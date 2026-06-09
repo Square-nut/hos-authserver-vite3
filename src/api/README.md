@@ -1,6 +1,6 @@
 # api 目录说明（标准 Vue3）
 
-接口按业务域拆分为 **`*.ts`**，`url` 与具名函数同文件，使用 `httpGet` / `httpPost` / `http`，**不经过** loader 字符串 key。
+接口按业务域拆分为 **`*.ts`**，`url` 与具名函数同文件，使用 `httpGet` / `httpPost` / `http`。
 
 统一导出见 **`index.ts`**（仅 re-export）。
 
@@ -28,7 +28,6 @@ AI / Cursor 约定：`.cursor/rules/api-http-conventions.mdc`；迁移流程：`
 | `staff.ts` | 员工 CRUD（独立 `baseURL`，遗留） |
 | `ssoVisit.ts` | SSO 单点访问 |
 | `slider.ts` | 拼图滑块验证码（jigsaw） |
-| `legacy-index.ts` | 旧版 `index.js` 全部接口（仅 loader / `$api('getCaptcha')` 等） |
 | `index.ts` | 聚合导出各 `*Api` 对象 |
 
 **`src/api` 下已无 `*.js` 文件。** 新接口只新增 `*.ts`，组件直接 `import { fetchXxx } from '@/api/...'`。
@@ -57,9 +56,9 @@ if (res.code != 200 || !res.data) return
 
 ---
 
-## loader key → 新函数（本次迁移）
+## 历史 `$api` key → 新函数（对照表）
 
-| 原 loader key | 新函数 | 模块 |
+| 原 `$api` key | 新函数 | 模块 |
 |---------------|--------|------|
 | `ca.getQRData` | `fetchQRData` | `ca.ts` |
 | `ca.getQRResultData` | `fetchQRResultData` | `ca.ts` |
@@ -71,9 +70,8 @@ if (res.code != 200 || !res.data) return
 | `forget-password.*` | `validateForgetCode` 等 | `forget-password.ts` |
 | `scan-code.getPhoneScan` | `fetchPhoneScan` | `scan-code.ts` |
 | `sys-password.ForcinggetPwdPolicy` | `fetchForcingPwdPolicy` | `sys-password.ts` |
-| `websys.cmd` | `fetchWebsysCmd` / `cmd` | `websys.ts` |
-| `slider.generateCaptcha` | `generateCaptcha` | `slider.ts` |
-| `getI18nConfig` | `getI18nConfig` / `fetchI18nLoginPageConfig` | `legacy-index.ts` / `i18n.ts` |
-| `ca.getCAOpenFlag` | `fetchCAOpenFlag` / `getCAOpenFlag` | `ca.ts` |
+| `websys.cmd` | `fetchWebsysCmd` | `websys.ts` |
+| `slider.generateCaptcha` | `fetchGenerateCaptcha` | `slider.ts` |
+| `getI18nConfig` | `fetchI18nLoginPageConfig` | `i18n.ts` |
 
 更早迁移见各模块文件头注释；`/security/*` 见 `login.ts`。

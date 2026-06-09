@@ -1,8 +1,8 @@
 import router from '@/router';
 import { useDeviceStore } from '@/stores/device';
 import { useLoginSessionStore } from '@/stores/loginSession';
-import api from '@/axios';
 import { INDEX_MAIN_PAGE_PATH } from '@/store/mutation-types';
+import { fetchI18nLoginPageConfig } from '@/api/i18n';
 
 import { getToken } from '@/utils/base/token-util';
 import { useUserStore } from '@/stores/user';
@@ -114,7 +114,7 @@ async function loginPageElements() {
 	const loginSessionStore = useLoginSessionStore();
 	try {
 		const language = getCurrentLocale() || getDefaultLocale() || '';
-		const { data, code } = await api.request('getI18nConfig', {}, { language });
+		const { data, code } = await fetchI18nLoginPageConfig({ language });
 		if (code == 200) {
 			loginSessionStore.SET_I18N_STATUS(!!data?.languageList?.length);
 			loginSessionStore.SET_I18N_LIST(data?.languageList || []);

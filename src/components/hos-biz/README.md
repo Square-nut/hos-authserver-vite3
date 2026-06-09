@@ -69,14 +69,7 @@ function onAdd() {
 </script>
 ```
 
-### 使用 `$api` 作数据源（遗留）
-
-```js
-// Options API 或 getCurrentInstance().proxy.$api
-tableData(params) {
-  return this.$api('module.methodName', params)
-}
-```
+`table-data` **必须是函数**（返回 `Promise<ApiResult>`），不支持 loader 字符串 key。
 
 ## cols 常用字段
 

@@ -1,5 +1,5 @@
 /**
- * 登录 / 安全（/security）相关接口（标准 Vue3，不经 loader key）
+ * 登录 / 安全（/security）相关接口
  */
 import { http, httpGet, httpPost } from '@/axios'
 import type { LoginConfigData } from '@/types/login-layout'

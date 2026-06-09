@@ -10,16 +10,15 @@ HTTP 基础设施。日常业务开发**一般不要修改**本目录。
 |------|------------|
 | **`src/api/*.ts`** | ✅ 加 `httpGet` / `httpPost` / `http` 封装 |
 | **`src/axios/`** | ❌ 勿动 |
-| **`.vue` / `stores`** | ✅ `import` from `@/api/xxx`，不要改拦截器 |
+| **`.vue` / `stores`** | ✅ `import { fetchXxx } from '@/api/...'`，不要改拦截器 |
 
 ---
 
-## 请求方式（标准）
+## 请求方式（唯一标准）
 
 | 方法 | 用途 |
 |------|------|
-| `httpGet` / `httpPost` / `http` | **`src/api/*.ts`** 与组件直连调用（推荐） |
-| `apiRequest('loaderKey')` / `$api` | 遗留；**勿新增**；`src/api` 已无 `*.js` |
+| `httpGet` / `httpPost` / `http` | **`src/api/*.ts`** 与组件直连调用 |
 
 ```ts
 import { httpGet } from '@/axios'
@@ -36,17 +35,17 @@ import { fetchLangList } from '@/api/i18n'
 const res = await fetchLangList()
 ```
 
+**不支持** loader key、`$api('module.method')`、`apiRequest('key')`。
+
 ---
 
 ## 文件职责
 
 | 文件 | 作用 |
 |------|------|
-| `http.ts` | Axios 实例、`request`(loader)、`requestConfig`(直连) |
-| `loader.ts` | 字符串 key → `api/*.ts`（兼容遗留 key） |
+| `http.ts` | Axios 实例、`requestConfig` |
 | `interceptors.ts` | 拦截器 |
-| `api-request.ts` | `apiRequest`、`httpGet`、`httpPost`、`http` |
-| `typed-request.ts` | `request(key)`，仅供过渡期 `services/` |
+| `api-request.ts` | `httpGet`、`httpPost`、`http` |
 | `index.ts` | 统一导出 |
 
 ---
@@ -60,4 +59,4 @@ LoginLayout.vue
   → 拦截器 → ApiResult<T>
 ```
 
-AI 协作约定见项目根 `.cursor/rules/api-http-conventions.mdc`。
+AI 协作约定见 `.cursor/rules/api-http-conventions.mdc`。

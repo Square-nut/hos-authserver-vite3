@@ -31,21 +31,12 @@ export function fetchLanguages() {
 	return httpGet<unknown>('/i18n/language/select-Language')
 }
 
-/** 登录页 i18n 配置（原 getI18nConfig / `$api('getI18nConfig')`） */
-export function fetchI18nLoginPageConfig() {
+/** 登录页 i18n 配置 */
+export function fetchI18nLoginPageConfig(headers?: Record<string, string>) {
 	return httpGet<{
 		languageList?: LangOption[]
 		pageElements?: Record<string, string>
-	}>('/i18n/element/get-login-page-config', { moduleCode: 'loginPage' })
-}
-
-/** loader：`i18n.getI18nConfig` */
-export function getI18nConfig() {
-	return {
-		url: '/i18n/element/get-login-page-config',
-		method: 'get',
-		params: { moduleCode: 'loginPage' },
-	}
+	}>('/i18n/element/get-login-page-config', { moduleCode: 'loginPage' }, headers)
 }
 
 export const i18nApi = {

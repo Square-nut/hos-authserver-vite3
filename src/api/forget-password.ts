@@ -19,23 +19,6 @@ export function fetchForgetPhone(loginName: string) {
 	return httpGet<unknown>('/security/forget/get-phone', { loginName })
 }
 
-/** --- loader（与旧版 forget-password.js 一致）--- */
-export function getPhoneCode(params?: Record<string, unknown>) {
-	return { url: '/security/sms/sendValidate', method: 'get', params }
-}
-
-export function editPass(data?: Record<string, unknown>) {
-	return { url: '/security/forget/password', method: 'post', data }
-}
-
-export function getPhone(params?: { loginName?: string }) {
-	const loginName = params?.loginName ?? ''
-	return {
-		url: `/security/forget/get-phone?loginName=${loginName}`,
-		method: 'get',
-	}
-}
-
 export const forgetPasswordApi = {
 	fetchForgetPhoneCode,
 	validateForgetCode,

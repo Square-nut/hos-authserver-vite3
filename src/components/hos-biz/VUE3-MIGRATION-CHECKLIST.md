@@ -1,5 +1,9 @@
 # hos-biz Vue3 + TS 改造 Checklist
 
+> **升级工作流（框架层）**：`.cursor/skills/vue2-to-vue3-framework-init/SKILL.md`  
+> **日常约束**：`.cursor/rules/vue3-constraints.mdc`  
+> **本文档**：hos-biz 专项改造记录（`hos-authserver-web-v3` 已完成，供参考与归档）
+
 > **原则**：对外用法不变（`cols` + `form` + `table-data` + `page` + `uid`），只做运行时与类型升级。  
 > **范围**：`src/components/hos-biz/` + `stores/hosBiz*.ts` + `composables/useHosBiz.ts` + 别名/样式。  
 > **不做的**：换 Vben schema、拆成每页 composable 手写三件套、改 cols 字段语义。
@@ -39,8 +43,8 @@
 |---|----|------|------|
 | 1.1 | `main.ts` 注册 `HosBiz` | ✅ | `app.use(HosBiz)` |
 | 1.2 | hos-biz 直接使用 Element Plus 组件 | ✅ | `element-plus-resolve.js`，已移除 `hos-element-aliases` |
-| 1.3 | `globalProperties.$theme` | ✅ | 供 `hos-biz-table` 判断 0/1/2 主题 |
-| 1.4 | `globalProperties.$message` | ✅ | 遗留 Options 页 `this.$message` |
+| 1.3 | 主题判断 | ✅ | `UI_THEME` / `@/constants/ui-theme`，已移除 `$theme` globalProperties |
+| 1.4 | 消息提示 | ✅ | 显式 `ElMessage`，已移除 `$message` globalProperties |
 | 1.5 | Pinia `hosBizTable` / `hosBizDialog` | ✅ | 替代 Vuex `table`/`dialog` 模块 |
 | 1.6 | `composables/useHosBiz.ts` 收口 | ✅ | 业务勿直接 `commit` |
 | 1.7 | 遗留 `store/table.js`、`store/dialog.js` | ✅ | 已删除，状态仅 Pinia |
@@ -95,7 +99,7 @@
 |---|----|------|------|
 | 2.5.1 | `table-data` 请求 + `after-load` | ✅ | `isOkResponse` / `isSuccessCode` |
 | 2.5.2 | `subscribeHosBizTableMutations` 刷新/重载 | ✅ | `hosBizUidMatches` |
-| 2.5.3 | `this.$api(loaderKey)` 数据源 | ✅ | `parseData` 字符串分支 |
+| 2.5.3 | `table-data` 函数数据源 | ✅ | `(params) => fetchXxx(params)`，已移除字符串 key |
 | 2.5.4 | 列筛选 `columnSelected` + popover | ✅ | `#reference` + `el-popover` |
 | 2.5.5 | `Sortable` 列拖拽 | ✅ | 兼容 `.el-table__body-wrapper` |
 | 2.5.6 | `fitHeight` / `refresh` expose | ✅ | 表格方法 + `select-table-v2` `expose` |
@@ -117,7 +121,7 @@
 
 | # | 文件 | 状态 | 说明 |
 |---|------|------|------|
-| 3.1 | `data-patch-v1/*` | ✅ | 与 `setTableData` / `$api` 联用未改语义 |
+| 3.1 | `data-patch-v1/*` | ✅ | 与 `setTableData` / `fetchXxx` 联用未改语义 |
 | 3.2 | `table-methods/index` | ✅ | `getTableLqRef` 统一转发 EP 表格 API |
 | 3.3 | `filter-empty` / `try-get-only-array` | ✅ | 仍用于 `parseData` / 列表归一 |
 | 3.4 | `pinia-bridge.js` | ✅ | `hosBizUidMatches` |
@@ -146,7 +150,7 @@
 | 5.4 | 登录-CA/二次认证弹窗 | `ca.vue` / `index.vue` | ✅ 代码 |
 | 5.5 | 标准报表页（查询+表格+底部分页） | `post-dialog.vue`（`el-biz-button` 查询/重置） | ✅ 参考页 |
 | 5.6 | 顶部分页 + 工具栏 | `hos-biz-table` `pagePos=top` | ✅ 代码 |
-| 5.7 | `$api('xxx', params)` 作 `table-data` | `hos-biz-table` `data` 为 string | ✅ 代码 |
+| 5.7 | `fetchXxx` 作 `table-data` | `hos-biz-table` `data` 为函数 | ✅ 代码 |
 | 5.8 | 拼图验证码 | `otplogin` + `Slide-verify` + `slider.*` | ✅ 代码 |
 
 ---
@@ -158,7 +162,7 @@
 | 6.1 | 《报表页模板》可复制 `.vue`（cols + form + loadData） | ✅ | `README.md` |
 | 6.2 | 《cols 常用字段说明》 | ✅ | `README.md` |
 | 6.3 | 《刷新/弹窗 API》仅列 `useHosBiz` 四个方法 | ✅ | `README.md` |
-| 6.4 | 已知差异说明（hos 图标类名、主题 `$theme`） | ✅ | `README.md` |
+| 6.4 | 已知差异说明（hos 图标类名、`UI_THEME` 替代 `$theme`） | ✅ | `README.md` |
 
 ---
 

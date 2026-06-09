@@ -1,6 +1,6 @@
 ---
-description: API 与 HTTP 封装约定（src/api/*.ts + httpGet/httpPost，禁止新增 loader/$api）
-globs: src/api/**,src/**/*.vue,src/stores/**,src/services/**
+description: API 与 HTTP 封装约定（src/api/*.ts + httpGet/httpPost）
+globs: src/api/**,src/**/*.vue,src/stores/**
 alwaysApply: false
 ---
 
@@ -10,11 +10,11 @@ alwaysApply: false
 
 ## 必须遵守
 
-1. **新接口**只写在 `src/api/<domain>.ts`，使用 `httpGet` / `httpPost` / `http`（从 `@/axios` 导入）。
-2. **组件 / Store** 使用 `import { fetchXxx } from '@/api/...'`，**禁止**新增 `this.$api('module.method')` 或 `apiRequest('loaderKey')`（遗留调用可逐步改，不要扩大范围）。
-3. **不要修改** `src/axios/`（拦截器、loader、http 实例），业务变更只改 `src/api/*.ts`。
-4. 响应按 `ApiResult<T>` 处理：`if (res.code != 200) return`；`websys` 等特例见对应 api 模块注释。
-5. 独立 `baseURL`（如 `websys`、`staff`）在 `http({ baseURL, ... })` 中传入，勿在组件里裸写 axios。
+1. **所有接口**只写在 `src/api/<domain>.ts`，使用 `httpGet` / `httpPost` / `http`（从 `@/axios` 导入）。
+2. **组件 / Store** 使用 `import { fetchXxx } from '@/api/...'`。
+3. **不要修改** `src/axios/`（拦截器、http 实例），业务变更只改 `src/api/*.ts`。
+4. 响应按 `ApiResult<T>` 处理，成功码用 `isSuccessCode(code)`（兼容 `200` / `'200'`）。
+5. 独立 `baseURL`（如 `websys`、`staff`）在 `http({ baseURL, ... })` 中传入。
 
 ## 新增 API 模板
 
@@ -26,7 +26,6 @@ export function fetchSomething(params?: Record<string, unknown>) {
   return httpGet<YourType>('/your/path', params)
 }
 
-// POST 且参数走 query（对齐旧 loader 行为时）
 export function fetchLegacyStyle(params?: Record<string, unknown>) {
   return http({ method: 'post', url: '/path', params })
 }
@@ -36,9 +35,9 @@ export function fetchLegacyStyle(params?: Record<string, unknown>) {
 
 ## 禁止
 
-- 新增 `src/api/*.js` 或 loader 字符串 key
+- loader key、`apiRequest('module.method')`、`useApi()`、`$api`
 - 在 `.vue` 里直接 `axios.create` / 写完整 URL（除环境变量 base）
-- 为单接口新建 `src/services/`（已废弃，用 `src/api/*.ts`）
+- 新增 `src/api/*.js` 或返回 `{ url, method }` 的 config builder
 
 ## 特殊场景
 

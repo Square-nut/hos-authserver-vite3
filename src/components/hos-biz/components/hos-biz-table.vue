@@ -127,7 +127,6 @@ import RenderLabel from '../utils/render-label'
 import { v4 as uuidv4 } from 'uuid'
 import { deepClone, returnGlobalValue } from '@/utils/index'
 import { UI_THEME } from '@/constants/ui-theme'
-import { useApi } from '@/composables/useApi'
 import { useHosBizTableExpose } from '../utils/useHosBizTableExpose'
 
 defineOptions({ name: 'HosBizTable' })
@@ -187,7 +186,6 @@ const emit = defineEmits<{
 
 const attrs = useAttrs()
 const slots = useSlots()
-const api = useApi()
 
 const hosBizTableStore = useHosBizTableStore()
 storeToRefs(hosBizTableStore)
@@ -317,28 +315,7 @@ function setTableData(response: { data?: Record<string, unknown>; [key: string]:
 
 function parseData(params: Record<string, unknown>) {
 	const _params = filterEmpty(params)
-	if (typeof props.data === 'string') {
-		tableIsLoading.value = true
-		return api(props.data, _params)
-			.then((response) => {
-				if (response && isOkResponse(response.code)) {
-					setTableData(response as unknown as { data?: Record<string, unknown>; [key: string]: unknown })
-				} else {
-					total.value = 0
-					tableIsLoading.value = false
-				}
-			})
-			.catch(() => {
-				total.value = 0
-				tableIsLoading.value = false
-			})
-			.finally(() => {
-				emit('after-load', tableData.value || [])
-				nextTick(() => {
-					tableExposeMethods.doLayout()
-				})
-			})
-	} else if (typeof props.data === 'function') {
+	if (typeof props.data === 'function') {
 		tableIsLoading.value = true
 		return (props.data as (p: Record<string, unknown>) => Promise<{ code?: unknown; msg?: string; data?: Record<string, unknown> }>)(_params)
 			.then((response) => {

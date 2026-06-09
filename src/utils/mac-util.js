@@ -2,7 +2,8 @@ import UserConstant from '@/constant/user-constant'
 import { returnGlobalValue, getOs } from '@/utils'
 import { ls } from '@/utils/ls'
 import { useSysStore } from '@/stores/sys'
-import api from '@/axios'
+import { fetchWebsysCmd } from '@/api/websys'
+import { fetchDbDialogShowData } from '@/api/sys'
 import Qs from 'qs'
 
 function setShowDbDialog() {
@@ -30,7 +31,7 @@ async function getIpMac() {
   let resolve
   const promise = new Promise((res) => (resolve = res))
   try {
-    const { status, rtn } = await api.request('websys.cmd')
+    const { status, rtn } = await fetchWebsysCmd()
     if (status == '200') {
       const config = JSON.parse(rtn)
       ls.set(UserConstant.IP, config.IP)
@@ -145,7 +146,7 @@ export async function initWebsys() {
   let isOpenDb = ls.get('isOpenDb')
   // 未被接口赋值时,默认值为null.若不是boolean,表示还未请求接口获取数据.因此先请求接口.
   if (typeof isOpenDb !== 'boolean') {
-    const { code, data } = await api.request('dbDialogShowData')
+    const { code, data } = await fetchDbDialogShowData()
     if (code == '200') {
       ls.set('isOpenDb', data)
       isOpenDb = data

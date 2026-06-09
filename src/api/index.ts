@@ -1,21 +1,5 @@
 /**
  * API 模块统一导出（Vue3 标准：按域拆分 *.ts）
- *
- * @see ./login.ts
- * @see ./i18n.ts
- * @see ./oauth.ts
- * @see ./org.ts
- * @see ./sys.ts
- * @see ./auth.ts
- * @see ./ca.ts
- * @see ./forget-password.ts
- * @see ./scan-code.ts
- * @see ./sys-password.ts
- * @see ./tenant.ts
- * @see ./tree.ts
- * @see ./websys.ts
- * @see ./staff.ts
- * @see ./ssoVisit.ts
  */
 
 export * from './login'
@@ -31,35 +15,8 @@ export * from './sys-password'
 export * from './tenant'
 export * from './tree'
 export * from './websys'
-export {
-	STAFF_BASE_URL,
-	fetchSelectPageStaff,
-	fetchStaffSelectPage,
-	insertStaff,
-	fetchStaffById,
-	updateStaffById,
-	deleteStaffById,
-	selectPageStaff,
-	selectPage,
-	insert,
-	selectById,
-	updateById,
-	deleteById,
-	api4,
-} from './staff'
-export {
-	fetchSsoSystemList,
-	savePersonalConfig,
-	fetchSystemExeDownload,
-	fetchSsoRoleList,
-	saveProgramInstallRecord,
-	getSystemList,
-	save,
-	systemExeDownload,
-	roleList,
-	saveInstall,
-	getRoleList,
-} from './ssoVisit'
+export * from './staff'
+export * from './ssoVisit'
 export * from './slider'
 
 export { loginApi } from './login'

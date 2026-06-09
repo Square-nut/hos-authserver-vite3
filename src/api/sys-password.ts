@@ -30,19 +30,6 @@ export function validateOldPassword2(param?: Record<string, unknown>) {
 	)
 }
 
-/** --- loader（与旧版 sys-password.js 一致）--- */
-export function getPwdPolicy() {
-	return { url: '/security/select-password-complex', method: 'get' }
-}
-
-export function useLastPwd(data?: Record<string, unknown>) {
-	return { url: '/security/continue/password', method: 'post', data }
-}
-
-export function ForcinggetPwdPolicy() {
-	return { url: '/security/select-password-complex', method: 'get' }
-}
-
 export const sysPasswordApi = {
 	changePassword,
 	fetchPwdPolicy,

@@ -109,7 +109,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '@/composables/useApi'
+import { fetchGenerateCaptcha, fetchVerifyCaptcha } from '@/api/slider'
 import fallbackSlideBg from '@/assets/images/big_bg.jpg'
 import { isSuccessCode } from '@/types/api-common'
 
@@ -202,7 +202,7 @@ function initDom() {
 
 function getCaptcha() {
 	isLoading.value = true
-	api('slider.generateCaptcha', {})
+	fetchGenerateCaptcha({})
 		.then((response) => {
 			isLoading.value = false
 			const data = response.data as {
@@ -448,7 +448,7 @@ function refresh() {
 }
 
 function verifyCaptchaRequest(val: { sessionId: string; moveX: number }) {
-	api('slider.verifyCaptcha', {
+	fetchVerifyCaptcha({
 		...val,
 		mobile: props.pcode,
 	})
